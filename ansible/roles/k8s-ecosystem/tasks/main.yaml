@@ -1,12 +1,14 @@
 - name: Install Kubernetes Secrets
   include_tasks: k8s-secrets.yaml
 
-- name: Save kubeconfig (local)
+- name: Save All Kubeconfigs
   ansible.builtin.copy:
-    content: "{{ kubeconfig_content }}"
-    dest: "{{ paths.kubeconfigs }}/{{ inventory_hostname }}.yaml"
+    content: "{{ item.value.kubeconfig_content }}"
+    dest: "{{ paths.kubeconfigs }}/{{ item.key }}.yaml"
     mode: '0644'
-  delegate_to: localhost
+  loop: "{{ hostvars | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
 
 - name: Install Additional Helm Applications
   import_tasks: helm-applications.yaml

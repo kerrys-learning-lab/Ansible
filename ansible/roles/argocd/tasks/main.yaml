@@ -59,12 +59,12 @@
   register: argocd_managed_clusters_list
   changed_when: false
 
-# - name: Manage ArgoCD Cluster
-#   ansible.builtin.command:
-#     /usr/local/bin/argocd cluster add --name {{ item.key }}
-#                                       --kubeconfig {{ item.value.kubeconfig }}
-#                                       {{ item.value.context }}
-#   loop: "{{ argocd.clusters | dict2items }}"
-#   loop_control:
-#     label: "{{ item.key }}"
-#   when: "item.key not in argocd_managed_clusters_list.stdout"
+- name: Manage ArgoCD Cluster
+  ansible.builtin.command:
+    /usr/local/bin/argocd cluster add --name {{ item.key }}
+                                      --kubeconfig {{ item.value.kubeconfig }}
+                                      {{ item.value.context }}
+  loop: "{{ argocd.clusters | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: "item.key not in argocd_managed_clusters_list.stdout"

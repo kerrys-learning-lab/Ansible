@@ -26,7 +26,7 @@ argocd:
       argocd-server:
         dnsNames:
           - argocd.westsidestreet.net
-  # clusters:
-  #   raspberry-pi:
-  #     context: microk8s
-  #     kubeconfig: /var/lib/ansible/kubeconfig.d/raspberrypi5-01.yaml
+  clusters:
+    raspberry-pi:
+      context: microk8s
+      kubeconfig: /var/lib/ansible/kubeconfig.d/raspberrypi5-01.yaml
