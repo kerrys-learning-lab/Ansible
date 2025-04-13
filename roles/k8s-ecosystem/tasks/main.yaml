@@ -24,3 +24,7 @@
 
 - name: Configure Cert Manager
   import_tasks: cert-manager.yaml
+
+- name: Install Elasticsearch Operator
+  import_tasks: elasticsearch-operator.yaml
+  when: elasticsearch is defined

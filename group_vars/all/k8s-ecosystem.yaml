@@ -30,6 +30,17 @@ applications:
           pod-security.kubernetes.io/audit: privileged
           pod-security.kubernetes.io/warn: privileged
 
+_elasticsearch:
+  operator:
+    version: 2.16.1
+
+elasticsearch:
+  operator:
+    version: "{{ lookup('ansible.builtin.vars', '_elasticsearch').operator.version }}"
+    urls:
+      crds: https://download.elastic.co/downloads/eck/{{ lookup('ansible.builtin.vars', '_elasticsearch').operator.version }}/crds.yaml
+      operator: https://download.elastic.co/downloads/eck/{{ lookup('ansible.builtin.vars', '_elasticsearch').operator.version }}/operator.yaml
+
 storage_classes:
   smb:
     provisioner: smb.csi.k8s.io

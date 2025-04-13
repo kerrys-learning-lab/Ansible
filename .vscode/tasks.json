@@ -11,7 +11,7 @@
                 "westsidestreet.net.yaml"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/ansible"
+                "cwd": "${workspaceFolder}"
             },
             "presentation": {
                 "echo": true,

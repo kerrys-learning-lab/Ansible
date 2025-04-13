@@ -40,7 +40,7 @@ gitlab:
             existingClaim: postgresql
   directories:
     /mnt/ssd/k8s-local-pv/gitlab:
-      mode: a=rx
+      mode: u=rwx,go=rx
     /mnt/ssd/k8s-local-pv/gitlab/postgresql:
       owner: 1001
       group: 1001

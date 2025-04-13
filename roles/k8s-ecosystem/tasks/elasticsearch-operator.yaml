@@ -1,0 +1,13 @@
+- name: Install Elasticsearch CRDs
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    src: "{{ elasticsearch.operator.urls.crds }}"
+    kubeconfig: /etc/kubeconfig
+
+- name: Install Elasticsearch Operator
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    src: "{{ elasticsearch.operator.urls.operator }}"
+    kubeconfig: /etc/kubeconfig
