@@ -1,0 +1,7 @@
+- name: Install Helm
+  import_tasks: helm.yaml
+  when: helm is defined
+
+- name: Install k9s
+  import_tasks: k9s.yaml
+  when: k9s is defined

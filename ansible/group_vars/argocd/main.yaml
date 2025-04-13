@@ -1,0 +1,32 @@
+argocd:
+  cli:
+    version: v2.14.2
+    server:
+      username: admin
+      password: "{{ lookup('ansible.builtin.vars', 'secrets').argocd.admin.password }}"
+      port: 30443
+  helm:
+    ref: argo-cd
+    repo:
+      name: argo
+      url: https://argoproj.github.io/argo-helm
+      version: 7.8.2
+    helm_values:
+      global:
+        domain: argocd.westsidestreet.net
+      server:
+        ingress:
+          enabled: true
+          tls: true
+          ingressClassName: gitlab-nginx
+        service:
+          type: LoadBalancer
+  k8s:
+    certificates:
+      argocd-server:
+        dnsNames:
+          - argocd.westsidestreet.net
+  # clusters:
+  #   raspberry-pi:
+  #     context: microk8s
+  #     kubeconfig: /var/lib/ansible/kubeconfig.d/raspberrypi5-01.yaml

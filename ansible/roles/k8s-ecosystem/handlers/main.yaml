@@ -1,0 +1,6 @@
+- name: Bootstrap k8s Cluster
+  ansible.builtin.shell: k8s bootstrap
+  register: bootstrap_k8s_cluster
+
+- name: Upgrade CertBot Pip
+  ansible.builtin.shell: "{{ certbot.venv }}/bin/pip install --upgrade pip"

@@ -1,0 +1,134 @@
+- name: Install/Configure GitLab Operator via Helm
+  kubernetes.core.helm:
+    name: "{{ gitlab.operator.name }}"
+    namespace: "{{ gitlab.operator.namespace }}"
+    chart_repo_url: "{{ gitlab.operator.url }}"
+    chart_version: "{{ gitlab.operator.version }}"
+    chart_ref: "{{ gitlab.operator.ref }}"
+    release_values: "{{ gitlab.operator.helm_values }}"
+    create_namespace: true
+    kubeconfig: /etc/kubeconfig
+  notify:
+    - Wait for GitLab Operator to be Installed
+
+- name: Wait for GitLab Operator to be Installed (flush handlers)
+  ansible.builtin.meta: flush_handlers
+
+- name: Create Local Kubernetes Volume Directories
+  ansible.builtin.file:
+    path: "{{ item.key }}"
+    state: directory
+    owner: "{{ item.value.owner | default('root') }}"
+    group: "{{ item.value.group | default('root') }}"
+    mode: "{{ item.value.mode }}"
+  loop: "{{ gitlab.directories | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create Local Kubernetes Volume(s) for GitLab
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ item.key }}"
+        labels:
+          owner: "{{ item.key }}"
+      spec:
+        capacity:
+          storage: "{{ item.value.capacity | default('10Gi') }}"
+        accessModes:
+          - "{{ item.value.accessMode | default('ReadWriteOnce') }}"
+        persistentVolumeReclaimPolicy: "{{ item.value.reclaimPolicy | default('Retain') }}"
+        storageClassName: local
+        hostPath:
+          path: "{{ item.value.path }}"
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ gitlab.k8s.volumes.local | default({}) |dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create Local Kubernetes Claim(s) for GitLab
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: "{{ item.key }}"
+        namespace: "{{ item.value.namespace | default('gitlab-system') }}"
+      spec:
+        resources:
+          requests:
+            storage: "{{ item.value.capacity | default('10Gi') }}"
+        accessModes:
+          - "{{ item.value.accessMode | default('ReadWriteOnce') }}"
+        volumeName: "{{ item.value.volume }}"
+        storageClassName: local
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ gitlab.k8s.claims.local | default({}) |dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create GitLab Certificates
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: "{{ item.key }}"
+        namespace: "{{ item.value.namespace | default('gitlab-system') }}"
+      spec:
+        secretName: "{{ item.key }}-tls"
+        dnsNames: "{{ item.value.dnsNames }}"
+        issuerRef:
+          name: "{{ certmanager.issuer.name }}"
+          kind: "{{ certmanager.issuer.type | default('ClusterIssuer') }}"
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ gitlab.k8s.certificates | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Apply GitLab CRD
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: apps.gitlab.com/v1beta1
+      kind: GitLab
+      metadata:
+        name: gitlab
+        namespace: gitlab-system
+      spec:
+        chart:
+          version: "{{ gitlab.application.version }}"
+          values: "{{ gitlab.application.crd_values }}"
+    kubeconfig: /etc/kubeconfig
+
+- name: Apply GitLab NodePort Service
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: gitlab-nodeport
+        namespace: gitlab-system
+      spec:
+        type: NodePort
+        selector:
+          app: webservice
+          gitlab.com/webservice-name: default
+          release: gitlab
+        ports:
+          - name: http-webservice
+            port: 31080
+            nodePort: 31080
+            targetPort: http-webservice
+    kubeconfig: /etc/kubeconfig

@@ -1,0 +1,20 @@
+dev:
+  hosts:
+    wsl:
+      ansible_connection: local
+
+gitlab:
+  hosts:
+    elitedesk:
+      ansible_host: elitedesk.westsidestreet.net
+
+argocd:
+  hosts:
+    elitedesk:
+      ansible_host: elitedesk.westsidestreet.net
+
+raspberry_pi:
+  hosts:
+    raspberrypi5-01:
+    raspberrypi5-02:
+    raspberrypi4-01:

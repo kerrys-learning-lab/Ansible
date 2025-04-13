@@ -1,0 +1,9 @@
+- name: Install development packages (OS)
+  ansible.builtin.package:
+    name: "{{ dev.packages }}"
+  when: dev is defined and 'packages' in dev
+
+- name: Install development packages (pip)
+  ansible.builtin.pip:
+    name: "{{ dev.pip }}"
+  when: dev is defined and 'pip' in dev

@@ -1,0 +1,4 @@
+
+- name: Install AWS CLI
+  import_tasks: aws-cli.yaml
+  when: aws is defined

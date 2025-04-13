@@ -1,0 +1,70 @@
+- name: Install/Configure ArgoCD via Helm
+  kubernetes.core.helm:
+    name: argo-cd
+    namespace: argo
+    chart_repo_url: "{{ argocd.helm.repo.url }}"
+    chart_version: "{{ argocd.helm.repo.version }}"
+    chart_ref: "{{ argocd.helm.ref }}"
+    release_values: "{{ argocd.helm.helm_values }}"
+    create_namespace: true
+    kubeconfig: /etc/kubeconfig
+
+- name: Create ArgoCD Certificates
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: "{{ item.value.secretName | default(item.key) }}"
+        namespace: "{{ item.value.namespace | default('argo') }}"
+      spec:
+        secretName: "{{ item.key }}-tls"
+        dnsNames: "{{ item.value.dnsNames }}"
+        issuerRef:
+          name: "{{ certmanager.issuer.name }}"
+          kind: "{{ certmanager.issuer.type | default('ClusterIssuer') }}"
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ argocd.k8s.certificates | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Ensure ArgoCD downloadpath
+  ansible.builtin.file:
+    name: "{{ paths.download }}/argocd-{{ argocd.cli.version }}"
+    state: directory
+
+- name: Download ArgoCD CLI
+  ansible.builtin.get_url:
+    url: https://github.com/argoproj/argo-cd/releases/download/{{ argocd.cli.version }}/argocd-linux-amd64
+    dest: "{{ paths.download }}/argocd-{{ argocd.cli.version}}/argocd-linux-amd64"
+    mode: 0555
+
+- name: Link ArgoCD CLI
+  ansible.builtin.file:
+    src: "{{ paths.download }}/argocd-{{ argocd.cli.version}}/argocd-linux-amd64"
+    dest: /usr/local/bin/argocd
+    state: link
+
+- name: Login to ArgoCD CLI
+  ansible.builtin.command:
+    /usr/local/bin/argocd login --username {{ argocd.cli.server.username }}
+                                --password {{ argocd.cli.server.password }}
+                                {{ argocd.hostname | default('argocd.westsidestreet.net') }}
+
+- name: List ArgoCD Managed Clusters
+  ansible.builtin.command:
+    /usr/local/bin/argocd cluster list
+  register: argocd_managed_clusters_list
+  changed_when: false
+
+# - name: Manage ArgoCD Cluster
+#   ansible.builtin.command:
+#     /usr/local/bin/argocd cluster add --name {{ item.key }}
+#                                       --kubeconfig {{ item.value.kubeconfig }}
+#                                       {{ item.value.context }}
+#   loop: "{{ argocd.clusters | dict2items }}"
+#   loop_control:
+#     label: "{{ item.key }}"
+#   when: "item.key not in argocd_managed_clusters_list.stdout"

@@ -1,0 +1,6 @@
+certbot:
+  venv: /opt/certbot
+  packages:
+    - certbot
+    - certbot-nginx
+    - certbot-dns-route53

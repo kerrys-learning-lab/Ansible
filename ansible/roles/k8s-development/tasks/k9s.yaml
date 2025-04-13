@@ -1,0 +1,28 @@
+
+# ----- k9s -------------------------------------------------------------------
+- name: Ensure k9s downloadpath
+  ansible.builtin.file:
+    name: "{{ paths.download }}/k9s-{{ k9s.version }}"
+    state: directory
+
+- name: Set k9s File Fact
+  ansible.builtin.set_fact:
+    k9s_file: k9s_Linux_{{ ansible_local['dpkg']['arch'] }}.tar.gz
+
+- name: Download k9s CLI
+  ansible.builtin.get_url:
+    url: https://github.com/derailed/k9s/releases/download/{{ k9s.version }}/{{ hostvars[inventory_hostname]['k9s_file'] }}
+    dest: "{{ paths.download }}/k9s-{{ k9s.version }}/{{ hostvars[inventory_hostname]['k9s_file'] }}"
+
+- name: Extract k9s CLI
+  ansible.builtin.unarchive:
+    src: "{{ paths.download }}/k9s-{{ k9s.version }}/{{ hostvars[inventory_hostname]['k9s_file'] }}"
+    dest: "{{ paths.download }}/k9s-{{ k9s.version }}"
+    remote_src: true
+    mode: 0555
+
+- name: Link k9s CLI
+  ansible.builtin.file:
+    src: "{{ paths.download }}/k9s-{{ k9s.version }}/k9s"
+    dest: /usr/local/bin/k9s
+    state: link

@@ -1,0 +1,14 @@
+
+- name: Install/Configure Applications via Helm
+  kubernetes.core.helm:
+    name: "{{ item.name }}"
+    namespace: "{{ item.value.namespace }}"
+    chart_repo_url: "{{ item.value.url }}"
+    chart_version: "{{ item.value.version }}"
+    chart_ref: "{{ item.value.ref }}"
+    release_values: "{{ item.value.helm_values }}"
+    create_namespace: true
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ applications }}"
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,0 +1,62 @@
+- name: Install extra packages (OS)
+  ansible.builtin.package:
+    name: "{{ extra.packages }}"
+  when: extra is defined and 'packages' in extra
+
+- name: Create Network Mount Locations (SMB)
+  ansible.builtin.file:
+    state: directory
+    path: /mnt/{{ item.value.path }}
+  loop: "{{ smb.mounts | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Mount Network Shares (SMB)
+  ansible.posix.mount:
+    state: mounted
+    src: "//{{ smb.host }}/{{ item.key }}"
+    path: /mnt/{{ item.value.path }}
+    fstype: "{{ item.value.type | default('cifs') }}"
+    opts: "{{ item.value.opts | default(smb.opts) }}"
+  loop: "{{ smb.mounts | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create Extra Mount Locations
+  ansible.builtin.file:
+    state: directory
+    path: /mnt/{{ item.value.mount_path | default(item.key) }}
+  loop: "{{ extra.mounts | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Mount Extra Shares/Drives
+  ansible.posix.mount:
+    state: mounted
+    src: "{{ item.value.src }}"
+    path: /mnt/{{ item.value.mount_path | default(item.key) }}
+    fstype: "{{ item.value.type }}"
+  loop: "{{ extra.mounts | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create Custom Ansible Facts
+  import_tasks: facts.yaml
+
+- name: Ensure Common Paths
+  ansible.builtin.file:
+    name: "{{ item.value }}"
+    state: directory
+    mode: '0655'
+  loop: "{{ paths | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Ensure Extra Paths
+  ansible.builtin.file:
+    name: "{{ item.value }}"
+    state: directory
+    mode: '0655'
+  loop: "{{ extra.paths | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

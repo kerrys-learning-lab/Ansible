@@ -1,0 +1,39 @@
+- name: Install microk8s Snap(s)
+  community.general.snap:
+    name: "{{ k8s.snaps }}"
+    classic: true
+  when: k8s.snaps
+
+- name: Add user to microk8s group
+  ansible.builtin.user:
+    name: "{{ user.name | default('kerry') }}"
+    groups:
+      - microk8s
+    append: true
+
+- name: Get kubeconfig
+  ansible.builtin.command: "{{ microk8s }} config"
+  register: kubeconfig_output
+  changed_when: false
+
+- name: Extract kubeconfig
+  ansible.builtin.set_fact:
+    kubeconfig_content: "{{ kubeconfig_output.stdout }}"
+
+- name: Save kubeconfig
+  ansible.builtin.copy:
+    content: "{{ kubeconfig_content }}"
+    dest: /etc/kubeconfig
+    mode: '0644'
+
+- name: Create k8s Namespaces
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ item }}"
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ k8s.namespaces }}"

@@ -1,0 +1,9 @@
+k8s:
+  snaps:
+    - microk8s
+    - kubectl
+  namespaces:
+    - infrastructure
+
+microk8s: /snap/bin/microk8s
+

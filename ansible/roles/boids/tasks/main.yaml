@@ -1,0 +1,28 @@
+
+- name: Create Boids project
+  kubernetes.core.k8s:
+    src: "{{ user_dev_root }}/Boids/argocd/boids-project.yaml"
+    state: present
+    kubeconfig: "{{ user_kubeconfig }}"
+
+- name: Create argocd namespace
+  kubernetes.core.k8s:
+    name: boids
+    api_version: v1
+    kind: Namespace
+    state: present
+    kubeconfig: "{{ user_kubeconfig }}"
+
+- name: Apply Kafka application
+  kubernetes.core.k8s:
+    namespace: boids
+    src: "{{ user_dev_root }}/Boids/argocd/kafka-application.yaml"
+    state: present
+    kubeconfig: "{{ user_kubeconfig }}"
+
+- name: Apply MongoDB application
+  kubernetes.core.k8s:
+    namespace: boids
+    src: "{{ user_dev_root }}/Boids/argocd/mongodb-application.yaml"
+    state: present
+    kubeconfig: "{{ user_kubeconfig }}"

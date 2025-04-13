@@ -1,0 +1,5 @@
+
+user:
+  name: kerry
+
+user_dev_root: "/home/{{ user.name }}/dev"

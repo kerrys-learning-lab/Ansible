@@ -1,0 +1,62 @@
+
+applications:
+  - name: csi-driver
+    value:
+      namespace: infrastructure
+      url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts
+      ref: csi-driver-smb
+      version: v1.17.0
+      helm_values:
+        linux:
+          kubelet: /var/snap/microk8s/common/var/lib/kubelet
+  - name: cert-manager
+    value:
+      namespace: infrastructure
+      url: https://charts.jetstack.io
+      ref: cert-manager
+      version: v1.17.1
+      helm_values:
+        crds:
+          enabled: true
+  - name: metal-lb
+    value:
+      namespace: infrastructure
+      url: https://metallb.github.io/metallb
+      ref: metallb
+      version: v0.14.9
+      helm_values:
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+
+storage_classes:
+  smb:
+    provisioner: smb.csi.k8s.io
+    default: "true"
+    parameters:
+      source: //{{ lookup('ansible.builtin.vars', 'smb').host }}/kubernetes
+      subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
+      csi.storage.k8s.io/provisioner-secret-name: nas--smb
+      csi.storage.k8s.io/provisioner-secret-namespace: infrastructure
+      csi.storage.k8s.io/node-stage-secret-name: nas--smb
+      csi.storage.k8s.io/node-stage-secret-namespace: infrastructure
+    volumeBindingMode: Immediate
+    allowVolumeExpansion: true
+    mountOptions:
+      - dir_mode=0777
+      - file_mode=0777
+      - uid=0
+      - gid=0
+      - noperm
+      - mfsymlinks
+      - cache=strict
+      - noserverino  # required to prevent data corruption
+  local:
+    provisioner: kubernetes.io/no-provisioner
+    volumeBindingMode: WaitForFirstConsumer
+
+certmanager:
+  issuer:
+    type: ClusterIssuer
+    name: letsencrypt

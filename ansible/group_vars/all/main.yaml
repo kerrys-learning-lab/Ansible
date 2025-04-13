@@ -1,0 +1,14 @@
+paths:
+  kubeconfigs: /var/lib/ansible/kubeconfig.d
+  facts: /var/lib/ansible/facts.d
+  download: /usr/local/downloads
+
+smb:
+  host: 192.168.1.10
+  opts: username={{ lookup('ansible.builtin.vars', 'secrets').smb.username }},password={{ lookup('ansible.builtin.vars', 'secrets').smb.password }}
+  mounts:
+    homes:
+      path: nas-homes
+    kubernetes:
+      path: nas-kubernetes
+

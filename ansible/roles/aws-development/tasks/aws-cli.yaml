@@ -1,0 +1,22 @@
+
+- name: Ensure AWS CLI downloadpath
+  ansible.builtin.file:
+    name: "{{ paths.download }}/aws-cli-{{ aws.version }}"
+    state: directory
+
+- name: Download AWS CLI
+  ansible.builtin.get_url:
+    url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64-{{ aws.version }}.zip
+    dest: "{{ paths.download }}/aws-cli-{{ aws.version }}/aws-exe-linux-x86_64.zip"
+
+- name: Extract AWS CLI
+  ansible.builtin.unarchive:
+    src: "{{ paths.download }}/aws-cli-{{ aws.version }}/aws-exe-linux-x86_64.zip"
+    dest: "{{ paths.download }}/aws-cli-{{ aws.version }}"
+    remote_src: true
+    mode: 0555
+
+- name: Install AWS CLI
+  ansible.builtin.shell:
+    cmd: "{{ paths.download }}/aws-cli-{{ aws.version }}/aws/install"
+    creates: /usr/local/bin/aws
