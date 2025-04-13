@@ -39,6 +39,8 @@ gitlab:
           persistence:
             existingClaim: postgresql
   directories:
+    /mnt/ssd/k8s-local-pv:
+      mode: u=rwx,go=rx
     /mnt/ssd/k8s-local-pv/gitlab:
       mode: u=rwx,go=rx
     /mnt/ssd/k8s-local-pv/gitlab/postgresql:

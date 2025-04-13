@@ -56,7 +56,7 @@
   ansible.builtin.file:
     name: "{{ item.value }}"
     state: directory
-    mode: '0655'
+    mode: '0755'
   loop: "{{ extra.paths | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
