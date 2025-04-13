@@ -21,6 +21,12 @@ argocd:
           ingressClassName: gitlab-nginx
         service:
           type: LoadBalancer
+      configs:
+        credentialTemplates:
+          kerrys-learning-lab:
+            url: git@gitlab.westsidestreet.net:kerrys-learning-lab
+            sshPrivateKey: |
+              "{{ lookup('ansible.builtin.vars', 'secrets').ssh.privateKey }}"
   k8s:
     certificates:
       argocd-server:
