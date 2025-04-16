@@ -22,17 +22,49 @@ argocd:
         service:
           type: LoadBalancer
       configs:
+        ssh:
+          knownHosts: "{{ lookup('ansible.builtin.vars', 'secrets').ssh.knownHosts }}"
         credentialTemplates:
           kerrys-learning-lab:
             url: git@gitlab.westsidestreet.net:kerrys-learning-lab
             sshPrivateKey: |
-              "{{ lookup('ansible.builtin.vars', 'secrets').ssh.privateKey }}"
+              {{ lookup('ansible.builtin.vars', 'secrets').ssh.privateKey }}
+        repositories:
+          boids-argocd:
+            name: boids-argocd
+            url: git@gitlab.westsidestreet.net:kerrys-learning-lab/boids/boids-argocd.git
+          elasticsearch-helm-chart:
+            name: elasticsearch-helm-chart
+            url: git@gitlab.westsidestreet.net:kerrys-learning-lab/devsecops/helm-charts/elasticsearch-helm-chart.git
+          nats:
+            name: nats
+            url: https://nats-io.github.io/k8s/helm/charts/
+            type: helm
   k8s:
     certificates:
       argocd-server:
         dnsNames:
           - argocd.westsidestreet.net
   clusters:
+    wsl:
+      context: microk8s
+      kubeconfig: /var/lib/ansible/kubeconfig.d/wsl.yaml
     raspberry-pi:
       context: microk8s
       kubeconfig: /var/lib/ansible/kubeconfig.d/raspberrypi5-01.yaml
+  projects:
+    boids:
+      description: |
+        Boids is an artificial life program, developed by Craig Reynolds in
+        1986, which simulates the flocking behaviour of birds, and related
+        group motion.
+      destination:
+        name: "*"
+  applicationsets:
+    boids:
+      source:
+        url: git@gitlab.westsidestreet.net:kerrys-learning-lab/boids/boids-argocd.git
+        ref: main
+        path: "*"
+      destination:
+        name: wsl

@@ -13,6 +13,12 @@
     - development
     - k8s
     - k8s-development
+
+- name: Configure Clusters
+  hosts:
+    - clusters
+  become: true
+  roles:
     - k8s-ecosystem
 
 - name: Configure ArgoCD
@@ -28,3 +34,10 @@
   become: true
   roles:
     - gitlab
+
+- name: Configure GitLab Runner(s)
+  hosts:
+    - clusters
+  become: true
+  roles:
+    - gitlab-runner

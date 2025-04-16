@@ -13,6 +13,12 @@ argocd:
     elitedesk:
       ansible_host: elitedesk.westsidestreet.net
 
+clusters:
+  hosts:
+    elitedesk:
+    raspberrypi4-01: # All Pis are combined in a single cluster!
+    wsl:
+
 raspberry_pi:
   hosts:
     raspberrypi5-01:

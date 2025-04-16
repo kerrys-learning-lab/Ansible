@@ -68,3 +68,128 @@
   loop_control:
     label: "{{ item.key }}"
   when: "item.key not in argocd_managed_clusters_list.stdout"
+
+- name: Create ArgoCD Projects
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: AppProject
+      metadata:
+        name: "{{ item.key }}"
+        namespace: argo
+        finalizers:
+          - resources-finalizer.argocd.argoproj.io
+      spec:
+        description: "{{ item.value.description | default('TBP') }}"
+        sourceRepos:
+          - '*'
+        destinations:
+          - namespace: "{{ item.value.destination.namespace | default(item.key) }}"
+            name: "{{ item.value.destination.name | default('in-cluster') }}"
+        clusterResourceWhitelist:
+          - group: ''
+            kind: Namespace
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ argocd.projects | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create ArgoCD ApplicationSets for Helm Charts
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: ApplicationSet
+      metadata:
+        name: "{{ item.key }}-applicationset-helm-chart"
+        namespace: argo
+      spec:
+        goTemplate: true
+        goTemplateOptions:
+          - missingkey=error
+        generators:
+          - git:
+              repoURL: "{{ item.value.source.url }}"
+              revision: "{{ item.value.source.ref }}"
+              files:
+                - path: application-configs/*/chart.yaml
+        template:
+          metadata:
+            name: "{{ item.key }}-{{ '{{' }} index .path.segments 1 {{ '}}' }}"
+          spec:
+            project: "{{ item.key }}"
+            sources:
+              - repoURL: "{{ '{{' }} .source.repoURL {{ '}}' }}"
+                targetRevision: "{{ '{{' }} .source.targetRevision {{ '}}' }}"
+                chart: "{{ '{{' }} .source.chart {{ '}}' }}"
+                helm:
+                  valueFiles:
+                    - $values/values/{{ item.value.destination.name }}/{{ '{{' }} index .path.segments 1 {{ '}}' }}.yaml
+              - repoURL: "{{ item.value.source.url }}"
+                targetRevision: "{{ item.value.source.ref }}"
+                ref: values
+            destination:
+              name: "{{ item.value.destination.name }}"
+              namespace: "{{ item.value.destination.namespace | default(item.key) }}"
+            syncPolicy:
+              automated:
+                prune: "{{ item.value.automatedSync.prune | default(True) }}"
+                selfHeal: "{{ item.value.automatedSync.selfHeal | default(True) }}"
+              syncOptions:
+                - CreateNamespace=true
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ argocd.applicationsets | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create ArgoCD ApplicationSets for Git Repos
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: ApplicationSet
+      metadata:
+        name: "{{ item.key }}-applicationset-git-repo"
+        namespace: argo
+      spec:
+        goTemplate: true
+        goTemplateOptions:
+          - missingkey=error
+        generators:
+          - git:
+              repoURL: "{{ item.value.source.url }}"
+              revision: "{{ item.value.source.ref }}"
+              files:
+                - path: application-configs/*/repo.yaml
+        template:
+          metadata:
+            name: "{{ item.key }}-{{ '{{' }} index .path.segments 1 {{ '}}' }}"
+          spec:
+            project: "{{ item.key }}"
+            sources:
+              - repoURL: "{{ '{{' }} .source.repoURL {{ '}}' }}"
+                targetRevision: "{{ '{{' }} .source.targetRevision {{ '}}' }}"
+                path: "{{ '{{' }} .source.path {{ '}}' }}"
+                helm:
+                  valueFiles:
+                    - $values/values/{{ item.value.destination.name }}/{{ '{{' }} index .path.segments 1 {{ '}}' }}.yaml
+              - repoURL: "{{ item.value.source.url }}"
+                targetRevision: "{{ item.value.source.ref }}"
+                ref: values
+            destination:
+              name: "{{ item.value.destination.name }}"
+              namespace: "{{ item.value.destination.namespace | default(item.key) }}"
+            syncPolicy:
+              automated:
+                prune: "{{ item.value.automatedSync.prune | default(True) }}"
+                selfHeal: "{{ item.value.automatedSync.selfHeal | default(True) }}"
+              syncOptions:
+                - CreateNamespace=true
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ argocd.applicationsets | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
