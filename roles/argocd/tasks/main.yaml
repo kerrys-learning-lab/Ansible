@@ -47,27 +47,36 @@
     dest: /usr/local/bin/argocd
     state: link
 
+- name: Create Directory for Cluster Secrets
+  ansible.builtin.file:
+    state: directory
+    path: /var/lib/ansible/argocd.d
+    mode: 0755
+
+- name: Create Cluster Secrets K8s File
+  ansible.builtin.template:
+    src: cluster-secret.j2.yaml
+    dest: /var/lib/ansible/argocd.d/{{ item.key }}-cluster-secret.yaml
+    mode: 0400
+  loop: "{{ clusters | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Managed Clusters
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    src: /var/lib/ansible/argocd.d/{{ item.key }}-cluster-secret.yaml
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ argocd.clusters | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
 - name: Login to ArgoCD CLI
   ansible.builtin.command:
     /usr/local/bin/argocd login --username {{ argocd.cli.server.username }}
                                 --password {{ argocd.cli.server.password }}
                                 {{ argocd.hostname | default('argocd.westsidestreet.net') }}
-
-- name: List ArgoCD Managed Clusters
-  ansible.builtin.command:
-    /usr/local/bin/argocd cluster list
-  register: argocd_managed_clusters_list
-  changed_when: false
-
-- name: Manage ArgoCD Cluster
-  ansible.builtin.command:
-    /usr/local/bin/argocd cluster add --name {{ item.key }}
-                                      --kubeconfig {{ item.value.kubeconfig }}
-                                      {{ item.value.context }}
-  loop: "{{ argocd.clusters | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  when: "item.key not in argocd_managed_clusters_list.stdout"
 
 - name: Create ArgoCD Projects
   kubernetes.core.k8s:

@@ -6,9 +6,7 @@ applications:
       url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts
       ref: csi-driver-smb
       version: v1.17.0
-      helm_values:
-        linux:
-          kubelet: /var/snap/microk8s/common/var/lib/kubelet
+      helm_values: {}
   - name: cert-manager
     value:
       namespace: infrastructure
@@ -18,6 +16,16 @@ applications:
       helm_values:
         crds:
           enabled: true
+  - name: nfs-subdir-external-provisioner
+    value:
+      namespace: infrastructure
+      url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+      ref: nfs-subdir-external-provisioner
+      version: 4.0.18
+      helm_values:
+        nfs:
+          server: "{{ lookup('ansible.builtin.vars', 'nfs').host }}"
+          path: /volume2/kubernetes
   - name: metal-lb
     value:
       namespace: infrastructure

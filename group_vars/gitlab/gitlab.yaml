@@ -14,7 +14,11 @@ gitlab:
           domain: westsidestreet.net
         externalIp: 192.168.1.31
         ingress:
-          configureCertmanager: false
+          configureCertmanager: true
+        appConfig:
+          backups:
+            bucket: gitlab-backup
+            tmpBucket: gitlab-tmp
       gitlab:
         gitaly:
           persistence:
@@ -26,14 +30,23 @@ gitlab:
           ingress:
             tls:
               secretName: gitlab-ingress-tls
-        registry:
-          ingress:
-            tls:
-              secretName: gitlab-ingress-tls
-        minio:
-          ingress:
-            tls:
-              secretName: gitlab-ingress-tls
+        toolbox:
+          backups:
+            objectStorage:
+              config:
+                secret: external-backup-s3cfg
+            cron:
+              enabled: true
+              schedule: "@weekly"
+      minio:
+        ingress:
+          tls:
+            secretName: gitlab-ingress-tls
+      registry:
+        ingress:
+          enabled: true
+          tls:
+            secretName: gitlab-ingress-tls
       postgresql:
         primary:
           persistence:
@@ -71,3 +84,10 @@ gitlab:
         postgresql:
           volume: gitlab-postgresql
           capacity: 100Gi
+  backups:
+    minio:
+      base: nas-minio.westsidestreet.net:9000
+      bucket: nas-minio.westsidestreet.net:9000
+      location: us-east-1
+      https: false
+      access: IHSe4VmyDT0mOpwPaUeu

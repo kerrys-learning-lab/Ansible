@@ -1,8 +1,10 @@
-dev:
+os:
   packages:
     - jq
     - smbclient
+    - pigz
     - podman
+    - tree
     - unzip
     # Certbot Dependencies:
     - python3

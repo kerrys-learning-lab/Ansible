@@ -5,3 +5,9 @@ extra:
     #       - sudo apt update
     #       as described here: https://github.com/firecow/gitlab-ci-local?tab=readme-ov-file#installation
     - gitlab-ci-local
+    - podman-compose
+  k8s:
+    namespaces:
+      - dev
+
+fqdn: wsl.westsidestreet.net

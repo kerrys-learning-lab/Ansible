@@ -4,15 +4,21 @@
   become: true
   roles:
     - common
+    - os
 
-- name: Configure Development Machine(s)
+- name: Configure Kubernetes Machine(s)
   hosts:
     - all
   become: true
   roles:
-    - development
     - k8s
     - k8s-development
+
+- name: Configure Development Machine(s)
+  hosts:
+    - dev
+  roles:
+    - development
 
 - name: Configure Clusters
   hosts:
@@ -35,9 +41,9 @@
   roles:
     - gitlab
 
-- name: Configure GitLab Runner(s)
-  hosts:
-    - clusters
-  become: true
-  roles:
-    - gitlab-runner
+# - name: Configure GitLab Runner(s)
+#   hosts:
+#     - clusters
+#   become: true
+#   roles:
+#     - gitlab-runner

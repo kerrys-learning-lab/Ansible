@@ -25,6 +25,27 @@
   loop_control:
     label: "{{ item.key }}"
 
+- name: Create GitLab Backup Secret
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: external-backup-s3cfg
+        namespace: gitlab-system
+      stringData:
+        config: |
+          host_base = {{ gitlab.backups.minio.base }}
+          host_bucket = {{ gitlab.backups.minio.bucket }}
+          bucket_location = {{ gitlab.backups.minio.location }}
+          use_https = {{ gitlab.backups.minio.https }}
+          access_key = {{ gitlab.backups.minio.access }}
+          secret_key = {{ gitlab_secrets.backups.minio.key }}
+          signature_v2 = False
+    kubeconfig: /etc/kubeconfig
+
 - name: Create Local Kubernetes Volume(s) for GitLab
   kubernetes.core.k8s:
     state: present

@@ -1,48 +1,9 @@
-- name: Upgrade the OS (apt-get upgrade)
-  ansible.builtin.apt:
-    update_cache: true
-    upgrade: dist
-    autoclean: true
-    autoremove: true
-  notify:
-    - Restart rpi
+- name: Install packages (OS)
+  ansible.builtin.package:
+    name: "{{ os.packages }}"
+  when: os is defined and 'packages' in os
 
-- name: Install OS packages/prerequisites
-  ansible.builtin.apt:
-    name:
-      - ca-certificates
-      - curl
-      - gnupg
-      - nfs-common
-      - raspberrypi-bootloader
-      - raspberrypi-kernel
-      - snapd
-    state: present
-  notify:
-    - Restart rpi
-
-- name: Flush handlers after upgrade
-  ansible.builtin.meta: flush_handlers
-
-- name: Enable container features (/boot/cmdline.txt)
-  ansible.builtin.replace:
-    path: /boot/cmdline.txt
-    regexp: '^([\w](?!.*\b{{ item }}\b).*)$'
-    replace: '\1 {{ item }}'
-  with_items:
-    - "cgroup_enable=cpuset"
-    - "cgroup_memory=1"
-    - "cgroup_enable=memory"
-  notify:
-    - Restart rpi
-
-- name: Enable I2C (/boot/config.txt)
-  ansible.builtin.lineinfile:
-    dest: /boot/config.txt
-    regexp: '^#dtparam=i2c_arm=on$'
-    line: 'dtparam=i2c_arm=on'
-  notify:
-    - Restart rpi
-
-- name: Flush handlers - I2C setup
-  ansible.builtin.meta: flush_handlers
+- name: Install packages (pip)
+  ansible.builtin.pip:
+    name: "{{ os.pip }}"
+  when: os is defined and 'pip' in os

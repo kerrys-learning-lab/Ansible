@@ -1,0 +1,3 @@
+- name: Install GitLab Runner Operator
+  include_tasks: gitlab-runner.yaml
+  when: gitlab_runner is defined

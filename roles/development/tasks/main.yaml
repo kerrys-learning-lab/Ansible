@@ -1,9 +1,25 @@
-- name: Install development packages (OS)
-  ansible.builtin.package:
-    name: "{{ dev.packages }}"
-  when: dev is defined and 'packages' in dev
 
-- name: Install development packages (pip)
-  ansible.builtin.pip:
-    name: "{{ dev.pip }}"
-  when: dev is defined and 'pip' in dev
+- name: Create Local Kubernetes Volume(s) for Development
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ item.key }}"
+        labels:
+          owner: "{{ item.key }}"
+      spec:
+        capacity:
+          storage: "{{ item.value.capacity | default('10Gi') }}"
+        accessModes:
+          - "{{ item.value.accessMode | default('ReadWriteOnce') }}"
+        persistentVolumeReclaimPolicy: "{{ item.value.reclaimPolicy | default('Retain') }}"
+        storageClassName: local
+        hostPath:
+          path: "{{ item.value.path }}"
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ dev.k8s.volumes.local | default({}) |dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

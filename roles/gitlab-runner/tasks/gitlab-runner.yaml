@@ -1,0 +1,29 @@
+- name: Install/Configure GitLab Runner via Helm
+  kubernetes.core.helm:
+    name: "{{ gitlab_runner.helm.name }}"
+    namespace: "{{ gitlab_runner.helm.namespace }}"
+    chart_repo_url: "{{ gitlab_runner.helm.url }}"
+    chart_version: "{{ gitlab_runner.helm.version }}"
+    chart_ref: "{{ gitlab_runner.helm.ref }}"
+    release_values: "{{ gitlab_runner.helm.helm_values }}"
+    create_namespace: true
+    kubeconfig: /etc/kubeconfig
+
+# NOTE: I did all of this when I thought GitLab Runner Operator
+#       would work in this environment...
+- name: Infer GitLab Runner Tags
+  ansible.builtin.set_fact:
+    inferred_gitlab_runner_tags:
+      - "{{ ansible_architecture }}"
+      - "{{ ansible_hostname }}"
+      - "{{ ansible_local['dpkg']['arch'] }}"
+      - "{{ ansible_distribution | lower }}"
+      - "{{ ansible_distribution_release | lower }}"
+
+- name: Calculate All GitLab Runner Tags
+  ansible.builtin.set_fact:
+    gitlab_runner_tags: "{{ (inferred_gitlab_runner_tags | default({}) + gitlab_runner.runner.tags | default([])) | join(', ') }}"
+
+- name: Print GitLab Runner Tags
+  ansible.builtin.debug:
+    var: gitlab_runner_tags

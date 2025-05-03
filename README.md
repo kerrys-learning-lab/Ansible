@@ -1,4 +1,10 @@
 
+### Prerequisites
+
+  - https://docs.rke2.io/install/quickstart
+    curl -sfL https://get.rke2.io | sudo sh -
+
+
 cd ~/dev/devenv/ansible
 
 ```

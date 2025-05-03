@@ -1,6 +1,6 @@
 argocd:
   cli:
-    version: v2.14.2
+    version: v2.14.11
     server:
       username: admin
       password: "{{ lookup('ansible.builtin.vars', 'secrets').argocd.admin.password }}"
@@ -45,13 +45,6 @@ argocd:
       argocd-server:
         dnsNames:
           - argocd.westsidestreet.net
-  clusters:
-    wsl:
-      context: microk8s
-      kubeconfig: /var/lib/ansible/kubeconfig.d/wsl.yaml
-    raspberry-pi:
-      context: microk8s
-      kubeconfig: /var/lib/ansible/kubeconfig.d/raspberrypi5-01.yaml
   projects:
     boids:
       description: |

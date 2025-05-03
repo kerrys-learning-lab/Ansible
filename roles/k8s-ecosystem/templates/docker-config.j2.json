@@ -1,0 +1,9 @@
+{
+  "auths": {
+    {% for key, value in secrets.k8s.image_pull.auth.items() %}
+      "{{ key }}": {
+        "auth": "{{ '%s:%s' | format(value['username'], value['password']) | b64encode }}"
+      }{{ ", " if not loop.last else "" }}
+    {% endfor %}
+  }
+}
