@@ -2,8 +2,11 @@
   "auths": {
     {% for key, value in secrets.k8s.image_pull.auth.items() %}
       "{{ key }}": {
+        "username": "{{ value['username'] }}",
+        "password": "{{ value['password'] }}",
+        "email": "{{ value['username']}}@example.com",
         "auth": "{{ '%s:%s' | format(value['username'], value['password']) | b64encode }}"
-      }{{ ", " if not loop.last else "" }}
+      }{{ "" if loop.last else ", " }}
     {% endfor %}
   }
 }

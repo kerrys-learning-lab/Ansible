@@ -8,6 +8,11 @@ gitlab:
     elitedesk:
       ansible_host: elitedesk.westsidestreet.net
 
+mlflow:
+  hosts:
+    elitedesk:
+      ansible_host: elitedesk.westsidestreet.net
+
 argocd:
   hosts:
     elitedesk:
@@ -16,11 +21,11 @@ argocd:
 clusters:
   hosts:
     elitedesk:
-    raspberrypi4-01: # All Pis are combined in a single cluster!
+    # raspberrypi4-01: # All Pis are combined in a single cluster!
     wsl:
 
 raspberry_pi:
   hosts:
-    raspberrypi5-01:
-    raspberrypi5-02:
-    raspberrypi4-01:
+    # raspberrypi5-01:
+    # raspberrypi5-02:
+    # raspberrypi4-01:

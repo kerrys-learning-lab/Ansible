@@ -1,0 +1,4 @@
+registries:
+  ephemeral-registry:
+    url: nas.westsidestreet.net:5555
+    insecure: "true"

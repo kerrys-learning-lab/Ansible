@@ -19,6 +19,7 @@
     - dev
   roles:
     - development
+    - podman
 
 - name: Configure Clusters
   hosts:
@@ -27,12 +28,12 @@
   roles:
     - k8s-ecosystem
 
-- name: Configure ArgoCD
-  hosts:
-    - argocd
-  become: true
-  roles:
-    - argocd
+# - name: Configure ArgoCD
+#   hosts:
+#     - argocd
+#   become: true
+#   roles:
+#     - argocd
 
 - name: Configure GitLab
   hosts:
@@ -41,9 +42,16 @@
   roles:
     - gitlab
 
-# - name: Configure GitLab Runner(s)
-#   hosts:
-#     - clusters
-#   become: true
-#   roles:
-#     - gitlab-runner
+- name: Configure MLFlow
+  hosts:
+    - mlflow
+  become: true
+  roles:
+    - mlflow
+
+- name: Configure GitLab Runner(s)
+  hosts:
+    - clusters
+  become: true
+  roles:
+    - gitlab-runner

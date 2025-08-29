@@ -45,6 +45,12 @@ argocd:
       argocd-server:
         dnsNames:
           - argocd.westsidestreet.net
+      nas:
+        dnsNames:
+          - nas.westsidestreet.net
+          - nas-minio.westsidestreet.net
+          - nas-registry.westsidestreet.net
+          - ephemeral-registry.westsidestreet.net
   projects:
     boids:
       description: |

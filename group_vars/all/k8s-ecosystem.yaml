@@ -37,6 +37,13 @@ applications:
           pod-security.kubernetes.io/enforce: privileged
           pod-security.kubernetes.io/audit: privileged
           pod-security.kubernetes.io/warn: privileged
+  - name: mysql-operator
+    value:
+      namespace: infrastructure
+      url: https://mysql.github.io/mysql-operator
+      ref: mysql-operator
+      version: 2.2.5
+      helm_values: {}
 
 _elasticsearch:
   operator:

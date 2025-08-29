@@ -19,6 +19,13 @@ gitlab:
           backups:
             bucket: gitlab-backup
             tmpBucket: gitlab-tmp
+      controller: # aka NGINX Ingress Controller
+        # https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/charts/nginx-ingress/values.yaml
+        config:
+          data:
+            proxy-body-size: 0
+          # https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size
+          proxy-body-size: 0 # disables checking of client request body size
       gitlab:
         gitaly:
           persistence:
@@ -43,24 +50,39 @@ gitlab:
           tls:
             secretName: gitlab-ingress-tls
       registry:
+        enabled: true
+        maintenance:
+          readonly:
+            enabled: false
         ingress:
           enabled: true
           tls:
             secretName: gitlab-ingress-tls
+        database:
+          configure: true
+          enabled: true
+          name: registry
+          user: registry
+          password:
+            secret: gitlab-registry-database-password
+            key: password
+          migrations:
+            enabled: true
       postgresql:
+        install: true
         primary:
           persistence:
             existingClaim: postgresql
   directories:
-    /mnt/ssd/k8s-local-pv:
+    /var/lib/k8s-local-pv:
       mode: u=rwx,go=rx
-    /mnt/ssd/k8s-local-pv/gitlab:
+    /var/lib/k8s-local-pv/gitlab:
       mode: u=rwx,go=rx
-    /mnt/ssd/k8s-local-pv/gitlab/postgresql:
+    /var/lib/k8s-local-pv/gitlab/postgresql:
       owner: 1001
       group: 1001
       mode: u=rwx,go=rx
-    /mnt/ssd/k8s-local-pv/gitlab/gitaly:
+    /var/lib/k8s-local-pv/gitlab/gitaly:
       owner: 1000
       group: 1000
       mode: u=rwx,go=rx
@@ -75,10 +97,10 @@ gitlab:
       local:
         gitlab-postgresql:
           capacity: 100Gi
-          path: /mnt/ssd/k8s-local-pv/gitlab/postgresql
+          path: /var/lib/k8s-local-pv/gitlab/postgresql
         gitlab-gitaly:
           capacity: 100Gi
-          path: /mnt/ssd/k8s-local-pv/gitlab/gitaly
+          path: /var/lib/k8s-local-pv/gitlab/gitaly
     claims:
       local:
         postgresql:

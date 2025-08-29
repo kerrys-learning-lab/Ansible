@@ -1,4 +1,15 @@
 
+- name: Create Local Kubernetes Volume Directories
+  ansible.builtin.file:
+    path: "{{ item.key }}"
+    state: directory
+    owner: "{{ item.value.owner | default('root') }}"
+    group: "{{ item.value.group | default('root') }}"
+    mode: "{{ item.value.mode }}"
+  loop: "{{ dev.directories | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
 - name: Create Local Kubernetes Volume(s) for Development
   kubernetes.core.k8s:
     state: present
@@ -21,5 +32,26 @@
           path: "{{ item.value.path }}"
     kubeconfig: /etc/kubeconfig
   loop: "{{ dev.k8s.volumes.local | default({}) |dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create Development Certificate(s)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: "{{ item.key }}"
+        namespace: "{{ item.value.namespace | default('dev') }}"
+      spec:
+        secretName: "{{ item.key }}-tls"
+        dnsNames: "{{ item.value.dnsNames }}"
+        issuerRef:
+          name: "{{ certmanager.issuer.name }}"
+          kind: "{{ certmanager.issuer.type | default('ClusterIssuer') }}"
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ dev.k8s.certificates | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

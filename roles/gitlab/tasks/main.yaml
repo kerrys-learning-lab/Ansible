@@ -46,6 +46,24 @@
           signature_v2 = False
     kubeconfig: /etc/kubeconfig
 
+
+# # NOTE: See https://docs.gitlab.com/charts/charts/registry/metadata_database
+# - name: Create GitLab Registry PostgreSQL Secret
+#   kubernetes.core.k8s:
+#     state: present
+#     apply: true
+#     definition:
+#       apiVersion: v1
+#       kind: Secret
+#       metadata:
+#         name: gitlab-registry-database-password
+#         namespace: gitlab-system
+#       type: kubernetes.io/basic-auth
+#       stringData:
+#         username: "{{ gitlab_secrets.registry.postgresql.username }}"
+#         password: "{{ gitlab_secrets.registry.postgresql.password }}"
+#     kubeconfig: /etc/kubeconfig
+
 - name: Create Local Kubernetes Volume(s) for GitLab
   kubernetes.core.k8s:
     state: present

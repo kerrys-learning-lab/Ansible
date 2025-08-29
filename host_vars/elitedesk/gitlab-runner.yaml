@@ -18,5 +18,7 @@ gitlab_runner:
               FF_SCRIPT_SECTIONS = true
               FF_TIMESTAMPS = true
             [runners.kubernetes]
-              image = "ubuntu"
-
+              image = "registry.westsidestreet.net/kerrys-learning-lab/devsecops/gitlab-runner/gitlab-runner:main"
+              privileged = true
+              allowed_pull_policies = ["always", "if-not-present"]
+              pull_policy = "always"
