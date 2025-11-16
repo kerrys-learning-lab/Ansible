@@ -1,0 +1,63 @@
+- name: Set K8s Share Base Facts
+  ansible.builtin.set_fact:
+    k8s_share_fetch_remote_path: "{{ k8s_share.fetch.remote_path | default(k8s_share_defaults.fetch.remote_path) }}"
+    k8s_share_fetch_local_path_prefix: "{{ k8s_share.fetch.local_path_prefix | default(k8s_share_defaults.fetch.local_path_prefix) }}"
+    k8s_share_fetch_owner: "{{ k8s_share.fetch.owner | default(k8s_share_defaults.fetch.owner) }}"
+    k8s_share_fetch_group: "{{ k8s_share.fetch.group | default(k8s_share_defaults.fetch.group) }}"
+    k8s_share_fetch_mode: "{{ k8s_share.fetch.mode | default(k8s_share_defaults.fetch.mode) }}"
+    k8s_share_share_remote_path_prefix: "{{ k8s_share.share.remote_path_prefix | default(k8s_share_defaults.share.remote_path_prefix) }}"
+    k8s_share_share_owner: "{{ k8s_share.share.owner | default(k8s_share_defaults.share.owner) }}"
+    k8s_share_share_group: "{{ k8s_share.share.group | default(k8s_share_defaults.share.group) }}"
+    k8s_share_share_mode: "{{ k8s_share.share.mode | default(k8s_share_defaults.share.mode) }}"
+    k8s_share_hosts: "{{ k8s_share.hosts | default(k8s_share_defaults.hosts) }}"
+
+- name: Set K8s Share Derived Facts
+  ansible.builtin.set_fact:
+    k8s_share_fetch_local_path_prefix: "{{ k8s_share.fetch.local_path_prefix | default(k8s_share_defaults.fetch.local_path_prefix) }}"
+
+- name: Create Local K8s Sharing Directories
+  ansible.builtin.file:
+    state: directory
+    path: "{{ k8s_share_fetch_local_path_prefix }}/{{ item.key }}"
+    owner: "{{ k8s_share_fetch_owner }}"
+    group: "{{ k8s_share_fetch_group }}"
+    mode: "{{ k8s_share_fetch_mode }}"
+  loop: "{{ hostvars | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: "inventory_hostname in k8s_share_hosts"
+
+- name: Fetch All Kubeconfigs
+  ansible.builtin.fetch:
+    src: "{{ k8s_share_fetch_remote_path }}"
+    dest: "{{ k8s_share_fetch_local_path_prefix }}/{{ inventory_hostname }}/kubeconfig"
+    flat: true
+
+- name: Update IP Address in Kubeconfigs
+  ansible.builtin.replace:
+    path: "{{ k8s_share_fetch_local_path_prefix }}/{{ item.key }}/kubeconfig"
+    regexp: 127\.0\.0\.1
+    replace: "{{ k8s_share.lookup[item.key] }}"
+  loop: "{{ hostvars | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  delegate_to: localhost
+
+- name: Create Remote K8s Sharing Directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ k8s_share_share_remote_path_prefix }}"
+    owner: "{{ k8s_share_share_owner }}"
+    group: "{{ k8s_share_share_group }}"
+    mode: "{{ k8s_share_share_mode }}"
+
+- name: Share All Kubeconfigs
+  ansible.builtin.copy:
+    src: "{{ k8s_share_fetch_local_path_prefix }}/{{ item.key }}/kubeconfig"
+    dest: "{{ k8s_share_share_remote_path_prefix }}/{{ item.key }}"
+    owner: "{{ k8s_share_share_owner }}"
+    group: "{{ k8s_share_share_group }}"
+    mode: "{{ k8s_share_share_mode }}"
+  loop: "{{ hostvars | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

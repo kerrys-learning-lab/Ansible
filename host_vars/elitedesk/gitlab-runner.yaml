@@ -9,7 +9,7 @@ gitlab_runner:
       gitlabUrl: https://gitlab.westsidestreet.net
       rbac:
         create: true
-      runnerToken: "{{ lookup('ansible.builtin.vars', 'runner_token') }}"
+      runnerToken: "{{ lookup('ansible.builtin.vars', 'gitlab_runner_secrets').token }}"
       runners:
         config: |
           [[runners]]

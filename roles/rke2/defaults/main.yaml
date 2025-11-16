@@ -1,0 +1,7 @@
+rke2:
+  kubeconfig:
+    src: /etc/rancher/rke2/rke2.yaml
+    dest: /etc/kubeconfig
+  kubectl:
+    src: /var/lib/rancher/rke2/bin/kubectl
+    dest: /usr/bin/kubectl

@@ -1,0 +1,36 @@
+- name: Ensure Helm downloadpath
+  ansible.builtin.file:
+    name: "{{ paths.download }}/helm-{{ helm.version }}"
+    state: directory
+
+- name: Set Helm File Fact
+  ansible.builtin.set_fact:
+    helm_file: helm-{{ helm.version }}-linux-{{ ansible_local['dpkg']['arch'] }}.tar.gz
+
+- name: Download Helm CLI ({{ helm.version }})
+  ansible.builtin.get_url:
+    url:  https://get.helm.sh/{{ hostvars[inventory_hostname]['helm_file'] }}
+    dest: "{{ paths.download }}/helm-{{ helm.version }}/{{ hostvars[inventory_hostname]['helm_file'] }}"
+    decompress: false
+
+- name: Extract Helm CLI
+  ansible.builtin.unarchive:
+    src: "{{ paths.download }}/helm-{{ helm.version }}/{{ hostvars[inventory_hostname]['helm_file'] }}"
+    dest: "{{ paths.download }}/helm-{{ helm.version }}"
+    remote_src: true
+    mode: 0555
+
+- name: Link Helm CLI
+  ansible.builtin.file:
+    src: "{{ paths.download }}/helm-{{ helm.version }}/linux-{{ ansible_local['dpkg']['arch']}}/helm"
+    dest: /usr/local/bin/helm
+    state: link
+
+- name: Install Helm Plug-ins
+  kubernetes.core.helm_plugin:
+    plugin_version: "{{ item.value.version }}"
+    plugin_path: "{{ item.value.url }}"
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ helm.plugins | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

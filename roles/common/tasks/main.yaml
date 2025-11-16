@@ -1,7 +1,7 @@
-- name: Install extra packages (OS)
+- name: Install host-specific packages (OS)
   ansible.builtin.package:
-    name: "{{ extra.packages }}"
-  when: extra is defined and 'packages' in extra
+    name: "{{ host.packages }}"
+  when: host is defined and 'packages' in host
 
 - name: Create Network Mount Locations (SMB)
   ansible.builtin.file:
@@ -22,21 +22,33 @@
   loop_control:
     label: "{{ item.key }}"
 
-- name: Create Extra Mount Locations
+- name: Mount Network Home Directories (SMB)
+  ansible.posix.mount:
+    state: mounted
+    src: "//{{ smb.host }}/{{ smb.homes.source }}"
+    path: "{{ smb.homes.path }}/{{ item.key }}"
+    fstype: "{{ smb.homes.type | default('cifs') }}"
+    opts: "uid={{ item.value.uid }},gid={{ item.value.gid }},{{ item.value.opts | default(smb.opts) }}"
+  loop: "{{ smb.homes.users | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: smb.homes is defined
+
+- name: Create Host-specific Mount Locations
   ansible.builtin.file:
     state: directory
     path: /mnt/{{ item.value.mount_path | default(item.key) }}
-  loop: "{{ extra.mounts | default({}) | dict2items }}"
+  loop: "{{ host.mounts | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
-- name: Mount Extra Shares/Drives
+- name: Mount Host-specific Shares/Drives
   ansible.posix.mount:
     state: mounted
     src: "{{ item.value.src }}"
     path: /mnt/{{ item.value.mount_path | default(item.key) }}
     fstype: "{{ item.value.type }}"
-  loop: "{{ extra.mounts | default({}) | dict2items }}"
+  loop: "{{ host.mounts | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
@@ -52,11 +64,11 @@
   loop_control:
     label: "{{ item.key }}"
 
-- name: Ensure Extra Paths
+- name: Ensure Host-specific Paths
   ansible.builtin.file:
     name: "{{ item.value }}"
     state: directory
     mode: '0755'
-  loop: "{{ extra.paths | default({}) | dict2items }}"
+  loop: "{{ host.paths | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

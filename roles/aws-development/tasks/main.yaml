@@ -1,4 +1,40 @@
+- name: Set AWS CLI Base Facts
+  ansible.builtin.set_fact:
+    aws_cli_url_prefix: "{{ aws_development.cli.url_prefix | default(aws_development_defaults.cli.url_prefix) }}"
+    aws_cli_os: "{{ ansible_system | lower }}"
+    aws_cli_architecture: "{{ ansible_architecture | lower }}"
+    aws_cli_download_root: "{{ aws_development.paths.download | default(aws_development_defaults.paths.download) }}"
+    aws_cli_version: "{{ aws_development.cli.version | default(aws_development_defaults.cli.version) }}"
+    aws_cli_owner: "{{ aws_development.owner | default(aws_development_defaults.owner) }}"
+    aws_cli_group: "{{ aws_development.group | default(aws_development_defaults.group) }}"
+    aws_cli_mode: "{{ aws_development.mode | default(aws_development_defaults.mode) }}"
+    aws_cli_bin_path: "{{ aws_development.paths.bin | default(aws_development_defaults.paths.bin) }}"
+
+- name: Set AWS CLI Derived Facts
+  ansible.builtin.set_fact:
+    aws_cli_download_path: "{{ aws_cli_download_root }}/aws-cli-{{ aws_cli_version }}"
+
+- name: Ensure AWS CLI downloadpath
+  ansible.builtin.file:
+    name: "{{ aws_cli_download_path }}"
+    state: directory
+    owner: "{{ aws_cli_owner }}"
+    group: "{{ aws_cli_group }}"
+    mode: "{{ aws_cli_mode }}"
+
+- name: Download AWS CLI
+  ansible.builtin.get_url:
+    url: "{{ aws_cli_url_prefix }}-{{ aws_cli_version }}.zip"
+    dest: "{{ aws_cli_download_path }}/aws-exe-{{ aws_cli_os }}-{{ aws_cli_architecture }}.zip"
+
+- name: Extract AWS CLI
+  ansible.builtin.unarchive:
+    src: "{{ aws_cli_download_path }}/aws-exe-{{ aws_cli_os }}-{{ aws_cli_architecture }}.zip"
+    dest: "{{ aws_cli_download_path }}"
+    remote_src: true
+    mode: "{{ aws_cli_mode }}"
 
 - name: Install AWS CLI
-  import_tasks: aws-cli.yaml
-  when: aws is defined
+  ansible.builtin.shell:
+    cmd: "{{ paths.download }}/aws-cli-{{ aws_development_defaults.cli.version }}/aws/install"
+    creates: "{{ aws_cli_bin_path }}"

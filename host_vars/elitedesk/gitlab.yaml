@@ -1,0 +1,92 @@
+gitlab:
+  operator:
+    name: gitlab-ci
+    namespace: gitlab-system
+    url: https://charts.gitlab.io
+    ref: gitlab-operator
+    version: 1.6.0
+    helm_values: {}
+  application:
+    version: 8.5.1
+    crd_values:
+      global:
+        hosts:
+          domain: westsidestreet.net
+        externalIp: 192.168.1.31
+        ingress:
+          configureCertmanager: true
+        appConfig:
+          backups:
+            bucket: gitlab-backup
+            tmpBucket: gitlab-tmp
+        kas:
+          # Was never able to get Kubernetes Agent Server working because
+          # ingress cert is self-signed
+          enabled: false
+      controller: # aka NGINX Ingress Controller
+        # https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/charts/nginx-ingress/values.yaml
+        config:
+          data:
+            proxy-body-size: 0
+          # https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size
+          proxy-body-size: 0 # disables checking of client request body size
+      gitlab:
+        gitaly:
+          persistence:
+            storageClass: local
+            matchLabels:
+              owner: gitlab-gitaly
+            size: 100Gi
+        webservice:
+          ingress:
+            tls:
+              secretName: gitlab-ingress-tls
+        toolbox:
+          backups:
+            objectStorage:
+              config:
+                secret: external-backup-s3cfg
+            cron:
+              enabled: true
+              schedule: "@weekly"
+      minio:
+        ingress:
+          tls:
+            secretName: gitlab-ingress-tls
+      registry:
+        enabled: true
+        maintenance:
+          readonly:
+            enabled: false
+        ingress:
+          enabled: true
+          tls:
+            secretName: gitlab-ingress-tls
+        database:
+          configure: true
+          enabled: true
+          name: registry
+          user: registry
+          password:
+            secret: gitlab-registry-database-password
+            key: password
+          migrations:
+            enabled: true
+      postgresql:
+        install: true
+        primary:
+          persistence:
+            existingClaim: postgresql
+  k8s:
+    claims:
+      local:
+        postgresql:
+          volume: gitlab-postgresql
+          capacity: 100Gi
+  backups:
+    minio:
+      base: nas-minio.westsidestreet.net:9000
+      bucket: nas-minio.westsidestreet.net:9000
+      location: us-east-1
+      https: false
+      access: IHSe4VmyDT0mOpwPaUeu

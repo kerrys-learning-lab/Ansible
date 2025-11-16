@@ -1,0 +1,22 @@
+- name: Set Podman Remote Base Facts
+  ansible.builtin.set_fact:
+    podman_remote_packages: "{{ podman_remote.packages | default(podman_remote_defaults.packages) }}"
+    podman_remote_socket_path: "{{ podman_remote.socket.path | default(podman_remote_defaults.socket.path) }}"
+    podman_remote_env_path: "{{ podman_remote.env.path | default(podman_remote_defaults.env.path) }}"
+    podman_remote_env_mode: "{{ podman_remote.env.mode | default(podman_remote_defaults.env.mode) }}"
+
+- name: Install Podman Remote Packages`
+  ansible.builtin.package:
+    name: "{{ podman_remote_packages }}"
+
+- name:
+  ansible.builtin.copy:
+    dest: "{{ podman_remote_env_path }}"
+    content: |
+      if [ -z "${DOCKER_HOST-}" ]; then
+          export DOCKER_HOST=unix://{{ podman_remote_socket_path }}
+      fi
+      if [ -z "${CONTAINER_HOST-}" ]; then
+          export CONTAINER_HOST=unix://{{ podman_remote_socket_path }}
+      fi
+    mode: "{{ podman_remote_env_mode }}"

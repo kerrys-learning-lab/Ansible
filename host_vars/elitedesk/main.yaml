@@ -1,6 +1,18 @@
-extra:
+host:
   packages:
     - ntfs-3g
+  argocd:
+    helm_values:
+      global:
+        domain: argocd.westsidestreet.net
+      server:
+        ingress:
+          enabled: true
+          tls: true
+          ingressClassName: gitlab-nginx
+        service:
+          type: LoadBalancer
+
   mounts: {}
   metal:
     # NOTE: Reserved these in the Netgear router by setting the upper

@@ -1,0 +1,10 @@
+k8s:
+  namespaces:
+    - dev
+    - infrastructure
+  kubeconfig:
+    src: /mnt/c/Users/kerry/.kube/config
+    dest: /etc/kubeconfig
+  kubectl:
+    src: /snap/bin/kubectl
+    dest: /usr/bin/kubectl

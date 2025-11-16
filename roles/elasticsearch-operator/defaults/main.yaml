@@ -1,0 +1,4 @@
+elasticsearch_operator_defaults:
+  version: 3.1.0
+  url:
+    prefix: https://download.elastic.co/downloads/eck

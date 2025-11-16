@@ -1,0 +1,3 @@
+k9s:
+  paths:
+    download: /usr/local/downloads

@@ -1,3 +1,3 @@
-
-aws:
-  version: 2.25.1
+aws_development:
+  paths:
+    download: "{{ lookup('ansible.builtin.vars', 'paths').download }}"

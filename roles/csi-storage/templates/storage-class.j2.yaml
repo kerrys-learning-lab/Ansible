@@ -1,0 +1,23 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ storage_class_name }}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "{{ spec.default | default('false') }}"
+provisioner: {{ spec.provisioner }}
+{% if 'parameters' in spec %}
+parameters:
+{% for pkey, pvalue in spec.parameters.items() %}
+  {{ pkey }}: {{ pvalue }}
+{% endfor %}
+{% endif %}
+reclaimPolicy: {{ spec.reclaimPolicy | default('Retain') }}
+volumeBindingMode: {{ spec.volumeBindingMode | default('Immediate') }}
+allowVolumeExpansion: {{ spec.allowVolumeExpansion | default('false') }}
+{% if 'mountOptions' in spec %}
+mountOptions:
+{% for opt in spec.mountOptions %}
+  - {{ opt }}
+{% endfor %}
+{% endif %}

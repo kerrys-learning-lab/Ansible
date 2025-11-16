@@ -8,7 +8,7 @@ nfs:
 
 smb:
   host: 192.168.0.3
-  opts: username={{ lookup('ansible.builtin.vars', 'secrets').smb.username }},password={{ lookup('ansible.builtin.vars', 'secrets').smb.password }}
+  opts: username={{ lookup('ansible.builtin.vars', '_secrets').smb.username }},password={{ lookup('ansible.builtin.vars', '_secrets').smb.password }}
   mounts:
     homes:
       path: nas-homes

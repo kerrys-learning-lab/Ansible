@@ -15,7 +15,7 @@
   ansible.builtin.set_fact:
     inferred_gitlab_runner_tags:
       - "{{ ansible_architecture }}"
-      - "{{ ansible_hostname }}"
+      - "{{ inventory_hostname }}"
       - "{{ ansible_local['dpkg']['arch'] }}"
       - "{{ ansible_distribution | lower }}"
       - "{{ ansible_distribution_release | lower }}"

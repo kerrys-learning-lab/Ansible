@@ -1,0 +1,30 @@
+- name: Create the IP Address Pool for Metal LB
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: IPAddressPool
+      metadata:
+        name: metal-lb-address-pool
+        namespace: infrastructure
+      spec:
+        addresses:
+          - "{{ host.metal.pool }}"
+        autoAssign: true
+    kubeconfig: /etc/kubeconfig
+
+- name: Create the L2 Advertisement Metal LB
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: L2Advertisement
+      metadata:
+        name: metal-lb-l2-advertisement
+        namespace: infrastructure
+      spec:
+        ipAddressPools:
+          - metal-lb-address-pool
+    kubeconfig: /etc/kubeconfig

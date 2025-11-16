@@ -1,57 +1,76 @@
 - name: Common Configuration for all Linux Hosts
+  become: true
   hosts:
     - all
-  become: true
   roles:
     - common
     - os
-
-- name: Configure Kubernetes Machine(s)
-  hosts:
-    - all
-  become: true
-  roles:
-    - k8s
-    - k8s-development
+  tags:
+    - base
+    - os
+  any_errors_fatal: true
 
 - name: Configure Development Machine(s)
+  become: true
   hosts:
+    - all
+  roles:
+    - role: aws-development
+      when: aws_development is defined
+      tags:
+        - aws
+    - role: k9s
+      when: k9s is defined
+      tags:
+        - k9s
+    - role: podman-remote
+      when: podman_remote is defined
+      tags:
+        - podman
+  tags:
     - dev
-  roles:
-    - development
-    - podman
+  any_errors_fatal: true
 
-- name: Configure Clusters
-  hosts:
-    - clusters
+- name: Kubernetes
   become: true
-  roles:
-    - k8s-ecosystem
-
-# - name: Configure ArgoCD
-#   hosts:
-#     - argocd
-#   become: true
-#   roles:
-#     - argocd
-
-- name: Configure GitLab
   hosts:
-    - gitlab
-  become: true
+    - all
   roles:
-    - gitlab
+    - role: k8s
+      when: k8s is defined
+      tags:
+        - k8s
+    - role: k8s-local-volumes
+      when: k8s_local_volumes is defined
+      tags:
+        - k8s
+    - role: k8s-certificates
+      when: k8s_certificates is defined
+      tags:
+        - k8s
+    - role: k8s-secrets
+      when: k8s_secrets is defined
+      tags:
+        - k8s
+    - role: elasticsearch-operator
+      when: elasticsearch_operator is defined
+      tags:
+        - k8s
+    - role: sealed-secrets
+      when: sealed_secrets is defined
+      tags:
+        - k8s
+  any_errors_fatal: true
 
-- name: Configure MLFlow
-  hosts:
-    - mlflow
+- name: Remote Access to Other K8s Clusters
   become: true
-  roles:
-    - mlflow
-
-- name: Configure GitLab Runner(s)
   hosts:
-    - clusters
-  become: true
+    - all
   roles:
-    - gitlab-runner
+    - role: k8s-share
+      when: k8s_share is defined
+      tags:
+        - k8s
+  tags:
+    - k8s
+  any_errors_fatal: true

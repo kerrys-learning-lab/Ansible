@@ -1,46 +1,15 @@
-- name: Create Rancker/RKE2 Configuration Directory
-  ansible.builtin.file:
-    path: /etc/rancher/rke2
-    state: directory
-    force: true
-    mode: '0755'
-
-- name: Configure Rancher/RKE2
-  ansible.builtin.template:
-    src: rke2-config.j2.yaml
-    dest: /etc/rancher/rke2/config.yaml
-  notify:
-    - Restart RKE2
-
-- name: Start Rancher/RKE2 Service
-  ansible.builtin.service:
-    name: rke2-server
-    enabled: true
-    state: started
-
-- name: Flush Handlers After Updating RKE2
-  ansible.builtin.meta: flush_handlers
-
-- name: Link kubeconfig
-  ansible.builtin.file:
-    src: /etc/rancher/rke2/rke2.yaml
-    path: /etc/kubeconfig
-    state: link
-    force: true
+- name: Set K9s Base Facts
+  ansible.builtin.set_fact:
+    k8s_env_path: "{{ k8s.env.path | default(k8s_defaults.env.path) }}"
+    k8s_env_mode: "{{ k8s.env.mode | default(k8s_defaults.env.mode) }}"
+    k8s_kubeconfig_path: "{{ k8s.kubeconfig.path | default(k8s_defaults.kubeconfig.path) }}"
 
 - name: Set k8s Environment
   ansible.builtin.copy:
-    dest: /etc/profile.d/kubernetes.sh
+    dest: "{{ k8s_env_path }}"
     content: |
-      export KUBECONFIG=/etc/kubeconfig
-    mode: 0444
-
-- name: Link kubectl
-  ansible.builtin.file:
-    src: /var/lib/rancher/rke2/bin/kubectl
-    path: /usr/bin/kubectl
-    state: link
-    force: true
+      export KUBECONFIG={{ k8s_kubeconfig_path }}
+    mode: "{{ k8s_env_mode }}"
 
 - name: Create k8s Namespaces
   kubernetes.core.k8s:
@@ -53,55 +22,3 @@
         name: "{{ item }}"
     kubeconfig: /etc/kubeconfig
   loop: "{{ k8s.namespaces | default([]) }}"
-  when: k8s is defined
-
-- name: Create Extra k8s Namespaces
-  kubernetes.core.k8s:
-    state: present
-    apply: true
-    definition:
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: "{{ item }}"
-    kubeconfig: /etc/kubeconfig
-  loop: "{{ extra.k8s.namespaces | default([]) }}"
-  loop_control:
-    label: "{{ item }}"
-  when: extra is defined and 'k8s' in extra
-
-- name: Create Ansible Hosts Directories
-  ansible.builtin.file:
-    state: directory
-    path: /var/lib/ansible/hosts.d/{{ item.key }}/etc
-    owner: root
-    group: kerry
-    mode: 0775
-  loop: "{{ hostvars | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  delegate_to: localhost
-
-- name: Fetch All Kubeconfigs
-  ansible.builtin.fetch:
-    src: /etc/kubeconfig
-    dest: /var/lib/ansible/hosts.d
-
-- name: Update IP Address in Kubeconfigs
-  ansible.builtin.replace:
-    path: /var/lib/ansible/hosts.d/{{ item.key }}/etc/kubeconfig
-    regexp: 127\.0\.0\.1
-    replace: "{{ item.value.ansible_default_ipv4.address }}"
-  loop: "{{ hostvars | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  delegate_to: localhost
-
-- name: Share All Kubeconfigs
-  ansible.builtin.copy:
-    src: /var/lib/ansible/hosts.d/{{ item.key }}/etc/kubeconfig
-    dest: /var/lib/ansible/kubeconfig.d/{{ item.key }}
-    mode: '0644'
-  loop: "{{ hostvars | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"

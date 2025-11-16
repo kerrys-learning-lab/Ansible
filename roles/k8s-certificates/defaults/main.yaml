@@ -1,0 +1,6 @@
+k8s_certificates_defaults:
+  issuer:
+    type: ClusterIssuer
+    name: letsencrypt
+  namespace: dev
+  server: https://acme-v02.api.letsencrypt.org/directory

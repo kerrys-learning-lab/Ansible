@@ -5,30 +5,9 @@
     chart_repo_url: "{{ argocd.helm.repo.url }}"
     chart_version: "{{ argocd.helm.repo.version }}"
     chart_ref: "{{ argocd.helm.ref }}"
-    release_values: "{{ argocd.helm.helm_values }}"
+    release_values: "{{ argocd.helm.helm_values | ansible.builtin.combine(host.argocd.helm_values, recursive=true) }}"
     create_namespace: true
     kubeconfig: /etc/kubeconfig
-
-- name: Create ArgoCD Certificates
-  kubernetes.core.k8s:
-    state: present
-    apply: true
-    definition:
-      apiVersion: cert-manager.io/v1
-      kind: Certificate
-      metadata:
-        name: "{{ item.value.secretName | default(item.key) }}"
-        namespace: "{{ item.value.namespace | default('argo') }}"
-      spec:
-        secretName: "{{ item.key }}-tls"
-        dnsNames: "{{ item.value.dnsNames }}"
-        issuerRef:
-          name: "{{ certmanager.issuer.name }}"
-          kind: "{{ certmanager.issuer.type | default('ClusterIssuer') }}"
-    kubeconfig: /etc/kubeconfig
-  loop: "{{ argocd.k8s.certificates | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
 
 - name: Ensure ArgoCD downloadpath
   ansible.builtin.file:
@@ -46,31 +25,6 @@
     src: "{{ paths.download }}/argocd-{{ argocd.cli.version}}/argocd-linux-amd64"
     dest: /usr/local/bin/argocd
     state: link
-
-- name: Create Directory for Cluster Secrets
-  ansible.builtin.file:
-    state: directory
-    path: /var/lib/ansible/argocd.d
-    mode: 0755
-
-- name: Create Cluster Secrets K8s File
-  ansible.builtin.template:
-    src: cluster-secret.j2.yaml
-    dest: /var/lib/ansible/argocd.d/{{ item.key }}-cluster-secret.yaml
-    mode: 0400
-  loop: "{{ clusters | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-
-- name: Managed Clusters
-  kubernetes.core.k8s:
-    state: present
-    apply: true
-    src: /var/lib/ansible/argocd.d/{{ item.key }}-cluster-secret.yaml
-    kubeconfig: /etc/kubeconfig
-  loop: "{{ argocd.clusters | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
 
 - name: Login to ArgoCD CLI
   ansible.builtin.command:
@@ -98,8 +52,18 @@
           - namespace: "{{ item.value.destination.namespace | default(item.key) }}"
             name: "{{ item.value.destination.name | default('in-cluster') }}"
         clusterResourceWhitelist:
-          - group: ''
+          - group: '*'
             kind: Namespace
+          - group: '*'
+            kind: ClusterRole
+          - group: '*'
+            kind: ClusterRoleBinding
+          - group: '*'
+            kind: Role
+          - group: '*'
+            kind: RoleBinding
+          - group: '*'
+            kind: CustomResourceDefinition
     kubeconfig: /etc/kubeconfig
   loop: "{{ argocd.projects | default({}) | dict2items }}"
   loop_control:
@@ -124,7 +88,7 @@
               repoURL: "{{ item.value.source.url }}"
               revision: "{{ item.value.source.ref }}"
               files:
-                - path: application-configs/*/chart.yaml
+                - path: argocd-app-of-apps/*/chart.yaml
         template:
           metadata:
             name: "{{ item.key }}-{{ '{{' }} index .path.segments 1 {{ '}}' }}"
@@ -136,7 +100,7 @@
                 chart: "{{ '{{' }} .source.chart {{ '}}' }}"
                 helm:
                   valueFiles:
-                    - $values/values/{{ item.value.destination.name }}/{{ '{{' }} index .path.segments 1 {{ '}}' }}.yaml
+                    - $values/argocd-app-of-apps/{{ '{{' }} index .path.segments 1 {{ '}}' }}/{{ item.value.destination.name }}-values.yaml
               - repoURL: "{{ item.value.source.url }}"
                 targetRevision: "{{ item.value.source.ref }}"
                 ref: values
@@ -173,7 +137,7 @@
               repoURL: "{{ item.value.source.url }}"
               revision: "{{ item.value.source.ref }}"
               files:
-                - path: application-configs/*/repo.yaml
+                - path: argocd-app-of-apps/*/repo.yaml
         template:
           metadata:
             name: "{{ item.key }}-{{ '{{' }} index .path.segments 1 {{ '}}' }}"
@@ -185,7 +149,7 @@
                 path: "{{ '{{' }} .source.path {{ '}}' }}"
                 helm:
                   valueFiles:
-                    - $values/values/{{ item.value.destination.name }}/{{ '{{' }} index .path.segments 1 {{ '}}' }}.yaml
+                    - $values/argocd-app-of-apps/{{ '{{' }} index .path.segments 1 {{ '}}' }}/{{ item.value.destination.name }}-values.yaml
               - repoURL: "{{ item.value.source.url }}"
                 targetRevision: "{{ item.value.source.ref }}"
                 ref: values

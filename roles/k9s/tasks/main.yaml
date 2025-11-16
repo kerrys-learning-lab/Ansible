@@ -1,0 +1,41 @@
+- name: Set K9s Base Facts
+  ansible.builtin.set_fact:
+    k9s_url_prefix: "{{ k9s.cli.url_prefix | default(k9s_defaults.cli.url_prefix) }}"
+    k9s_version: "{{ k9s.cli.version | default(k9s_defaults.cli.version) }}"
+    k9s_download_root: "{{ k9s.paths.download | default(k9s_defaults.paths.download) }}"
+    k9s_cli_owner: "{{ k9s.owner | default(k9s_defaults.owner) }}"
+    k9s_cli_group: "{{ k9s.group | default(k9s_defaults.group) }}"
+    k9s_cli_mode: "{{ k9s.mode | default(k9s_defaults.mode) }}"
+    k9s_file: k9s_{{ ansible_system }}_{{ ansible_local['dpkg']['arch'] }}.tar.gz
+    k9s_bin: "{{ k9s.paths.bin | default(k9s_defaults.paths.bin) }}"
+
+- name: Set K9s Derived Facts
+  ansible.builtin.set_fact:
+    k9s_download_path: "{{ k9s_download_root }}/k9s-{{ k9s_version }}"
+
+# ----- k9s -------------------------------------------------------------------
+- name: Ensure k9s downloadpath
+  ansible.builtin.file:
+    name: "{{ k9s_download_path }}"
+    state: directory
+    owner: "{{ k9s_cli_owner }}"
+    group: "{{ k9s_cli_group }}"
+    mode: "{{ k9s_cli_mode }}"
+
+- name: Download k9s CLI
+  ansible.builtin.get_url:
+    url: "{{ k9s_url_prefix }}/{{ k9s_version }}/{{ k9s_file }}"
+    dest: "{{ k9s_download_path }}/{{ k9s_file }}"
+
+- name: Extract k9s CLI
+  ansible.builtin.unarchive:
+    src: "{{ k9s_download_path }}/{{ k9s_file }}"
+    dest: "{{ k9s_download_path }}"
+    remote_src: true
+    mode: 0555
+
+- name: Link k9s CLI
+  ansible.builtin.file:
+    src: "{{ k9s_download_path }}//k9s"
+    dest: "{{ k9s_bin }}"
+    state: link

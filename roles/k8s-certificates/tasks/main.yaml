@@ -1,0 +1,60 @@
+- name: Set K8s Certificates Base Facts
+  ansible.builtin.set_fact:
+    k8s_certificates_issuer_type: "{{ k8s_certificates.config.issuer.type | default(k8s_certificates_defaults.issuer.type) }}"
+    k8s_certificates_issuer_name: "{{ k8s_certificates.config.issuer.name | default(k8s_certificates_defaults.issuer.name) }}"
+    k8s_certificates_namespace: "{{ k8s_certificates.config.namespace | default(k8s_certificates_defaults.namespace) }}"
+    k8s_certificates_server: "{{ k8s_certificates.config.server | default(k8s_certificates_defaults.server) }}"
+    k8s_certificates_email: "{{ k8s_certificates_secrets.email }}"
+    k8s_certificates_zone_id: "{{ k8s_certificates_secrets.aws.route53.zoneId }}"
+    k8s_certificates_region: "{{ k8s_certificates_secrets.aws.route53.region | default('us-east-1') }}"
+
+- name: Install Cert Manager Issuer
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: "{{ k8s_certificates_issuer_type }}"
+      metadata:
+        name: "{{ k8s_certificates_issuer_name }}"
+        namespace: "{{ k8s_certificates_namespace }}"
+      spec:
+        acme:
+          email: "{{ k8s_certificates_email }}"
+          server: "{{ k8s_certificates_server }}"
+          privateKeySecretRef:
+            name: "{{ k8s_certificates_issuer_name }}-cluster-issuer"
+          solvers:
+            - dns01:
+                route53:
+                  hostedZoneID: "{{ k8s_certificates_zone_id }}"
+                  region: "{{ k8s_certificates_region }}"
+                  accessKeyIDSecretRef:
+                    name: aws
+                    key: username
+                  secretAccessKeySecretRef:
+                    name: aws
+                    key: password
+    kubeconfig: /etc/kubeconfig
+
+- name: Create K8s Certificate(s)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: "{{ item.key }}"
+        namespace: "{{ item.value.namespace | default(k8s_certificates_namespace) }}"
+      spec:
+        secretName: "{{ item.key }}-tls"
+        dnsNames: "{{ item.value.dnsNames }}"
+        issuerRef:
+          name: "{{ k8s_certificates_issuer_name }}"
+          kind: "{{ k8s_certificates_issuer_type }}"
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ k8s_certificates | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: "item.key != 'config'"

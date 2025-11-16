@@ -3,7 +3,7 @@ argocd:
     version: v2.14.11
     server:
       username: admin
-      password: "{{ lookup('ansible.builtin.vars', 'secrets').argocd.admin.password }}"
+      password: "{{ lookup('ansible.builtin.vars', '_secrets').argocd.admin.password }}"
       port: 30443
   helm:
     ref: argo-cd
@@ -23,12 +23,12 @@ argocd:
           type: LoadBalancer
       configs:
         ssh:
-          knownHosts: "{{ lookup('ansible.builtin.vars', 'secrets').ssh.knownHosts }}"
+          knownHosts: "{{ lookup('ansible.builtin.vars', '_secrets').ssh.knownHosts }}"
         credentialTemplates:
           kerrys-learning-lab:
             url: git@gitlab.westsidestreet.net:kerrys-learning-lab
             sshPrivateKey: |
-              {{ lookup('ansible.builtin.vars', 'secrets').ssh.privateKey }}
+              {{ lookup('ansible.builtin.vars', '_secrets').ssh.privateKey }}
         repositories:
           boids-argocd:
             name: boids-argocd

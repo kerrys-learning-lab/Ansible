@@ -1,0 +1,13 @@
+k8s_share_defaults:
+  fetch:
+    remote_path: /etc/kubeconfig
+    local_path_prefix: /var/lib/ansible/hosts.d
+    owner: root
+    group: root
+    mode: ug=rwX,o=rX
+  share:
+    remote_path_prefix: /var/lib/ansible/kubeconfig.d
+    owner: root
+    group: root
+    mode: ug=rwX,o=rX
+  hosts: []

@@ -1,7 +1,11 @@
+all:
+  vars:
+    ansible_python_interpreter: auto_silent
+
 dev:
   hosts:
     wsl:
-      ansible_connection: local
+      ansible_host: wsl.westsidestreet.net
 
 gitlab:
   hosts:
@@ -17,12 +21,13 @@ argocd:
   hosts:
     elitedesk:
       ansible_host: elitedesk.westsidestreet.net
+    wsl:
+      ansible_host: wsl.westsidestreet.net
 
-clusters:
+rke2_clusters:
   hosts:
     elitedesk:
     # raspberrypi4-01: # All Pis are combined in a single cluster!
-    wsl:
 
 raspberry_pi:
   hosts:

@@ -7,3 +7,18 @@
   ansible.builtin.pip:
     name: "{{ os.pip }}"
   when: os is defined and 'pip' in os
+
+- name: Ensure inotify parameters are set in sysctl.conf
+  ansible.builtin.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-fs-inotify.conf
+    reload: yes
+  loop:
+    - name: fs.inotify.max_user_watches
+      value: 524288
+    - name: fs.inotify.max_user_instances
+      value: 524288
+    - name: fs.inotify.max_queued_events
+      value: 524288

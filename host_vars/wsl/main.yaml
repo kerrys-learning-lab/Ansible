@@ -1,0 +1,33 @@
+# Empty set of Helm applications for WSL host, since we're using OpenShift,
+# not sure if things like Metal LB would work here.
+
+host:
+  argocd:
+    helm_values:
+      server:
+        service:
+          type: NodePort
+
+  helm_applications: []
+
+
+  packages:
+    # NOTE: Prior to installing this package, must perform
+    #       - sudo wget -O /etc/apt/sources.list.d/gitlab-ci-local.sources https://gitlab-ci-local-ppa.firecow.dk/gitlab-ci-local.sources
+    #       - sudo apt update
+    #       as described here: https://github.com/firecow/gitlab-ci-local?tab=readme-ov-file#installation
+    - gitlab-ci-local
+    - podman-compose
+
+    # For local Python Gymnasium execution (graphics library)
+    - swig
+  k8s:
+    namespaces:
+      - dev
+      - boids
+  metal:
+    # NOTE: Reserved these in the Netgear router by setting the upper
+    #       limit of the router's IP range to a.b.c.199
+    pool: 192.168.0.225-192.168.0.234
+
+fqdn: wsl.westsidestreet.net

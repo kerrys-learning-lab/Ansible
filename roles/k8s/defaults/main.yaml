@@ -1,0 +1,7 @@
+k8s_defaults:
+  env:
+    path: /etc/profile.d/kubeconfig.sh
+    mode: a=r
+  kubeconfig:
+    path: /etc/kubeconfig
+

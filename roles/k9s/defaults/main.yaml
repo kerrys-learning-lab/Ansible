@@ -1,0 +1,10 @@
+k9s_defaults:
+  cli:
+    url_prefix: https://github.com/derailed/k9s/releases/download
+    version: v0.50.16
+  paths:
+    download: /var/lib/ansible/downloads
+    bin: /usr/local/bin/k9s
+  owner: root
+  group: root
+  mode: a=rX
