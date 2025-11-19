@@ -1,32 +1,25 @@
-all:
-  vars:
-    ansible_python_interpreter: auto_silent
 
-dev:
-  hosts:
-    wsl:
-      ansible_host: wsl.westsidestreet.net
+# dev:
+#   hosts:
+#     wsl:
+#       ansible_host: wsl.westsidestreet.net
 
 gitlab:
   hosts:
     elitedesk:
-      ansible_host: elitedesk.westsidestreet.net
 
 mlflow:
   hosts:
     elitedesk:
-      ansible_host: elitedesk.westsidestreet.net
 
 argocd:
   hosts:
     elitedesk:
-      ansible_host: elitedesk.westsidestreet.net
-    wsl:
-      ansible_host: wsl.westsidestreet.net
 
-rke2_clusters:
+rke2:
   hosts:
     elitedesk:
+    dev-vm:
     # raspberrypi4-01: # All Pis are combined in a single cluster!
 
 raspberry_pi:

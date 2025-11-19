@@ -28,19 +28,26 @@
   when: "inventory_hostname in k8s_share_hosts"
 
 - name: Fetch All Kubeconfigs
-  ansible.builtin.fetch:
+  ansible.builtin.slurp:
     src: "{{ k8s_share_fetch_remote_path }}"
-    dest: "{{ k8s_share_fetch_local_path_prefix }}/{{ inventory_hostname }}/kubeconfig"
-    flat: true
+  register: k8s_share_fetched_kubeconfigs
+
+- name: Write Unmodified Kubeconfigs
+  ansible.builtin.copy:
+    content: "{{ k8s_share_fetched_kubeconfigs.content | b64decode }}"
+    dest: "{{ k8s_share_fetch_local_path_prefix }}/{{ inventory_hostname }}/kubeconfig.local.yaml"
+    owner: root
+    group: root
+    mode: a=r
+  delegate_to: localhost
 
 - name: Update IP Address in Kubeconfigs
-  ansible.builtin.replace:
-    path: "{{ k8s_share_fetch_local_path_prefix }}/{{ item.key }}/kubeconfig"
-    regexp: 127\.0\.0\.1
-    replace: "{{ k8s_share.lookup[item.key] }}"
-  loop: "{{ hostvars | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
+  ansible.builtin.copy:
+    content: "{{ k8s_share_fetched_kubeconfigs.content | b64decode | replace('127.0.0.1', inventory_hostname) }}"
+    dest: "{{ k8s_share_fetch_local_path_prefix }}/{{ inventory_hostname }}/kubeconfig.external.yaml"
+    owner: root
+    group: root
+    mode: a=r
   delegate_to: localhost
 
 - name: Create Remote K8s Sharing Directory
@@ -53,7 +60,7 @@
 
 - name: Share All Kubeconfigs
   ansible.builtin.copy:
-    src: "{{ k8s_share_fetch_local_path_prefix }}/{{ item.key }}/kubeconfig"
+    src: "{{ k8s_share_fetch_local_path_prefix }}/{{ item.key }}/kubeconfig.external.yaml"
     dest: "{{ k8s_share_share_remote_path_prefix }}/{{ item.key }}"
     owner: "{{ k8s_share_share_owner }}"
     group: "{{ k8s_share_share_group }}"

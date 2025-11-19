@@ -4,6 +4,11 @@
   - https://docs.rke2.io/install/quickstart
     curl -sfL https://get.rke2.io | sudo sh -
 
+NOTE: Prior to installing this package, must perform
+    #       - sudo wget -O /etc/apt/sources.list.d/gitlab-ci-local.sources https://gitlab-ci-local-ppa.firecow.dk/gitlab-ci-local.sources
+    #       - sudo apt update
+    #       as described here: https://github.com/firecow/gitlab-ci-local?tab=readme-ov-file#installation
+
 
 cd ~/dev/devenv/ansible
 
@@ -24,4 +29,4 @@ Facts from all hosts:
     `argocd login argocd.westsidestreet.net`
 
 3. Add the Cluster
-    `argocd --kubeconfig /etc/kubeconfig-external cluster add --yes default --name wsl --server-name argocd.westsidestreet.net`
+    `argocd --kubeconfig /var/lib/ansible/kubeconfig.d/... cluster add --yes default --name asusrog --server-name argocd.westsidestreet.net`

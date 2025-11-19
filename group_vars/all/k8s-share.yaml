@@ -6,7 +6,4 @@ k8s_share:
     owner: kerry
     group: kerry
   hosts:
-    - wsl
-  lookup:
-    wsl: asusrog.westsidestreet.net
-    elitedesk: elitedesk.westsidestreet.net
+    - dev-vm

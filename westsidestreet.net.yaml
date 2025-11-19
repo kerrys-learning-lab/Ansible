@@ -5,6 +5,10 @@
   roles:
     - common
     - os
+    - role: resolve
+      when: resolve is defined
+      tags:
+        - resolve
   tags:
     - base
     - os
@@ -23,10 +27,6 @@
       when: k9s is defined
       tags:
         - k9s
-    - role: podman-remote
-      when: podman_remote is defined
-      tags:
-        - podman
   tags:
     - dev
   any_errors_fatal: true
@@ -36,6 +36,12 @@
   hosts:
     - all
   roles:
+    # NOTE: rke2 must come before k8s
+    - role: rke2
+      when: rke2 is defined
+      tags:
+        - k8s
+        - rke2
     - role: k8s
       when: k8s is defined
       tags:
@@ -60,6 +66,7 @@
       when: sealed_secrets is defined
       tags:
         - k8s
+        - secrets
   any_errors_fatal: true
 
 - name: Remote Access to Other K8s Clusters
@@ -71,6 +78,7 @@
       when: k8s_share is defined
       tags:
         - k8s
+        - share
   tags:
     - k8s
   any_errors_fatal: true

@@ -31,3 +31,4 @@ host:
     pool: 192.168.0.225-192.168.0.234
 
 fqdn: wsl.westsidestreet.net
+ansible_host: wsl.westsidestreet.net

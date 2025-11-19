@@ -1,0 +1,13 @@
+k8s_local_volumes:
+  roadmap-dashboard-mysql-dev:
+    capacity: 20Gi
+    path: dev/roadmap-dashboard/mysql
+    mode: u=rwx,go=rx
+    owner: 27
+    group: 27
+  boids-ui-mysql:
+    path: boids/boids-ui/mysql
+    capacity: 20Gi
+    owner: 27
+    group: 27
+    mode: u=rwx,go=rx

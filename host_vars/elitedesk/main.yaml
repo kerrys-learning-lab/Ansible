@@ -22,4 +22,5 @@ host:
     namespaces:
       - mlflow
 
-fqdn: elitdesk.westsidestreet.net
+fqdn: elitedesk.westsidestreet.net
+ansible_host: elitedesk.westsidestreet.net

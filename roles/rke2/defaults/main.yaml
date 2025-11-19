@@ -1,4 +1,4 @@
-rke2:
+rke2_defaults:
   kubeconfig:
     src: /etc/rancher/rke2/rke2.yaml
     dest: /etc/kubeconfig

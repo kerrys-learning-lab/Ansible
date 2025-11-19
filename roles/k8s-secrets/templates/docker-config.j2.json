@@ -1,0 +1,12 @@
+{
+  "auths": {
+    {% for key, value in item.value.auth.items() %}
+      "{{ key }}": {
+        "username": "{{ value['username'] }}",
+        "password": "{{ value['password'] }}",
+        "email": "{{ value['username']}}@example.com",
+        "auth": "{{ '%s:%s' | format(value['username'], value['password']) | b64encode }}"
+      }{{ "" if loop.last else ", " }}
+    {% endfor %}
+  }
+}

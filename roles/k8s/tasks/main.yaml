@@ -1,4 +1,4 @@
-- name: Set K9s Base Facts
+- name: Set k8s Base Facts
   ansible.builtin.set_fact:
     k8s_env_path: "{{ k8s.env.path | default(k8s_defaults.env.path) }}"
     k8s_env_mode: "{{ k8s.env.mode | default(k8s_defaults.env.mode) }}"

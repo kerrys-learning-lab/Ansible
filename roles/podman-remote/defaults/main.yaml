@@ -1,8 +1,0 @@
-podman_remote_defaults:
-  packages:
-    - podman-remote
-  env:
-    path: /etc/profile.d/podman-docker.sh
-    mode: a=r
-  socket:
-    path: /mnt/wsl/podman-sockets/podman-machine-default/podman-root.sock

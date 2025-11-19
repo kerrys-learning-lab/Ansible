@@ -1,5 +1,4 @@
 paths:
-  kubeconfigs: /var/lib/ansible/kubeconfig.d
   facts: /var/lib/ansible/facts.d
   download: /usr/local/downloads
 
@@ -15,3 +14,4 @@ smb:
     kubernetes:
       path: nas-kubernetes
 
+ansible_python_interpreter: auto_silent

@@ -1,0 +1,99 @@
+- name: Set K8s Secrets Base Facts
+  ansible.builtin.set_fact:
+    k8s_secrets_yaml_root: "{{ k8s_secrets.config.yaml_root | default(k8s_secrets_defaults.yaml_root) }}"
+    k8s_secrets_namespace: "{{ k8s_secrets.config.namespace | default(k8s_secrets_defaults.namespace) }}"
+    k8s_secrets_owner: "{{ k8s_secrets.config.owner | default(k8s_secrets_defaults.owner) }}"
+    k8s_secrets_group: "{{ k8s_secrets.config.group | default(k8s_secrets_defaults.group) }}"
+    k8s_secrets_mode: "{{ k8s_secrets.config.mode | default(k8s_secrets_defaults.mode) }}"
+
+- name: Create Parent Directory for Kubernetes StringData Secrets
+  ansible.builtin.file:
+    path: "{{ k8s_secrets_yaml_root }}"
+    state: directory
+    mode: a=rx
+
+- name: Create Kubernetes StringData Secrets
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      kind: Secret
+      apiVersion: v1
+      type: "{{ item.value.type | default('Opaque') }}"
+      metadata:
+        name: "{{ item.key }}"
+        namespace: "{{ item.value.namespace | default(k8s_secrets_namespace) | lower }}"
+      stringData: "{{ item.value.stringData }}"
+    kubeconfig: /etc/kubeconfig
+  when: "'stringData' in item.value"
+  loop: "{{ k8s_secrets.string | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Initialize K8s Secrets File Dictionary
+  set_fact:
+    k8s_secrets_image_pull_files: {}
+
+- name: Populate K8s Secrets File Dictionary
+  set_fact:
+    k8s_secrets_image_pull_files: >
+      {{ k8s_secrets_image_pull_files |
+          combine({
+            item.name: {
+              'namespace': item.namespace,
+              'auth': item.auth,
+              'path': '{root}/{name}--{namespace}--image-pull-secret.yaml'.format(root=k8s_secrets_yaml_root,
+                                                                                  name=item.name,
+                                                                                  namespace=item.namespace),
+            }
+          })
+      }}
+  loop: "{{ k8s_secrets.image_pull | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create K8s Image Pull Secrets YAML root Directory
+  ansible.builtin.file:
+    path: "{{ k8s_secrets_defaults.yaml_root }}"
+    state: directory
+    owner: "{{ k8s_secrets_owner }}"
+    group: "{{ k8s_secrets_group }}"
+    mode: "a=rX"
+
+- name: Create Image Pull Secret YAML File
+  ansible.builtin.template:
+    src: docker-config.j2.json
+    dest: "{{ item.value.path }}"
+    owner: "{{ k8s_secrets_owner }}"
+    group: "{{ k8s_secrets_group }}"
+    mode: "{{ k8s_secrets_mode }}"
+  loop: "{{ k8s_secrets_image_pull_files | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Slurp Each Image Pull Secret YAML File
+  ansible.builtin.slurp:
+    src: "{{ item.value.path }}"
+  loop: "{{ k8s_secrets_image_pull_files | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: k8s_secrets_slurped_yaml_files
+
+- name: Create Image Pull Secret
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      kind: Secret
+      apiVersion: v1
+      type: kubernetes.io/dockerconfigjson
+      metadata:
+        name: "{{ slurp_result.item.key }}-image-pull"
+        namespace: "{{ slurp_result.item.value.namespace }}"
+      data:
+        .dockerconfigjson: "{{ slurp_result.content }}"
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ k8s_secrets_slurped_yaml_files.results }}"
+  loop_control:
+    loop_var: slurp_result
+    label: "{{ slurp_result.item.value.namespace }}--{{ slurp_result.item.key }}"

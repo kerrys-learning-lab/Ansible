@@ -1,0 +1,51 @@
+- name: Set Sealed Secrets Base Facts
+  ansible.builtin.set_fact:
+    sealed_secrets_cli_version: "{{ sealed_secrets.cli.version | default(sealed_secrets_defaults.cli.version) }}"
+    sealed_secrets_cli_url_prefix: "{{ sealed_secrets.cli.url_prefix | default(sealed_secrets_defaults.cli.url_prefix) }}"
+    sealed_secrets_cli_download_root: "{{ sealed_secrets.cli.paths.download | default(sealed_secrets_defaults.cli.paths.download) }}"
+    sealed_secrets_cli_owner: "{{ sealed_secrets.cli.owner | default(sealed_secrets_defaults.cli.owner) }}"
+    sealed_secrets_cli_group: "{{ sealed_secrets.cli.group | default(sealed_secrets_defaults.cli.group) }}"
+    sealed_secrets_cli_mode: "{{ sealed_secrets.cli.mode | default(sealed_secrets_defaults.cli.mode) }}"
+    sealed_secrets_cli_bin_path: "{{ sealed_secrets.paths.bin | default(sealed_secrets_defaults.cli.paths.bin) }}"
+
+- name: Set Sealed Secrets Derived Facts -- 1
+  ansible.builtin.set_fact:
+    sealed_secrets_cli_file: "kubeseal-{{ sealed_secrets_cli_version }}-{{ ansible_system | lower }}-{{ ansible_local['dpkg']['arch'] }}.tar.gz"
+
+- name: Set Sealed Secrets Derived Facts -- 2
+  ansible.builtin.set_fact:
+    sealed_secrets_cli_url: "{{ sealed_secrets_cli_url_prefix }}/v{{ sealed_secrets_cli_version }}/{{ sealed_secrets_cli_file }}"
+    sealed_secrets_cli_download_path: "{{ sealed_secrets_cli_download_root }}/kubeseal-{{ sealedsecrets.cli.version }}"
+
+- name: Install Sealed Secrets Controller
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    src: "{{ sealedsecrets.controller.url }}/v{{ sealedsecrets.controller.version }}/controller.yaml"
+    kubeconfig: /etc/kubeconfig
+
+- name: Ensure Kubeseal CLI download path
+  ansible.builtin.file:
+    name: "{{ sealed_secrets_cli_download_path }}"
+    state: directory
+    owner: "{{ sealed_secrets_cli_owner }}"
+    group: "{{ sealed_secrets_cli_group }}"
+    mode: "{{ sealed_secrets_cli_mode }}"
+
+- name: Download Kubeseal CLI
+  ansible.builtin.get_url:
+    url: "{{ sealed_secrets_cli_url }}"
+    dest: "{{ sealed_secrets_cli_download_path }}/{{ sealed_secrets_cli_file }}"
+    mode: "{{ sealed_secrets_cli_mode }}"
+
+- name: Extract Kubeseal CLI
+  ansible.builtin.unarchive:
+    src: "{{ sealed_secrets_cli_download_path }}/{{ sealed_secrets_cli_file }}"
+    dest: "{{ sealed_secrets_cli_download_path }}"
+    remote_src: true
+
+- name: Link Kubeseal CLI
+  ansible.builtin.file:
+    src: "{{ sealed_secrets_cli_download_path }}/kubeseal"
+    dest: "{{ sealed_secrets_cli_bin_path }}"
+    state: link

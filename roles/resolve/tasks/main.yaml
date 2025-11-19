@@ -1,0 +1,29 @@
+- name: Set Resolve Base Facts
+  ansible.builtin.set_fact:
+    resolve_nameservers_raw: "{{ resolve.nameservers | default(resolve_defaults.nameservers) }}"
+    resolve_domain: "{{ resolve.domain | default(resolve_defaults.domain) }}"
+    resolve_link: "{{ resolve.link }}"
+
+- name: Set Resolve Derived Facts
+  ansible.builtin.set_fact:
+    resolve_nameservers: "{{ resolve_nameservers_raw | join(' ') }}"
+
+- name: Retrieve Existing Nameservers
+  ansible.builtin.shell: "resolvectl dns {{ resolve_link }}"
+  register: resolve_dns_existing_output
+  changed_when: false
+
+- name: Update Nameservers
+  ansible.builtin.shell: "resolvectl dns {{ resolve_link }} {{ resolve_nameservers }}"
+  register: resolve_dns_existing_output
+  when: "resolve_nameservers not in resolve_dns_existing_output.stdout"
+
+- name: Retrieve Existing Search Domain
+  ansible.builtin.shell: "resolvectl domain {{ resolve_link }}"
+  register: resolve_domain_existing_output
+  changed_when: false
+
+- name: Update Nameservers
+  ansible.builtin.shell: "resolvectl domain {{ resolve_link }} {{ resolve_domain }}"
+  register: resolve_domain_existing_output
+  when: "resolve_domain not in resolve_domain_existing_output.stdout"
