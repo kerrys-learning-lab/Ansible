@@ -54,7 +54,7 @@
 
 - name: Create K8s Image Pull Secrets YAML root Directory
   ansible.builtin.file:
-    path: "{{ k8s_secrets_defaults.yaml_root }}"
+    path: "{{ k8s_secrets_yaml_root }}"
     state: directory
     owner: "{{ k8s_secrets_owner }}"
     group: "{{ k8s_secrets_group }}"
