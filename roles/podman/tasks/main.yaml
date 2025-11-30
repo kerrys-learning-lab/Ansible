@@ -1,8 +1,26 @@
+- name: Set Podman Base Facts
+  ansible.builtin.set_fact:
+    podman_packages: "{{ (podman.packages  | default([])) + podman_defaults.packages }}"
+    podman_service_name: "{{ podman.service.name | default(podman_defaults.service.name) }}"
+    podman_service_unit_path: "{{ podman.service.unit_path | default(podman_defaults.service.unit_path) }}"
+
+- name: Install Podman OS Packages
+  ansible.builtin.package:
+    name: "{{ podman_packages }}"
+
 - name: Configure Podman Registries
   ansible.builtin.template:
-    src: registry.conf.j2
+    src: registry.j2.conf
     dest: /etc/containers/registries.conf.d/{{ item.key }}.conf
     mode: 0444
   loop: "{{ registries | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+
+- name: Configure Podman Systemd Service
+  ansible.builtin.template:
+    src: podman.j2.service
+    dest: "{{ podman_service_unit_path }}"
+    mode: 0444
+  notify:
+    - Reload Podman service

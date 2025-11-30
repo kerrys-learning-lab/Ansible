@@ -1,6 +1,0 @@
-helm:
-  version: v3.17.0
-  plugins:
-    diff:
-      url: https://github.com/databus23/helm-diff
-      version: v3.10.0

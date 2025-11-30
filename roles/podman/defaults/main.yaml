@@ -1,0 +1,10 @@
+podman_defaults:
+  packages:
+    - podman
+    - podman-compose
+    - podman-docker
+    - podman-remote
+    - podman-compose
+  service:
+    name: podman.service
+    unit_path: /usr/lib/systemd/system/podman.service

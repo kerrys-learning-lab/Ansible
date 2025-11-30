@@ -7,3 +7,4 @@ k8s_share:
     group: kerry
   hosts:
     - dev-vm
+  domain: westsidestreet.net

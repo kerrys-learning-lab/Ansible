@@ -1,16 +1,7 @@
-os:
+os_group_vars:
   packages:
     - jq
     - smbclient
     - pigz
-    - podman
-    - podman-docker
     - tree
     - unzip
-    # Certbot Dependencies:
-    - python3
-    - python3-kubernetes
-    - python3-pip
-    - python3-yaml
-    - python3-venv
-    - libaugeas0

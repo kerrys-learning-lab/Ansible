@@ -43,7 +43,7 @@
 
 - name: Update IP Address in Kubeconfigs
   ansible.builtin.copy:
-    content: "{{ k8s_share_fetched_kubeconfigs.content | b64decode | replace('127.0.0.1', inventory_hostname) }}"
+    content: "{{ k8s_share_fetched_kubeconfigs.content | b64decode | replace('127.0.0.1', ansible_fqdn ) }}"
     dest: "{{ k8s_share_fetch_local_path_prefix }}/{{ inventory_hostname }}/kubeconfig.external.yaml"
     owner: root
     group: root

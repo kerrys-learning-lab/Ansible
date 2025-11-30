@@ -1,0 +1,5 @@
+rke2_config:
+  tls-san:
+    - elitedesk
+    - elitedesk.westsidestreet.net
+    - 192.168.0.159

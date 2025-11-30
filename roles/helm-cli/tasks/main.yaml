@@ -1,0 +1,54 @@
+- name: Set Helm CLI Base Facts
+  ansible.builtin.set_fact:
+    helm_url_prefix: "{{ helm_cli.url_prefix | default(helm_cli_defaults.url_prefix) }}"
+    helm_cli_download_root: "{{ helm_cli.paths.download | default(helm_cli_defaults.paths.download) }}"
+    helm_cli_version: "{{ helm_cli.version | default(helm_cli_defaults.version) }}"
+    helm_cli_system: "{{ ansible_system | lower }}"
+    helm_cli_arch: "{{ ansible_local['dpkg']['arch'] }}"
+    helm_cli_bin_path: "{{ helm_cli.paths.bin | default(helm_cli_defaults.paths.bin) }}"
+    helm_cli_plugins: "{{ helm_cli_defaults.plugins | combine(helm_cli.plugins | default({})) }}"
+
+- name: Set Helm CLI Derived Facts - 1
+  ansible.builtin.set_fact:
+    helm_cli_file: helm-{{ helm_cli_version }}-linux-{{ helm_cli_arch }}.tar.gz
+    helm_cli_download_path: "{{ helm_cli_download_root }}/helm-{{ helm_cli_version }}"
+
+- name: Set Helm CLI Derived Facts - 2
+  ansible.builtin.set_fact:
+    helm_cli_url: "{{ helm_url_prefix }}/{{ helm_cli_file }}"
+
+- name: Ensure Helm downloadpath
+  ansible.builtin.file:
+    name: "{{ helm_cli_download_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0555
+
+- name: Download Helm CLI
+  ansible.builtin.get_url:
+    url:  "{{ helm_cli_url }}"
+    dest: "{{ helm_cli_download_path }}/{{ helm_cli_file }}"
+    decompress: false
+
+- name: Extract Helm CLI
+  ansible.builtin.unarchive:
+    src: "{{ helm_cli_download_path }}/{{ helm_cli_file }}"
+    dest: "{{ helm_cli_download_path }}"
+    remote_src: true
+    mode: 0555
+
+- name: Link Helm CLI
+  ansible.builtin.file:
+    src: "{{ helm_cli_download_path }}/{{ helm_cli_system }}-{{ helm_cli_arch }}/helm"
+    dest: "{{ helm_cli_bin_path }}"
+    state: link
+
+- name: Install Helm Plug-ins
+  kubernetes.core.helm_plugin:
+    plugin_version: "{{ item.value.version }}"
+    plugin_path: "{{ item.value.url }}"
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ helm_cli_plugins | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

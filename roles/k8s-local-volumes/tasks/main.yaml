@@ -5,6 +5,24 @@
     k8s_local_volumes_group: "{{ k8s_local_volumes.config.group | default(k8s_local_volumes_defaults.group) }}"
     k8s_local_volumes_mode: "{{ k8s_local_volumes.config.mode | default(k8s_local_volumes_defaults.mode) }}"
 
+- name: Create K8s Local Storage Class
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: local
+        annotations:
+          storageclass.kubernetes.io/is-default-class: "false"
+      provisioner: kubernetes.io/no-provisioner
+      reclaimPolicy: Retain
+      volumeBindingMode: WaitForFirstConsumer
+      allowVolumeExpansion: false
+    kubeconfig: /etc/kubeconfig
+
+
 - name: Create Local Kubernetes Volume Root Directories
   ansible.builtin.file:
     path: "{{ k8s_local_volumes_root_dir }}"

@@ -1,0 +1,10 @@
+helm_cli_defaults:
+  version: v3.17.0
+  url_prefix: https://get.helm.sh
+  paths:
+    download: /var/lib/ansible/downloads
+    bin: /usr/local/bin/helm
+  plugins:
+    diff:
+      url: https://github.com/databus23/helm-diff
+      version: v3.10.0

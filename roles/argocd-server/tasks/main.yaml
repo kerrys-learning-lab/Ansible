@@ -1,0 +1,154 @@
+- name: Set ArgoCD Server Base Facts
+  ansible.builtin.set_fact:
+    argocd_server_chart_ref: "{{ argocd_server.chart.ref | default(argocd_server_defaults.chart.ref) }}"
+    argocd_server_chart_url: "{{ argocd_server.chart.url | default(argocd_server_defaults.chart.url) }}"
+    argocd_server_chart_version: "{{ argocd_server.chart.version | default(argocd_server_defaults.chart.version) }}"
+    argocd_server_k8s_name: "{{ argocd_server.k8s.name | default(argocd_server_defaults.k8s.name) }}"
+    argocd_server_k8s_namespace: "{{ argocd_server.k8s.namespace | default(argocd_server_defaults.k8s.namespace) }}"
+    argocd_server_helm_config: "{{ argocd_server.helm }}"
+
+- name: Install/Configure ArgoCD via Helm
+  kubernetes.core.helm:
+    name: "{{ argocd_server_k8s_name }}"
+    namespace: "{{ argocd_server_k8s_namespace }}"
+    chart_repo_url: "{{ argocd_server_chart_url }}"
+    chart_version: "{{ argocd_server_chart_version }}"
+    chart_ref: "{{ argocd_server_chart_ref }}"
+    release_values: "{{ argocd_server_helm_config }}"
+    create_namespace: true
+    kubeconfig: /etc/kubeconfig
+
+- name: Create ArgoCD Projects
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: AppProject
+      metadata:
+        name: "{{ item.key }}"
+        namespace: argo
+        finalizers:
+          - resources-finalizer.argocd.argoproj.io
+      spec:
+        description: "{{ item.value.description | default('TBP') }}"
+        sourceRepos:
+          - '*'
+        destinations:
+          - namespace: "{{ item.value.destination.namespace | default(item.key) }}"
+            name: "{{ item.value.destination.name | default('in-cluster') }}"
+        clusterResourceWhitelist:
+          - group: '*'
+            kind: Namespace
+          - group: '*'
+            kind: ClusterRole
+          - group: '*'
+            kind: ClusterRoleBinding
+          - group: '*'
+            kind: Role
+          - group: '*'
+            kind: RoleBinding
+          - group: '*'
+            kind: CustomResourceDefinition
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ argocd_server.projects | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create ArgoCD ApplicationSets for Helm Charts
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: ApplicationSet
+      metadata:
+        name: "{{ item.key }}-applicationset-helm-chart"
+        namespace: argo
+      spec:
+        goTemplate: true
+        goTemplateOptions:
+          - missingkey=error
+        generators:
+          - git:
+              repoURL: "{{ item.value.source.url }}"
+              revision: "{{ item.value.source.ref }}"
+              files:
+                - path: "{{ item.value.source.path }}/*/chart.yaml"
+        template:
+          metadata:
+            name: "{{ item.key }}-{{ '{{' }} index .path.segments 1 {{ '}}' }}"
+          spec:
+            project: "{{ item.key }}"
+            sources:
+              - repoURL: "{{ '{{' }} .source.repoURL {{ '}}' }}"
+                targetRevision: "{{ '{{' }} .source.targetRevision {{ '}}' }}"
+                chart: "{{ '{{' }} .source.chart {{ '}}' }}"
+                helm:
+                  valueFiles:
+                    - $values/{{ item.value.source.path }}/{{ '{{' }} index .path.segments 1 {{ '}}' }}/{{ item.value.destination.name }}-values.yaml
+              - repoURL: "{{ item.value.source.url }}"
+                targetRevision: "{{ item.value.source.ref }}"
+                ref: values
+            destination:
+              name: "{{ item.value.destination.name }}"
+              namespace: "{{ item.value.destination.namespace | default(item.key) }}"
+            syncPolicy:
+              automated:
+                prune: "{{ item.value.automatedSync.prune | default(True) }}"
+                selfHeal: "{{ item.value.automatedSync.selfHeal | default(True) }}"
+              syncOptions:
+                - CreateNamespace=true
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ argocd_server.applicationsets | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create ArgoCD ApplicationSets for Git Repos
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: ApplicationSet
+      metadata:
+        name: "{{ item.key }}-applicationset-git-repo"
+        namespace: argo
+      spec:
+        goTemplate: true
+        goTemplateOptions:
+          - missingkey=error
+        generators:
+          - git:
+              repoURL: "{{ item.value.source.url }}"
+              revision: "{{ item.value.source.ref }}"
+              files:
+                - path: "{{ item.value.source.path }}/*/repo.yaml"
+        template:
+          metadata:
+            name: "{{ item.key }}-{{ '{{' }} index .path.segments 1 {{ '}}' }}"
+          spec:
+            project: "{{ item.key }}"
+            sources:
+              - repoURL: "{{ '{{' }} .source.repoURL {{ '}}' }}"
+                targetRevision: "{{ '{{' }} .source.targetRevision {{ '}}' }}"
+                path: "{{ '{{' }} .source.path {{ '}}' }}"
+                helm:
+                  valueFiles:
+                    - $values/{{ item.value.source.path }}/{{ '{{' }} index .path.segments 1 {{ '}}' }}/{{ item.value.destination.name }}-values.yaml
+              - repoURL: "{{ item.value.source.url }}"
+                targetRevision: "{{ item.value.source.ref }}"
+                ref: values
+            destination:
+              name: "{{ item.value.destination.name }}"
+              namespace: "{{ item.value.destination.namespace | default(item.key) }}"
+            syncPolicy:
+              automated:
+                prune: "{{ item.value.automatedSync.prune | default(True) }}"
+                selfHeal: "{{ item.value.automatedSync.selfHeal | default(True) }}"
+              syncOptions:
+                - CreateNamespace=true
+    kubeconfig: /etc/kubeconfig
+  loop: "{{ argocd_server.applicationsets | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

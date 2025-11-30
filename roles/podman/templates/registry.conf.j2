@@ -1,5 +1,0 @@
-[[registry]]
-location = "{{ item.value.url }}"
-{% if 'insecure' in item.value %}
-insecure = {{ item.value.insecure }}
-{% endif %}

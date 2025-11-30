@@ -1,0 +1,11 @@
+os_defaults:
+  users: []
+  groups: []
+  packages:
+    - bat
+    - speedtest-cli
+    - vim
+  sysctl:
+    fs.inotify.max_user_watches: 524288
+    fs.inotify.max_user_instances: 524288
+    fs.inotify.max_queued_events: 524288

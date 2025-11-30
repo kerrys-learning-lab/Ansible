@@ -1,5 +1,4 @@
-
-- name: Install/Configure Applications via Helm
+- name: Install/Configure Default Helm Applications
   kubernetes.core.helm:
     name: "{{ item.name }}"
     namespace: "{{ item.value.namespace }}"
@@ -9,11 +8,11 @@
     release_values: "{{ item.value.helm_values }}"
     create_namespace: true
     kubeconfig: /etc/kubeconfig
-  loop: "{{ helm_applications }}"
+  loop: "{{ helm_applications_defaults }}"
   loop_control:
     label: "{{ item.name }}"
 
-- name: Install/Configure Host's Custom Applications via Helm
+- name: Install/Configure Host's Custom Helm Applications
   kubernetes.core.helm:
     name: "{{ item.name }}"
     namespace: "{{ item.value.namespace }}"
@@ -23,8 +22,7 @@
     release_values: "{{ item.value.helm_values }}"
     create_namespace: true
     kubeconfig: /etc/kubeconfig
-  loop: "{{ host.helm_applications }}"
+  loop: "{{ helm_applications | default([]) }}"
   loop_control:
     label: "{{ item.name }}"
-  when: host.helm_applications is defined
 

@@ -1,0 +1,38 @@
+- name: Set ArgoCD CLI Base Facts
+  ansible.builtin.set_fact:
+    argocd_cli_url_prefix: "{{ argocd_cli.url_prefix | default(argocd_cli_defaults.url_prefix) }}"
+    argocd_cli_version: "{{ argocd_cli.version | default(argocd_cli_defaults.version) }}"
+    argocd_cli_system: "{{ ansible_system | lower }}"
+    argocd_cli_arch: "{{ ansible_local['dpkg']['arch'] }}"
+    argocd_cli_download_root: "{{ argocd_cli.paths.download | default(argocd_cli_defaults.paths.download) }}"
+    argocd_cli_owner: "{{ argocd_cli.owner | default(argocd_cli_defaults.owner) }}"
+    argocd_cli_group: "{{ argocd_cli.group | default(argocd_cli_defaults.group) }}"
+    argocd_cli_mode: "{{ argocd_cli.mode | default(argocd_cli_defaults.mode) }}"
+    argocd_cli_bin_path: "{{ argocd_cli.paths.bin | default(argocd_cli_defaults.paths.bin) }}"
+
+- name: Set ArgoCD CLI Derived Facts
+  ansible.builtin.set_fact:
+    argocd_cli_url: "{{ argocd_cli_url_prefix }}/{{ argocd_cli_version }}/argocd-{{ argocd_cli_system }}-{{ argocd_cli_arch }}"
+    argocd_cli_download_path: "{{ argocd_cli_download_root }}/argocd-{{ argocd_cli_version }}"
+    argocd_cli_download_file: "argcd-{{ argocd_cli_system }}-{{ argocd_cli_arch }}"
+
+- name: Ensure ArgoCD downloadpath
+  ansible.builtin.file:
+    name: "{{ argocd_cli_download_path }}"
+    state: directory
+    owner: "{{ argocd_cli_owner }}"
+    group: "{{ argocd_cli_group }}"
+    mode: "{{ argocd_cli_mode }}"
+
+- name: Download ArgoCD CLI
+  ansible.builtin.get_url:
+    url: "{{ argocd_cli_url }}"
+    dest: "{{ argocd_cli_download_path }}/{{ argocd_cli_download_file }}"
+    mode: 0555
+
+- name: Link ArgoCD CLI
+  ansible.builtin.file:
+    src: "{{ argocd_cli_download_path }}/{{ argocd_cli_download_file }}"
+    dest: "{{ argocd_cli_bin_path }}"
+    state: link
+

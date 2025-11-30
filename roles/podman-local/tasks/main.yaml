@@ -1,8 +1,0 @@
-- name: Configure Podman Registries
-  ansible.builtin.template:
-    src: registry.conf.j2
-    dest: /etc/containers/registries.conf.d/{{ item.key }}.conf
-    mode: 0444
-  loop: "{{ registries | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"

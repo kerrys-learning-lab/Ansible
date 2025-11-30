@@ -29,4 +29,4 @@ Facts from all hosts:
     `argocd login argocd.westsidestreet.net`
 
 3. Add the Cluster
-    `argocd --kubeconfig /var/lib/ansible/kubeconfig.d/... cluster add --yes default --name asusrog --server-name argocd.westsidestreet.net`
+    `argocd --kubeconfig /var/lib/ansible/kubeconfig.d/... cluster add --yes default --name dev-vm --server-name argocd.westsidestreet.net`

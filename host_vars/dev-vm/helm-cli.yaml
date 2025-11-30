@@ -1,0 +1,3 @@
+helm_cli:
+  paths:
+    download: /usr/local/downloads

@@ -39,7 +39,7 @@
     k8s_secrets_image_pull_files: >
       {{ k8s_secrets_image_pull_files |
           combine({
-            item.name: {
+            item.name + '--' + item.namespace: {
               'namespace': item.namespace,
               'auth': item.auth,
               'path': '{root}/{name}--{namespace}--image-pull-secret.yaml'.format(root=k8s_secrets_yaml_root,

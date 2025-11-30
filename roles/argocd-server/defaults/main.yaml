@@ -1,0 +1,8 @@
+argocd_server_defaults:
+  k8s:
+    name: argo-cd
+    namespace: argo
+  chart:
+    ref: argo-cd
+    url: https://argoproj.github.io/argo-helm
+    version: 7.8.2

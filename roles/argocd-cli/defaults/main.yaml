@@ -1,0 +1,9 @@
+argocd_cli_defaults:
+  url_prefix: https://github.com/argoproj/argo-cd/releases/download
+  version: v2.14.11
+  paths:
+    download: /var/lib/ansible/downloads
+    bin: /usr/local/bin/argocd
+  owner: root
+  group: root
+  mode: a=rX

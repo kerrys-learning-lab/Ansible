@@ -1,0 +1,4 @@
+metal_lb:
+  # NOTE: Reserved these in the Netgear router by setting the upper
+  #       limit of the router's IP range to a.b.c.199
+  pool: 192.168.0.225-192.168.0.234

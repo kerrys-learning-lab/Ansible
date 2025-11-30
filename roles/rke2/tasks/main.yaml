@@ -19,6 +19,15 @@
   notify:
     - Restart RKE2
 
+- name: Configure Rancher/RKE2 Registries
+  ansible.builtin.template:
+    src: rke2-registries.j2.yaml
+    dest: /etc/rancher/rke2/registries.yaml
+    mode: 0440
+  when: "'registries' in rke2_config"
+  notify:
+    - Restart RKE2
+
 - name: Start Rancher/RKE2 Service
   ansible.builtin.service:
     name: rke2-server

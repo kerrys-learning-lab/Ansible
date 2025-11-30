@@ -14,19 +14,35 @@
     - os
   any_errors_fatal: true
 
-- name: Configure Development Machine(s)
+- name: Configure for Development
   become: true
   hosts:
     - all
+  pre_tasks:
+    - ansible.builtin.setup:
+      tags:
+        - always
   roles:
+    - role: argocd-cli
+      when: argocd_cli is defined
+      tags:
+        - argocd
     - role: aws-development
       when: aws_development is defined
       tags:
         - aws
+    - role: helm-cli
+      when: helm_cli is defined
+      tags:
+        - helm
     - role: k9s
       when: k9s is defined
       tags:
         - k9s
+    - role: podman
+      when: podman is defined
+      tags:
+        - podman
   tags:
     - dev
   any_errors_fatal: true
@@ -44,29 +60,41 @@
         - rke2
     - role: k8s
       when: k8s is defined
-      tags:
-        - k8s
     - role: k8s-local-volumes
       when: k8s_local_volumes is defined
       tags:
-        - k8s
+        - pv
+        - pvs
+        - volumes
     - role: k8s-certificates
       when: k8s_certificates is defined
       tags:
-        - k8s
+        - cert
+        - certs
+        - certificates
+    - role: k8s-csi-storage
+      when: storage_classes is defined
+      tags:
+        - storage
     - role: k8s-secrets
       when: k8s_secrets is defined
       tags:
-        - k8s
+        - secrets
+    - role: metal-lb
+      when: metal_lb is defined
+      tags:
+        - metal
+        - metal-lb
     - role: elasticsearch-operator
       when: elasticsearch_operator is defined
       tags:
-        - k8s
+        - elasticsearch
     - role: sealed-secrets
       when: sealed_secrets is defined
       tags:
-        - k8s
         - secrets
+  tags:
+    - k8s
   any_errors_fatal: true
 
 - name: Remote Access to Other K8s Clusters
@@ -82,3 +110,21 @@
   tags:
     - k8s
   any_errors_fatal: true
+
+- name: Cluster Applications and Services
+  become: true
+  hosts:
+    - all
+  pre_tasks:
+    - ansible.builtin.setup:
+      tags:
+        - always
+  roles:
+    - role: argocd-server
+      when: argocd_server is defined
+      tags:
+        - argocd
+    - role: helm-applications
+      when: helm_applications is defined or helm_applications_defaults is defined
+      tags:
+        - helm

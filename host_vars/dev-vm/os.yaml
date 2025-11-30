@@ -1,16 +1,28 @@
-extra:
+os_host_vars:
+  groups:
+    - podman
+
+  users:
+    kerry:
+      groups:
+        - podman
+
   packages:
+    - age
+
     # NOTE: Prior to installing this package, must perform
     #       - sudo wget -O /etc/apt/sources.list.d/gitlab-ci-local.sources https://gitlab-ci-local-ppa.firecow.dk/gitlab-ci-local.sources
     #       - sudo apt update
     #       as described here: https://github.com/firecow/gitlab-ci-local?tab=readme-ov-file#installation
     - gitlab-ci-local
-    - podman-compose
+
+    # Certbot Dependencies:
+    - python3
+    - python3-kubernetes
+    - python3-pip
+    - python3-yaml
+    - python3-venv
+    - libaugeas0
 
     # For local Python Gymnasium execution (graphics library)
     - swig
-  k8s:
-    namespaces:
-      - dev
-
-fqdn: wsl.westsidestreet.net

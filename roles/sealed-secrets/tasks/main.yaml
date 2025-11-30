@@ -15,14 +15,7 @@
 - name: Set Sealed Secrets Derived Facts -- 2
   ansible.builtin.set_fact:
     sealed_secrets_cli_url: "{{ sealed_secrets_cli_url_prefix }}/v{{ sealed_secrets_cli_version }}/{{ sealed_secrets_cli_file }}"
-    sealed_secrets_cli_download_path: "{{ sealed_secrets_cli_download_root }}/kubeseal-{{ sealedsecrets.cli.version }}"
-
-- name: Install Sealed Secrets Controller
-  kubernetes.core.k8s:
-    state: present
-    apply: true
-    src: "{{ sealedsecrets.controller.url }}/v{{ sealedsecrets.controller.version }}/controller.yaml"
-    kubeconfig: /etc/kubeconfig
+    sealed_secrets_cli_download_path: "{{ sealed_secrets_cli_download_root }}/kubeseal-{{ sealed_secrets_cli_version }}"
 
 - name: Ensure Kubeseal CLI download path
   ansible.builtin.file:

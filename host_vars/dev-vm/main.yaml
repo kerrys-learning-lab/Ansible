@@ -3,13 +3,6 @@ host:
 
   helm_applications: []
 
-  packages:
-    # NOTE: Prior to installing this package, must perform
-    #       - sudo wget -O /etc/apt/sources.list.d/gitlab-ci-local.sources https://gitlab-ci-local-ppa.firecow.dk/gitlab-ci-local.sources
-    #       - sudo apt update
-    #       as described here: https://github.com/firecow/gitlab-ci-local?tab=readme-ov-file#installation
-    - gitlab-ci-local
-    - podman-compose
 
-    # For local Python Gymnasium execution (graphics library)
-    - swig
+ansible_fqdn: dev-vm.westsidestreet.net
+ansible_host: dev-vm.westsidestreet.net

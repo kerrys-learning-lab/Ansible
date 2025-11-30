@@ -1,3 +1,7 @@
+- name: Set MetalLB Base Facts
+  ansible.builtin.set_fact:
+    metal_lb_pool: "{{ metal_lb.pool | default(false) }}"
+
 - name: Create the IP Address Pool for Metal LB
   kubernetes.core.k8s:
     state: present
@@ -10,9 +14,10 @@
         namespace: infrastructure
       spec:
         addresses:
-          - "{{ host.metal.pool }}"
+          - "{{ metal_lb.pool }}"
         autoAssign: true
     kubeconfig: /etc/kubeconfig
+  when: metal_lb_pool
 
 - name: Create the L2 Advertisement Metal LB
   kubernetes.core.k8s:
@@ -28,3 +33,4 @@
         ipAddressPools:
           - metal-lb-address-pool
     kubeconfig: /etc/kubeconfig
+  when: metal_lb_pool

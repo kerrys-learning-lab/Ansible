@@ -1,0 +1,5 @@
+- name: Reload Podman service
+  ansible.builtin.systemd:
+    name: "{{ podman_service_name }}"
+    state: restarted
+    daemon_reload: true
