@@ -1,0 +1,37 @@
+cpp_development_defaults:
+  debs:
+    - https://github.com/bazelbuild/bazel/releases/download/8.5.0/bazel_8.5.0-linux-x86_64.deb
+  packages:
+    - cmake
+    - gdb
+
+    # Pistache (CPP REST Server)
+    - libpistache-dev
+    - libpistache0t64
+
+    # For certain CLI integrations (like continue, below)
+    - npm
+
+    # Protobuf
+    - libprotobuf-c-dev
+    - protobuf-c-compiler
+  npm:
+    - "@continuedev/cli"
+  paths:
+    download: /var/lib/ansible/downloads
+    source: /usr/local/src
+  owner: root
+  group: root
+  mode: a=rX
+  tools:
+    bazel-compile-commands:
+      version: 0.20.1
+      url: https://github.com/kiron1/bazel-compile-commands/releases/download/v0.20.1/bazel-compile-commands_0.20.1-linux_amd64.zip
+      dest: /
+      extract: true
+    buildifier:
+      version: v8.2.1
+      url: https://github.com/bazelbuild/buildtools/releases/download/v8.2.1/buildifier-linux-amd64
+      link:
+        src: /usr/local/downloads/buildifier-v8.2.1/buildifier-linux-amd64
+        dest: /usr/local/bin/buildifier

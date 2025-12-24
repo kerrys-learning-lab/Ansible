@@ -1,8 +1,8 @@
 
-# dev:
-#   hosts:
-#     wsl:
-#       ansible_host: wsl.westsidestreet.net
+dev:
+  hosts:
+    dev-vm:
+    nvidia-5080:
 
 gitlab:
   hosts:
@@ -18,8 +18,9 @@ argocd:
 
 rke2:
   hosts:
-    elitedesk:
     dev-vm:
+    elitedesk:
+    nvidia-5080:
     # raspberrypi4-01: # All Pis are combined in a single cluster!
 
 raspberry_pi:

@@ -28,4 +28,4 @@
   when: "'stringData' in item.value"
   loop: "{{ k8s_secrets.string | default({}) | dict2items }}"
   loop_control:
-    label: "{{ item.key }}"
+    label: "{{ item.value.namespace | default(k8s_secrets_namespace) | lower }}.{{ item.key }}"

@@ -12,6 +12,14 @@ k8s_local_volumes:
     owner: 1000
     group: 1000
     mode: u=rwx,go=rx
+  gitlab-dependabot-mongodb:
+    capacity: 10Gi
+    path: gitlab/dependabot/mongodb
+    owner: 1001
+    group: 0
+    mode: u=rwx,go=rx
+
+
 
   # --- MLFlow
   mlflow-postgresql:

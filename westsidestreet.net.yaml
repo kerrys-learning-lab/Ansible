@@ -11,6 +11,7 @@
         - resolve
   tags:
     - base
+    - common
     - os
   any_errors_fatal: true
 
@@ -23,6 +24,10 @@
       tags:
         - always
   roles:
+    - role: c++-development
+      when: cpp_development is defined
+      tags:
+        - c++
     - role: argocd-cli
       when: argocd_cli is defined
       tags:
@@ -39,6 +44,11 @@
       when: k9s is defined
       tags:
         - k9s
+    - role: open-gl
+      when: open_gl is defined
+      tags:
+        - open-gl
+        - opengl
     - role: podman
       when: podman is defined
       tags:
@@ -79,6 +89,7 @@
     - role: k8s-secrets
       when: k8s_secrets is defined
       tags:
+        - secret
         - secrets
     - role: metal-lb
       when: metal_lb is defined
@@ -124,6 +135,16 @@
       when: argocd_server is defined
       tags:
         - argocd
+    - role: dependabot-gitlab
+      when: dependabot_gitlab is defined
+      tags:
+        - dependabot
+        - dependabot-gitlab
+        - gitlab
+    - role: gitlab
+      when: gitlab is defined
+      tags:
+        - gitlab
     - role: helm-applications
       when: helm_applications is defined or helm_applications_defaults is defined
       tags:

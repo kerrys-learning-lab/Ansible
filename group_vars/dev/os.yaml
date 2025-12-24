@@ -9,6 +9,7 @@ os_host_vars:
 
   packages:
     - age
+    - python3-tk
 
     # NOTE: Prior to installing this package, must perform
     #       - sudo wget -O /etc/apt/sources.list.d/gitlab-ci-local.sources https://gitlab-ci-local-ppa.firecow.dk/gitlab-ci-local.sources

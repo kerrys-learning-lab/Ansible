@@ -1,0 +1,8 @@
+dependabot_gitlab_defaults:
+  k8s:
+    name: dependabot-gitlab
+    namespace: gitlab-system
+  chart:
+    ref: dependabot-gitlab
+    url: https://dependabot-gitlab.gitlab.io/chart
+    version: 3.15.0

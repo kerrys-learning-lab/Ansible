@@ -27,18 +27,18 @@
   ansible.builtin.file:
     path: "{{ k8s_local_volumes_root_dir }}"
     state: directory
-    owner: "{{ k8s_local_volumes_owner }}"
-    group: "{{ k8s_local_volumes_group }}"
-    mode: "{{ k8s_local_volumes_mode }}"
+    owner: root
+    group: root
+    mode: a=rx
 
 # We create the parent directories with less restrictive access
 - name: Create Local Kubernetes Volume Directory Parents
   ansible.builtin.file:
     path: "{{ k8s_local_volumes_root_dir }}/{{ item.value.path | dirname }}"
     state: directory
-    owner: "{{ item.value.owner | default(k8s_local_volumes_owner) }}"
-    group: "{{ item.value.group | default(k8s_local_volumes_group) }}"
-    mode: "a=rx"
+    owner: root
+    group: root
+    mode: a=rx
   loop: "{{ k8s_local_volumes | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

@@ -3,6 +3,7 @@ os_defaults:
   groups: []
   packages:
     - bat
+    - gnupg2
     - speedtest-cli
     - vim
   sysctl:

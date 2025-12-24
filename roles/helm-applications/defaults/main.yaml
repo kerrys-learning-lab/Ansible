@@ -4,7 +4,7 @@ helm_applications_defaults:
       namespace: infrastructure
       url: https://charts.jetstack.io
       ref: cert-manager
-      version: v1.17.1
+      version: v1.19.2
       helm_values:
         crds:
           enabled: true

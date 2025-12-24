@@ -42,7 +42,7 @@
   loop_control:
     label: "{{ item.key }}"
 
-- name: Mount Host-specific Shares/Drives
+- name: Mount Host-specific Shares/Drives (fstab)
   ansible.posix.mount:
     state: mounted
     src: "{{ item.value.src }}"

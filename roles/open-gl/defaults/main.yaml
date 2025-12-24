@@ -1,0 +1,4 @@
+open_gl_defaults:
+  packages:
+    - libgl1
+    - libglx-mesa0
