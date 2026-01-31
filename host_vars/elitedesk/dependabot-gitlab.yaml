@@ -10,7 +10,7 @@ dependabot_gitlab_disabled:
     auth:
       enabled: true
     credentials:
-      gitlab_access_token: "{{ lookup('ansible.builtin.vars', '_secrets').gitlab.glpat.password }}"
+      gitlab_access_token: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.password }}"
     env:
       gitlabUrl: https://gitlab.westsidestreet.net
       logColor: true
@@ -18,7 +18,7 @@ dependabot_gitlab_disabled:
       architecture: standalone
       auth:
         passwords:
-          - "{{ lookup('ansible.builtin.vars', '_secrets').gitlab.dependabot.mongodb.password }}"
+          - "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.dependabot.mongodb.password }}"
       persistence:
         existingClaim: gitlab-dependabot-mongodb
     redis:

@@ -1,24 +1,37 @@
-- name: Set k8s Base Facts
+- name: Merge k8s Variables
   ansible.builtin.set_fact:
-    k8s_env_path: "{{ k8s.env.path | default(k8s_defaults.env.path) }}"
-    k8s_env_mode: "{{ k8s.env.mode | default(k8s_defaults.env.mode) }}"
-    k8s_kubeconfig_path: "{{ k8s.kubeconfig.path | default(k8s_defaults.kubeconfig.path) }}"
+    k8s_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_k8s',
+                initial_value=k8s_defaults,
+                pattern_type='suffix') }}
 
 - name: Set k8s Environment
   ansible.builtin.copy:
-    dest: "{{ k8s_env_path }}"
+    dest: "{{ k8s_vars.global.paths.env }}"
     content: |
-      export KUBECONFIG={{ k8s_kubeconfig_path }}
-    mode: "{{ k8s_env_mode }}"
+      export KUBECONFIG={{ k8s_vars.global.paths.kubeconfig }}
+    mode: "{{ k8s_vars.global.mode }}"
 
-- name: Create k8s Namespaces
-  kubernetes.core.k8s:
-    state: present
-    apply: true
-    definition:
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: "{{ item }}"
-    kubeconfig: /etc/kubeconfig
-  loop: "{{ k8s.namespaces | default([]) }}"
+- name: Configure k8s Namespaces
+  ansible.builtin.include_tasks: namespaces.yaml
+  tags:
+    - namespace
+    - ns
+
+- name: Configure k8s Storage
+  ansible.builtin.include_tasks: storage.yaml
+  tags:
+    - pv
+    - storage
+
+- name: Configure k8s Secrets
+  ansible.builtin.include_tasks: secrets.yaml
+  tags:
+    - pv
+    - secret
+
+- name: Configure k8s Certificate Manager and Certificates
+  ansible.builtin.include_tasks: certificates.yaml
+  tags:
+    - cert

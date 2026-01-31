@@ -1,0 +1,16 @@
+dev_vm_k8s:
+
+  certificates:
+    boids-dev:
+      namespace: boids
+      dnsNames:
+        - boids-dev.westsidestreet.net
+
+  storage:
+    local_volumes:
+      boids-ui-mysql:
+        path: boids/boids-ui/mysql
+        capacity: 20Gi
+        owner: 27
+        group: 27
+        mode: u=rwx,go=rx

@@ -1,5 +1,0 @@
-k8s_local_volumes_defaults:
-  root_dir: /var/lib/k8s-local-pv
-  owner: root
-  group: root
-  mode: u=rwx,go=rx

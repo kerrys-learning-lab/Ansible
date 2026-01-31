@@ -16,6 +16,7 @@
   ansible.builtin.template:
     src: rke2-config.j2.yaml
     dest: /etc/rancher/rke2/config.yaml
+    mode: ug=rwx,o=rx
   notify:
     - Restart RKE2
 

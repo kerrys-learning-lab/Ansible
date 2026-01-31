@@ -4,6 +4,8 @@ cpp_development_defaults:
   packages:
     - cmake
     - gdb
+    - gcovr
+    - lcov
 
     # Pistache (CPP REST Server)
     - libpistache-dev

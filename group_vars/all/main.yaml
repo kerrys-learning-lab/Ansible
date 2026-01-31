@@ -2,12 +2,16 @@ paths:
   facts: /var/lib/ansible/facts.d
   download: /usr/local/downloads
 
+dns:
+  subdomain: westsidestreet.net
+  nameserver: 192.168.0.3
+
 nfs:
   host: 192.168.0.3
 
 smb:
   host: 192.168.0.3
-  opts: username={{ lookup('ansible.builtin.vars', '_secrets').smb.username }},password={{ lookup('ansible.builtin.vars', '_secrets').smb.password }}
+  opts: username={{ lookup('ansible.builtin.vars', 'secrets_vault').smb.username }},password={{ lookup('ansible.builtin.vars', 'secrets_vault').smb.password }}
   mounts:
     homes:
       path: nas-homes

@@ -11,16 +11,16 @@ argocd_server:
         type: LoadBalancer
     configs:
       ssh:
-        knownHosts: "{{ lookup('ansible.builtin.vars', '_secrets').ssh.knownHosts }}"
+        knownHosts: "{{ lookup('ansible.builtin.vars', 'secrets_vault').ssh.knownHosts }}"
       credentialTemplates:
         kerrys-learning-lab-git:
           url: git@gitlab.westsidestreet.net:kerrys-learning-lab
           sshPrivateKey: |
-            {{ lookup('ansible.builtin.vars', '_secrets').ssh.privateKey }}
+            {{ lookup('ansible.builtin.vars', 'secrets_vault').ssh.privateKey }}
         kerrys-learning-lab-helm:
           url: https://gitlab.westsidestreet.net/api/v4
-          username: "{{ lookup('ansible.builtin.vars', '_secrets').gitlab.glpat.username }}"
-          password: "{{ lookup('ansible.builtin.vars', '_secrets').gitlab.glpat.password }}"
+          username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.username }}"
+          password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.password }}"
       repositories:
         argo-cd:
           name: argo-cd
@@ -69,3 +69,12 @@ argocd_server:
         path: argocd-applications
       destination:
         name: dev-vm
+
+argocd_k8s:
+  certificates:
+    # TODO: Why did I put this in the 'gitlab-system' namespace?  Was this
+    #       before I implemented the cluster-wide Cert Manager? lol
+    argocd-server:
+      namespace: gitlab-system
+      dnsNames:
+        - argocd.westsidestreet.net

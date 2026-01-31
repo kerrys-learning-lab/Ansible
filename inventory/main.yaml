@@ -4,6 +4,12 @@ dev:
     dev-vm:
     nvidia-5080:
 
+k8s:
+  hosts:
+    dev-vm:
+    elitedesk:
+    nvidia-5080:
+
 gitlab:
   hosts:
     elitedesk:

@@ -1,0 +1,8 @@
+nvidia_defaults:
+  container_toolkit:
+    version: 1.18.1-1
+    packages:
+      - nvidia-container-toolkit  # ${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+      - nvidia-container-toolkit  # base=${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+      - libnvidia-container-tools # ${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+      - libnvidia-container1      # =${NVIDIA_CONTAINER_TOOLKIT_VERSION}

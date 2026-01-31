@@ -1,6 +1,0 @@
-k8s_secrets_defaults:
-  namespace: infrastructure
-  yaml_root: /var/lib/ansible/k8s-secrets.d
-  owner: root
-  group: root
-  mode: ug=r

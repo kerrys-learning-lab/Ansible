@@ -1,0 +1,12 @@
+# code: language=ansible
+- name: Create k8s Namespaces
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ item }}"
+    kubeconfig: "{{ k8s_vars.global.paths.kubeconfig }}"
+  loop: "{{ k8s_vars.namespaces | default([]) }}"

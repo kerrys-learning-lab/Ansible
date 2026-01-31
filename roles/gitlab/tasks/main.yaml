@@ -14,17 +14,6 @@
 - name: Wait for GitLab Operator to be Installed (flush handlers)
   ansible.builtin.meta: flush_handlers
 
-- name: Create Local Kubernetes Volume Directories
-  ansible.builtin.file:
-    path: "{{ item.key }}"
-    state: directory
-    owner: "{{ item.value.owner | default('root') }}"
-    group: "{{ item.value.group | default('root') }}"
-    mode: "{{ item.value.mode }}"
-  loop: "{{ gitlab.directories | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-
 - name: Create GitLab Backup Secret
   kubernetes.core.k8s:
     state: present
@@ -47,47 +36,22 @@
     kubeconfig: /etc/kubeconfig
 
 
-# # NOTE: See https://docs.gitlab.com/charts/charts/registry/metadata_database
-# - name: Create GitLab Registry PostgreSQL Secret
-#   kubernetes.core.k8s:
-#     state: present
-#     apply: true
-#     definition:
-#       apiVersion: v1
-#       kind: Secret
-#       metadata:
-#         name: gitlab-registry-database-password
-#         namespace: gitlab-system
-#       type: kubernetes.io/basic-auth
-#       stringData:
-#         username: "{{ gitlab_secrets.registry.postgresql.username }}"
-#         password: "{{ gitlab_secrets.registry.postgresql.password }}"
-#     kubeconfig: /etc/kubeconfig
-
-- name: Create Local Kubernetes Volume(s) for GitLab
+# NOTE: See https://docs.gitlab.com/charts/charts/registry/metadata_database
+- name: Create GitLab Registry PostgreSQL Secret
   kubernetes.core.k8s:
     state: present
     apply: true
     definition:
       apiVersion: v1
-      kind: PersistentVolume
+      kind: Secret
       metadata:
-        name: "{{ item.key }}"
-        labels:
-          owner: "{{ item.key }}"
-      spec:
-        capacity:
-          storage: "{{ item.value.capacity | default('10Gi') }}"
-        accessModes:
-          - "{{ item.value.accessMode | default('ReadWriteOnce') }}"
-        persistentVolumeReclaimPolicy: "{{ item.value.reclaimPolicy | default('Retain') }}"
-        storageClassName: local
-        hostPath:
-          path: "{{ item.value.path }}"
+        name: gitlab-registry-database-password
+        namespace: gitlab-system
+      type: kubernetes.io/basic-auth
+      stringData:
+        username: "{{ gitlab_secrets.registry.postgresql.username }}"
+        password: "{{ gitlab_secrets.registry.postgresql.password }}"
     kubeconfig: /etc/kubeconfig
-  loop: "{{ gitlab.k8s.volumes.local | default({}) |dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
 
 - name: Create Local Kubernetes Claim(s) for GitLab
   kubernetes.core.k8s:

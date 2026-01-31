@@ -1,0 +1,13 @@
+# NOTE: Dependabot is not fully implemented
+dependabot_k8s:
+  secrets:
+    dependabot--mongodb:
+      namespace: gitlab-system
+      stringData:
+        mongodb-root-password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.dependabot.mongodb.password }}"
+    dependabot--redis:
+      type: kubernetes.io/basic-auth
+      namespace: gitlab-system
+      stringData:
+        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.dependabot.redis.username }}"
+        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.dependabot.redis.password }}"

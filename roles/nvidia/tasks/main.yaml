@@ -1,0 +1,10 @@
+- name: Set NVIDIA Base Facts
+  ansible.builtin.set_fact:
+    nvidia_container_toolkit_version: "{{ nvidia.container_toolkit.version | default(nvidia_defaults.container_toolkit.version) }}"
+    nvidia_container_toolkit_packages: "{{ nvidia.container_toolkit.packages | default(nvidia_defaults.container_toolkit.packages) }}"
+
+- name: Ensure NVIDIA Container Toolkit Packages Installed
+  ansible.builtin.apt:
+    name: "{{ item }}={{ nvidia_container_toolkit_version }}"
+    state: present
+  loop: "{{ nvidia_container_toolkit_packages }}"

@@ -20,7 +20,8 @@
   hosts:
     - all
   pre_tasks:
-    - ansible.builtin.setup:
+    - name: Setup Ansible facts
+      ansible.builtin.setup:
       tags:
         - always
   roles:
@@ -57,40 +58,28 @@
     - dev
   any_errors_fatal: true
 
-- name: Kubernetes
+# NOTE: rke2 must come before k8s
+- name: RKE2
   become: true
   hosts:
-    - all
+    - rke2
   roles:
-    # NOTE: rke2 must come before k8s
     - role: rke2
       when: rke2 is defined
       tags:
         - k8s
         - rke2
+
+
+- name: Kubernetes
+  become: true
+  hosts:
+    - k8s
+  roles:
     - role: k8s
       when: k8s is defined
-    - role: k8s-local-volumes
-      when: k8s_local_volumes is defined
       tags:
-        - pv
-        - pvs
-        - volumes
-    - role: k8s-certificates
-      when: k8s_certificates is defined
-      tags:
-        - cert
-        - certs
-        - certificates
-    - role: k8s-csi-storage
-      when: storage_classes is defined
-      tags:
-        - storage
-    - role: k8s-secrets
-      when: k8s_secrets is defined
-      tags:
-        - secret
-        - secrets
+        - k8s
     - role: metal-lb
       when: metal_lb is defined
       tags:
@@ -149,3 +138,18 @@
       when: helm_applications is defined or helm_applications_defaults is defined
       tags:
         - helm
+
+- name: GPU Applications and Services
+  become: true
+  hosts:
+    - all
+  pre_tasks:
+    - ansible.builtin.setup:
+      tags:
+        - always
+  roles:
+    - role: nvidia
+      when: nvidia is defined
+      tags:
+        - gpu
+        - nvidia

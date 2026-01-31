@@ -1,0 +1,100 @@
+# ============================================================================
+k8s_defaults:
+
+
+  # --------------------------------------------------------------------------
+  cert_manager:
+    chart:
+      url: https://charts.jetstack.io
+      version: v1.19.2
+    helm_values:
+      crds:
+        enabled: true
+      # # dns01RecursiveNameservers: 192.168.0.3:53
+      # dns01RecursiveNameservers: 8.8.8.8:53,1.1.1.1:53
+      # dns01RecursiveNameserversOnly: true
+    server: https://acme-v02.api.letsencrypt.org/directory
+
+
+  # --------------------------------------------------------------------------
+  # secrets:
+  #   <key>:
+  #      type: <type> (string, optional, default: "Opaque")
+  #      namespace: <namespace> (string, optional, default: k8s.global.namespace)
+  #      stringData: (dict, required)
+  #         <string-key>: <string-value>
+  secrets: {}
+
+
+  # --------------------------------------------------------------------------
+  storage:
+    classes:
+      smb:
+        provisioner: smb.csi.k8s.io
+        parameters:
+          source: //{{ lookup('ansible.builtin.vars', 'smb').host }}/kubernetes
+          subDir: ${pvc.metadata.namespace}/${pvc.metadata.name}
+          csi.storage.k8s.io/provisioner-secret-name: nas--smb
+          csi.storage.k8s.io/provisioner-secret-namespace: infrastructure
+          csi.storage.k8s.io/node-stage-secret-name: nas--smb
+          csi.storage.k8s.io/node-stage-secret-namespace: infrastructure
+        volumeBindingMode: Immediate
+        allowVolumeExpansion: true
+        mountOptions:
+          - dir_mode=0777
+          - file_mode=0777
+          - uid=0
+          - gid=0
+          - noperm
+          - mfsymlinks
+          - cache=strict
+          - noserverino  # required to prevent data corruption
+
+      local:
+        provisioner: kubernetes.io/no-provisioner
+        volumeBindingMode: WaitForFirstConsumer
+        reclaimPolicy: Retain
+        allowVolumeExpansion: false
+
+      # Added host name to the path
+      smb-2025-11-01:
+        provisioner: smb.csi.k8s.io
+        default: "true"
+        parameters:
+          source: //{{ lookup('ansible.builtin.vars', 'smb').host }}/kubernetes
+          subDir: "{{ inventory_hostname }}/${pvc.metadata.namespace}/${pvc.metadata.name}"
+          csi.storage.k8s.io/provisioner-secret-name: nas--smb
+          csi.storage.k8s.io/provisioner-secret-namespace: infrastructure
+          csi.storage.k8s.io/node-stage-secret-name: nas--smb
+          csi.storage.k8s.io/node-stage-secret-namespace: infrastructure
+        volumeBindingMode: Immediate
+        allowVolumeExpansion: true
+        mountOptions:
+          - dir_mode=0777
+          - file_mode=0777
+          - uid=0
+          - gid=0
+          - noperm
+          - mfsymlinks
+          - cache=strict
+          - noserverino  # required to prevent data corruption
+
+    csi:
+      chart:
+        url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts
+        ref: csi-driver-smb
+        version: v1.17.0
+      helm_values: {}
+
+    local_volumes: {}
+
+  # --------------------------------------------------------------------------
+  global:
+    owner: root
+    group: root
+    mode: a=rX
+    paths:
+      env: /etc/profile.d/kubeconfig.sh
+      ansible: /var/lib/ansible/k8s.d
+      kubeconfig: /etc/kubeconfig
+      local_volumes: /var/lib/k8s-local-pv

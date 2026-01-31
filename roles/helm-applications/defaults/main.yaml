@@ -1,22 +1,4 @@
 helm_applications_defaults:
-  - name: cert-manager
-    value:
-      namespace: infrastructure
-      url: https://charts.jetstack.io
-      ref: cert-manager
-      version: v1.19.2
-      helm_values:
-        crds:
-          enabled: true
-
-  - name: csi-driver
-    value:
-      namespace: infrastructure
-      url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts
-      ref: csi-driver-smb
-      version: v1.17.0
-      helm_values: {}
-
   - name: metal-lb
     value:
       namespace: infrastructure
@@ -29,13 +11,19 @@ helm_applications_defaults:
           pod-security.kubernetes.io/audit: privileged
           pod-security.kubernetes.io/warn: privileged
 
-  - name: mysql-operator
-    value:
-      namespace: infrastructure
-      url: https://mysql.github.io/mysql-operator
-      ref: mysql-operator
-      version: 2.2.6
-      helm_values: {}
+  # NOTE: The 2.2.6 version of the MySQL operator has been removed from the
+  #       Oracle helm repository.  BUT, the 2.2.7 version fails because the
+  #       images don't exist in the Oracle container registry (at least as of
+  #       2026-01).
+  #
+  # Disabling for now
+  # - name: mysql-operator
+  #   value:
+  #     namespace: infrastructure
+  #     url: https://mysql.github.io/mysql-operator
+  #     ref: mysql-operator
+  #     version: 2.2.6
+  #     helm_values: {}
 
   - name: nfs-subdir-external-provisioner
     value:

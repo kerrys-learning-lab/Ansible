@@ -9,6 +9,9 @@ os_host_vars:
 
   packages:
     - age
+    - ansible
+    - ansible-core
+    - ansible-lint
     - python3-tk
 
     # NOTE: Prior to installing this package, must perform

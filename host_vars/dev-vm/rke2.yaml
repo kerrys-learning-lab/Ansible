@@ -5,8 +5,8 @@ rke2_config:
   tls-san:
     - dev-vm
     - dev-vm.westsidestreet.net
-    - 192.168.0.36
+    - 192.168.0.163
   registries:
     registry.westsidestreet.net:
-      username: "{{ lookup('ansible.builtin.vars', '_secrets').gitlab.glpat.username }}"
-      password: "{{ lookup('ansible.builtin.vars', '_secrets').gitlab.glpat.password }}"
+      username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.username }}"
+      password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.password }}"

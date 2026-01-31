@@ -1,7 +1,5 @@
-dev_k8s:
-  namespaces:
-    - dev
-    - infrastructure
+elitedesk_k8s:
+
   secrets:
     aws:
       type: kubernetes.io/basic-auth
@@ -15,3 +13,4 @@ dev_k8s:
       stringData:
         username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').smb.username }}"
         password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').smb.password }}"
+
