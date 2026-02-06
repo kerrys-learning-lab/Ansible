@@ -3,32 +3,50 @@
   hosts:
     - all
   roles:
-    - common
-    - os
-    - role: resolve
-      when: resolve is defined
+    - role: common
+    - role: synology-backup
       tags:
-        - resolve
+        - backup
+        - synology
   tags:
     - base
     - common
     - os
+    - packages
   any_errors_fatal: true
 
-- name: Configure for Development
+- name: Install/Configure k8s
   become: true
-  hosts:
-    - all
+  hosts: k8s
   pre_tasks:
     - name: Setup Ansible facts
       ansible.builtin.setup:
       tags:
         - always
   roles:
-    - role: c++-development
-      when: cpp_development is defined
+    - role: crc # (CodeReady Containers)
       tags:
-        - c++
+        - crc
+      when: ansible_distribution == "Fedora"
+    - role: rke2
+      when: ansible_distribution == "Ubuntu"
+      tags:
+        - rke2
+    - role: k8s
+  tags:
+    - k8s
+    - kubernetes
+
+- name: Configure for Development
+  become: true
+  hosts:
+    - development
+  pre_tasks:
+    - name: Setup Ansible facts
+      ansible.builtin.setup:
+      tags:
+        - always
+  roles:
     - role: argocd-cli
       when: argocd_cli is defined
       tags:
@@ -41,6 +59,16 @@
       when: helm_cli is defined
       tags:
         - helm
+    - role: c++-development
+      when: cpp_development is defined
+      tags:
+        - c++
+    - role: gitlabci-local
+      tags:
+        - gitlab
+        - gitlabci
+        - gitlab-ci
+        - gitlabci-local
     - role: k9s
       when: k9s is defined
       tags:
@@ -56,19 +84,8 @@
         - podman
   tags:
     - dev
+    - development
   any_errors_fatal: true
-
-# NOTE: rke2 must come before k8s
-- name: RKE2
-  become: true
-  hosts:
-    - rke2
-  roles:
-    - role: rke2
-      when: rke2 is defined
-      tags:
-        - k8s
-        - rke2
 
 
 - name: Kubernetes
@@ -80,19 +97,10 @@
       when: k8s is defined
       tags:
         - k8s
-    - role: metal-lb
-      when: metal_lb is defined
-      tags:
-        - metal
-        - metal-lb
     - role: elasticsearch-operator
       when: elasticsearch_operator is defined
       tags:
         - elasticsearch
-    - role: sealed-secrets
-      when: sealed_secrets is defined
-      tags:
-        - secrets
   tags:
     - k8s
   any_errors_fatal: true

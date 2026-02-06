@@ -1,0 +1,15 @@
+# code: language=ansible
+- name: Users and Groups - Create Groups
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ common_vars.users_and_groups.groups | default([]) }}"
+
+- name: Users and Groups - Append Groups to Users
+  ansible.builtin.user:
+    name: "{{ item.key }}"
+    groups: "{{ item.value.groups }}"
+    append: true
+  loop: "{{ common_vars.users_and_groups.users | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

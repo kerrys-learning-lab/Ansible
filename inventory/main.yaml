@@ -1,12 +1,16 @@
-
-dev:
+all:
   hosts:
-    dev-vm:
+    asus:
+    nvidia-5080:
+
+development:
+  hosts:
+    asus:
     nvidia-5080:
 
 k8s:
   hosts:
-    dev-vm:
+    asus:
     elitedesk:
     nvidia-5080:
 
@@ -21,13 +25,6 @@ mlflow:
 argocd:
   hosts:
     elitedesk:
-
-rke2:
-  hosts:
-    dev-vm:
-    elitedesk:
-    nvidia-5080:
-    # raspberrypi4-01: # All Pis are combined in a single cluster!
 
 raspberry_pi:
   hosts:

@@ -1,0 +1,6 @@
+synology_backup_defaults:
+  url_prefix: https://global.synologydownload.com/download/Utility/SynologyDriveClient
+  version: 4.0.2-17889
+  build: 17889
+  file_prefix: synology-drive-client
+  download_path: /usr/local/downloads/synology

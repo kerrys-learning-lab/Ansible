@@ -1,0 +1,12 @@
+crc_defaults:
+  remote:
+    version: 2.57.0
+    url_prefix: https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/crc
+    filename: crc-linux-amd64.tar.xz
+  local:
+    download: /usr/local/downloads/crc
+    bin: /usr/local/bin/crc
+    secrets: /var/lib/crc/secrets
+  packages:
+    - libvirt
+    - NetworkManager

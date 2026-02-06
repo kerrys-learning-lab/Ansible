@@ -1,73 +1,54 @@
-- name: Install host-specific packages (OS)
-  ansible.builtin.package:
-    name: "{{ host.packages }}"
-  when: host is defined and 'packages' in host
+# code: language=ansible
+- name: Merge Common Configuration
+  ansible.builtin.set_fact:
+    common_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_common',
+                pattern_type='suffix',
+                initial_value=common_defaults,
+                override='ignore') }}
 
-- name: Set timezone
-  community.general.timezone:
-    name: "{{ common_defaults. timezone }}"
+- name: Install/Configure OS Packages
+  ansible.builtin.include_tasks: packages.yaml
+  tags:
+    - os
+    - packages
 
-- name: Create Network Mount Locations (SMB)
-  ansible.builtin.file:
-    state: directory
-    path: /mnt/{{ item.value.path }}
-  loop: "{{ smb.mounts | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
+- name: Install/Configure OS Settings
+  ansible.builtin.include_tasks: settings.yaml
+  tags:
+    - os
+    - settings
 
-- name: Mount Network Shares (SMB)
-  ansible.posix.mount:
-    state: mounted
-    src: "//{{ smb.host }}/{{ item.key }}"
-    path: /mnt/{{ item.value.path }}
-    fstype: "{{ item.value.type | default('cifs') }}"
-    opts: "{{ item.value.opts | default(smb.opts) }}"
-  loop: "{{ smb.mounts | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
+- name: Configure Users and Groups
+  ansible.builtin.include_tasks: users-and-groups.yaml
+  tags:
+    - users
+    - groups
 
-- name: Mount Network Home Directories (SMB)
-  ansible.posix.mount:
-    state: mounted
-    src: "//{{ smb.host }}/{{ smb.homes.source }}"
-    path: "{{ smb.homes.path }}/{{ item.key }}"
-    fstype: "{{ smb.homes.type | default('cifs') }}"
-    opts: "uid={{ item.value.uid }},gid={{ item.value.gid }},{{ item.value.opts | default(smb.opts) }}"
-  loop: "{{ smb.homes.users | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  when: smb.homes is defined
+- name: Configure Name Resolution
+  ansible.builtin.include_tasks: resolve.yaml
+  tags:
+    - dns
+    - resolve
 
-- name: Create Host-specific Mount Locations
-  ansible.builtin.file:
-    state: directory
-    path: /mnt/{{ item.value.mount_path | default(item.key) }}
-    owner: "{{ item.value.owner | default(root) }}"
-    group: "{{ item.value.group | default(root) }}"
-    mode: "{{ item.value.mode | default(755) }}"
-  loop: "{{ host.mounts | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-
-- name: Mount Host-specific Shares/Drives (fstab)
-  ansible.posix.mount:
-    state: mounted
-    src: "{{ item.value.src }}"
-    path: /mnt/{{ item.value.mount_path | default(item.key) }}
-    fstype: "{{ item.value.type }}"
-  loop: "{{ host.mounts | default({}) | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
+- name: Filesystem Table (fstab)
+  ansible.builtin.include_tasks: fstab.yaml
+  tags:
+    - filesystem
+    - fstab
+    - nfs
+    - smb
 
 - name: Create Custom Ansible Facts
-  import_tasks: facts.yaml
+  ansible.builtin.import_tasks: facts.yaml
 
 - name: Ensure Common Paths
   ansible.builtin.file:
     name: "{{ item.value }}"
     state: directory
     mode: '0655'
-  loop: "{{ paths | dict2items }}"
+  loop: "{{ common_vars.paths | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 

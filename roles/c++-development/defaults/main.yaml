@@ -2,21 +2,11 @@ cpp_development_defaults:
   debs:
     - https://github.com/bazelbuild/bazel/releases/download/8.5.0/bazel_8.5.0-linux-x86_64.deb
   packages:
-    - cmake
-    - gdb
-    - gcovr
-    - lcov
 
-    # Pistache (CPP REST Server)
-    - libpistache-dev
-    - libpistache0t64
 
     # For certain CLI integrations (like continue, below)
     - npm
 
-    # Protobuf
-    - libprotobuf-c-dev
-    - protobuf-c-compiler
   npm:
     - "@continuedev/cli"
   paths:

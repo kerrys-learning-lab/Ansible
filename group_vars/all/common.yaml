@@ -1,0 +1,23 @@
+all_common:
+
+  # --------------------------------------------------------------------------
+  # fstab (i.e., filesystem table)
+  fstab:
+    smb:
+      host: 192.168.0.3
+      opts: username={{ lookup('ansible.builtin.vars', 'secrets_vault').smb.username }},password={{ lookup('ansible.builtin.vars', 'secrets_vault').smb.password }}
+      mounts:
+        homes:
+          path: nas-homes
+        kubernetes:
+          path: nas-kubernetes
+
+
+  # --------------------------------------------------------------------------
+  # Name resolution/DNS
+  resolve:
+    domain: westsidestreet.net
+    nameservers:
+      - 192.168.0.3
+      - 8.8.8.8
+      - 8.8.4.4

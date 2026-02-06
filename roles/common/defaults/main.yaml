@@ -1,2 +1,36 @@
 common_defaults:
-  timezone: America/Denver
+
+  # --------------------------------------------------------------------------
+  # OS Packages
+  # Design Decision: Only very low-level packages are in the 'defaults'.  I.e.,
+  #                  packages used by Ansible and/or for
+  #                  debugging/trouble-shooting
+  packages:
+    - gnupg2
+    - traceroute
+    - vim
+
+
+  # --------------------------------------------------------------------------
+  # OS Settings
+  settings:
+    timezone: America/Denver
+    sysctl:
+      # These were needed by k8s.. should they move to a k8s role??
+      fs.inotify.max_user_watches: 524288
+      fs.inotify.max_user_instances: 524288
+      fs.inotify.max_queued_events: 524288
+
+
+  # --------------------------------------------------------------------------
+  # Name resolution
+  resolve:
+    nameservers: []
+    hosts: {}
+    resolvectl: /usr/bin/resolvectl
+
+
+  # --------------------------------------------------------------------------
+  users_and_groups:
+    users: {}
+    groups: []

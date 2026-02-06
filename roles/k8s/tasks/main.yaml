@@ -16,18 +16,29 @@
 - name: Configure k8s Namespaces
   ansible.builtin.include_tasks: namespaces.yaml
   tags:
+    - k8s
     - namespace
     - ns
 
 - name: Configure k8s Storage
   ansible.builtin.include_tasks: storage.yaml
   tags:
+    - k8s
     - pv
     - storage
+
+- name: Configure k8s Sealed Secrets
+  ansible.builtin.include_tasks: sealed-secrets.yaml
+  tags:
+    - k8s
+    - sealed-secrets
+    - secret
+    - secrets
 
 - name: Configure k8s Secrets
   ansible.builtin.include_tasks: secrets.yaml
   tags:
+    - k8s
     - pv
     - secret
 
@@ -35,3 +46,12 @@
   ansible.builtin.include_tasks: certificates.yaml
   tags:
     - cert
+    - certs
+    - k8s
+
+- name: Configure k8s Metal Load Balancer
+  ansible.builtin.include_tasks: metal-lb.yaml
+  tags:
+    - k8s
+    - metal
+    - metal-lb

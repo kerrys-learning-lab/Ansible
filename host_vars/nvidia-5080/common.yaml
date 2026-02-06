@@ -1,0 +1,3 @@
+nvidi5080_common:
+  resolve:
+    link: 2

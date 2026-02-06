@@ -8,3 +8,6 @@ podman_defaults:
   service:
     name: podman.service
     unit_path: /usr/lib/systemd/system/podman.service
+  users: []
+  group: podman
+  registries: {}

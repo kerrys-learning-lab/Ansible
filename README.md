@@ -18,16 +18,6 @@ TODO:
     curl -sfL https://get.rke2.io | sudo sh -
     ```
 
-#### GitLabCI Local
-
-[GitLabCI Local Installation Guide](https://github.com/firecow/gitlab-ci-local?tab=readme-ov-file#installation)
-
-    ```bash
-    sudo wget -O /etc/apt/sources.list.d/gitlab-ci-local.sources https://gitlab-ci-local-ppa.firecow.dk/gitlab-ci-local.sources`
-
-    sudo apt update
-    ```
-
 #### NVIDIA Container Toolkit
 
 [Installing the NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)

@@ -1,0 +1,6 @@
+{
+    "yaml.customTags": [
+        "!vault"
+    ],
+    "ansible.python.interpreterPath": "/bin/python3"
+}

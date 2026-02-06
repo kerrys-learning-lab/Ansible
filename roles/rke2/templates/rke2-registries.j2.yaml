@@ -1,5 +1,5 @@
 configs:
-{% for key, value in rke2_config['registries'].items() %}
+{% for key, value in registries.items() %}
   {{ key }}:
     auth:
       username: {{ value.username }}

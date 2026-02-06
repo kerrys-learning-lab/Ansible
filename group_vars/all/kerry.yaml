@@ -1,0 +1,11 @@
+kerry_crc:
+  users:
+    kerry:
+      pull_secret: "{{ lookup('ansible.builtin.vars', 'secrets_vault').crc.pull_secret }}"
+      preset: openshift
+      kubeconfig:
+        mode: "0644"
+
+kerry_common:
+  packages:
+    - zsh

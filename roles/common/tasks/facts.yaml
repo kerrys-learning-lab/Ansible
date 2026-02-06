@@ -1,11 +1,12 @@
+# code: language=ansible
 - name: Create Custom Facts Directory
   ansible.builtin.file:
     name: /etc/ansible/facts.d
     state: directory
-    mode: 0555
+    mode: "0555"
 
 - name: Create dpkg Facts Script
   ansible.builtin.copy:
     src: files/dpkg.fact.sh
     dest: /etc/ansible/facts.d/dpkg.fact
-    mode: 0555
+    mode: "0555"

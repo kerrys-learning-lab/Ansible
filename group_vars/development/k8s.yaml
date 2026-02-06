@@ -1,0 +1,16 @@
+dev_k8s:
+  namespaces:
+    - dev
+  secrets:
+    aws:
+      type: kubernetes.io/basic-auth
+      namespace: infrastructure
+      stringData:
+        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').aws.account.username }}"
+        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').aws.account.password }}"
+    nas--smb:
+      type: kubernetes.io/basic-auth
+      namespace: infrastructure
+      stringData:
+        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').smb.username }}"
+        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').smb.password }}"

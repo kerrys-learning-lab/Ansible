@@ -1,26 +1,44 @@
-- name: Set Podman Base Facts
+# code: language=ansible
+- name: OS Packages - Merge Variables
   ansible.builtin.set_fact:
-    podman_packages: "{{ (podman.packages  | default([])) + podman_defaults.packages }}"
-    podman_service_name: "{{ podman.service.name | default(podman_defaults.service.name) }}"
-    podman_service_unit_path: "{{ podman.service.unit_path | default(podman_defaults.service.unit_path) }}"
+    podman_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_podman',
+                initial_value=podman_defaults,
+                pattern_type='suffix') }}
 
 - name: Install Podman OS Packages
   ansible.builtin.package:
-    name: "{{ podman_packages }}"
+    name: "{{ podman_vars.packages }}"
 
 - name: Configure Podman Registries
   ansible.builtin.template:
     src: registry.j2.conf
     dest: /etc/containers/registries.conf.d/{{ item.key }}.conf
-    mode: 0444
-  loop: "{{ registries | default({}) | dict2items }}"
+    mode: a=r
+  loop: "{{ podman_vars.registries | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
 - name: Configure Podman Systemd Service
   ansible.builtin.template:
     src: podman.j2.service
-    dest: "{{ podman_service_unit_path }}"
-    mode: 0444
+    dest: "{{ podman_vars.service.unit_path }}"
+    mode: a=r
   notify:
     - Reload Podman service
+
+- name: Start/Enable Podman Systemd Service
+  ansible.builtin.systemd:
+    name: "{{ podman_vars.service.name }}"
+    state: started
+    enabled: true
+
+- name: Configure Podman Users
+  ansible.builtin.user:
+    name: "{{ item.key }}"
+    groups: "{{ podman_vars.group }}"
+    append: true
+  loop: "{{ podman_vars.users }}"
+  loop_control:
+    label: "{{ item.key }}"

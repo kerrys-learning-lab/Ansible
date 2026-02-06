@@ -1,0 +1,15 @@
+# code: language=ansible
+- name: OS Settings - Ensure `inotify` Parameters are Set
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-fs-inotify.conf
+    reload: true
+  loop: "{{ common_vars.settings.sysctl | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: OS Settings - Set Timezone
+  community.general.timezone:
+    name: "{{ common_vars.settings.timezone }}"

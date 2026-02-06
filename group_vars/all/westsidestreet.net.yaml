@@ -1,11 +1,5 @@
-# Prerequisites:
-# curl -sfL https://get.rke2.io | sudo sh -
-# Reference: https://docs.rke2.io/install/quickstart
-nvidia5080_rke2:
-  tls-san:
-    - nvidia-5080
-    - nvidia-5080.westsidestreet.net
-    - 192.168.0.36
+
+westsidestreetnet_rke2:
   registries:
     registry.westsidestreet.net:
       username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.username }}"

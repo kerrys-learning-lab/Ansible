@@ -1,7 +1,0 @@
-os_group_vars:
-  packages:
-    - jq
-    - smbclient
-    - pigz
-    - tree
-    - unzip

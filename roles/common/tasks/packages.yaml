@@ -1,0 +1,4 @@
+# code: language=ansible
+- name: OS Packages - Install Packages
+  ansible.builtin.package:
+    name: "{{ common_vars.packages }}"

@@ -1,13 +1,32 @@
-- name: Set RKE2 Base Facts
+# code: language=ansible
+- name: Merge Variables
   ansible.builtin.set_fact:
-    rke2_kubeconfig_src: "{{ rke2.kubeconfig.src | default(rke2_defaults.kubeconfig.src) }}"
-    rke2_kubeconfig_dest: "{{ rke2.kubeconfig.dest | default(rke2_defaults.kubeconfig.dest) }}"
-    rke2_kubectl_src: "{{ rke2.kubectl.src | default(rke2_defaults.kubectl.src) }}"
-    rke2_kubectl_dest: "{{ rke2.kubectl.dest | default(rke2_defaults.kubectl.dest) }}"
+    rke2_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_rke2',
+                initial_value=rke2_defaults,
+                pattern_type='suffix') }}
+
+- name: Ensure Download Path
+  ansible.builtin.file:
+    name: "{{ rke2_vars.installer.download }}"
+    state: directory
+    mode: a=rX
+
+- name: Download RKE2 Installer
+  ansible.builtin.get_url:
+    url: "{{ rke2_vars.installer.url }}"
+    dest: "{{ rke2_vars.installer.download }}/installer.sh"
+    mode: a=rx
+
+- name: Run RKE2 Installer
+  ansible.builtin.command: "{{ rke2_vars.installer.download }}/installer.sh"
+  args:
+    creates: "{{ rke2_vars.installer.creates }}"
 
 - name: Create Rancher/RKE2 Configuration Directory
   ansible.builtin.file:
-    path: "{{ rke2_kubeconfig_src | dirname }}"
+    path: "{{ rke2_vars.kubeconfig.src | dirname }}"
     state: directory
     force: true
     mode: ug=rwx,o=rx
@@ -24,8 +43,10 @@
   ansible.builtin.template:
     src: rke2-registries.j2.yaml
     dest: /etc/rancher/rke2/registries.yaml
-    mode: 0440
-  when: "'registries' in rke2_config"
+    mode: a=r
+  vars:
+    registries: "{{ rke2_vars.registries }}"
+  when: "'registries' in rke2_vars"
   notify:
     - Restart RKE2
 
@@ -40,13 +61,13 @@
 
 - name: Link RKE2 kubeconfig
   ansible.builtin.file:
-    src: "{{ rke2_kubeconfig_src }}"
-    path: "{{ rke2_kubeconfig_dest }}"
+    src: "{{ rke2_vars.kubeconfig.src }}"
+    path: "{{ rke2_vars.kubeconfig.dest }}"
     state: link
 
 - name: Link kubectl
   ansible.builtin.file:
-    src: "{{ rke2_kubectl_src }}"
-    path: "{{ rke2_kubectl_dest }}"
+    src: "{{ rke2_vars.kubectl.src }}"
+    path: "{{ rke2_vars.kubectl.dest }}"
     state: link
     force: true

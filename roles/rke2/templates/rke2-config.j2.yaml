@@ -1,12 +1,12 @@
-{% if rke2_config is defined and  'server' in rke2_config %}
-server: "{{ rke2_config['server'] }}"
-token: "{{ rke2_config['token'] }}"
+{% if 'server' in rke2_vars %}
+server: "{{ rke2_vars['server'] }}"
+token: "{{ rke2_vars['token'] }}"
 {% endif %}
 write-kubeconfig-mode: "0644"
-advertise-address: "{{ ansible_default_ipv4.address }}"
-{% if rke2_config is defined and 'tls-san' in rke2_config %}
+advertise-address: "{{ rke2_vars.address | default(ansible_default_ipv4.address) }}"
+{% if 'tls-san' in rke2_vars %}
 tls-san:
-  {% for san in rke2_config['tls-san'] %}
+  {% for san in rke2_vars['tls-san'] %}
   - "{{ san }}"
   {% endfor %}
 {% endif %}

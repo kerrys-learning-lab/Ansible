@@ -44,11 +44,11 @@
     dest: "{{ helm_cli_bin_path }}"
     state: link
 
-- name: Install Helm Plug-ins
-  kubernetes.core.helm_plugin:
-    plugin_version: "{{ item.value.version }}"
-    plugin_path: "{{ item.value.url }}"
-    kubeconfig: /etc/kubeconfig
-  loop: "{{ helm_cli_plugins | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
+# - name: Install Helm Plug-ins
+#   kubernetes.core.helm_plugin:
+#     plugin_version: "{{ item.value.version }}"
+#     plugin_path: "{{ item.value.url }}"
+#     kubeconfig: /etc/kubeconfig
+#   loop: "{{ helm_cli_plugins | dict2items }}"
+#   loop_control:
+#     label: "{{ item.key }}"
