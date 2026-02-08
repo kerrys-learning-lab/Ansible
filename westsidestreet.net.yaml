@@ -116,10 +116,7 @@
     - role: k8s-share
       when: k8s_share is defined
       tags:
-        - k8s
         - share
-  tags:
-    - k8s
   any_errors_fatal: true
 
 - name: Cluster Applications and Services

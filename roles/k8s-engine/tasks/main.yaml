@@ -8,14 +8,20 @@
                 initial_value=k8s_engine_defaults,
                 override='ignore') }}
 
-- name: Install RKE2
-  ansible.builtin.import_tasks: rke2.yaml
+- name: Install K3S
+  ansible.builtin.import_tasks: k3s.yaml
   tags:
-    - rke2
-  when: k8s_engine.role == 'rke2'
+    - k3s
+  when: k8s_engine.engine == 'k3s'
 
 - name: Install OpenShift Local
   ansible.builtin.import_tasks: crc.yaml
   tags:
     - crc
-  when: k8s_engine.role == 'crc'
+  when: k8s_engine.engine == 'crc'
+
+- name: Install RKE2
+  ansible.builtin.import_tasks: rke2.yaml
+  tags:
+    - rke2
+  when: k8s_engine.engine == 'rke2'

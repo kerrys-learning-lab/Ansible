@@ -8,12 +8,26 @@
                 initial_value=nvidia_defaults,
                 override='ignore') }}
 
-- name: Install NVIDIA GPU Drivers
-  ansible.builtin.include_tasks: driver.yaml
+- name: Install NVIDIA GPU Drivers (Debian/Ubuntu)
+  ansible.builtin.include_tasks: driver-debian.yaml
   tags:
     - driver
+  when: ansible_os_family == 'Debian'
 
-- name: Install NVIDIA Container Toolkit
-  ansible.builtin.include_tasks: container-toolkit.yaml
+- name: Install NVIDIA GPU Drivers (RedHat/Fedora)
+  ansible.builtin.include_tasks: driver-redhat.yaml
+  tags:
+    - driver
+  when: ansible_os_family == 'RedHat'
+
+- name: Install NVIDIA Container Toolkit (Debian/Ubuntu)
+  ansible.builtin.include_tasks: container-toolkit-debian.yaml
   tags:
     - container-toolkit
+  when: ansible_os_family == 'Debian'
+
+- name: Install NVIDIA Container Toolkit (RedHat/Fedora)
+  ansible.builtin.include_tasks: container-toolkit-redhat.yaml
+  tags:
+    - container-toolkit
+  when: ansible_os_family == 'RedHat'

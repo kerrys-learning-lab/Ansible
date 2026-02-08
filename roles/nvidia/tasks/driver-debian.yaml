@@ -1,0 +1,18 @@
+# code: language=ansible
+- name: NVIDIA Driver (Debian) - Install Prerequisites
+  ansible.builtin.package:
+    name: "{{ nvidia_vars.driver.debian.packages }}"
+    state: present
+
+- name: NVIDIA Driver (Debian) - Check if NVIDIA Driver is Loaded
+  ansible.builtin.command: nvidia-smi
+  register: nvidia_smi_check
+  failed_when: false
+  changed_when: false
+
+- name: NVIDIA Driver (Debian) - Auto-install Recommended Driver
+  ansible.builtin.command: ubuntu-drivers install
+  when: nvidia_smi_check.rc != 0
+  notify: Reboot for NVIDIA driver
+  register: ubuntu_drivers_install
+  changed_when: "'Running kernel seems to be up-to-date' not in ubuntu_drivers_install.stdout"

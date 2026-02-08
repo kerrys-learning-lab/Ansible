@@ -1,6 +1,6 @@
 # code: language=ansible
 k8s_engine:
-  role: rke2
+  engine: rke2
   needs:
     cert_manager: true
     smb_driver: true

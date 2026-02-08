@@ -1,13 +1,13 @@
 # code: language=ansible
-{% if 'server' in rke2_vars %}
-server: "{{ rke2_vars['server'] }}"
-token: "{{ rke2_vars['token'] }}"
+{% if 'server' in k8s_engine_vars.rke2 %}
+server: "{{ k8s_engine_vars.rke2['server'] }}"
+token: "{{ k8s_engine_vars.rke2['token'] }}"
 {% endif %}
 write-kubeconfig-mode: "0644"
-advertise-address: "{{ rke2_vars.address | default(ansible_default_ipv4.address) }}"
-{% if 'tls-san' in rke2_vars %}
+advertise-address: "{{ k8s_engine_vars.rke2.address | default(ansible_default_ipv4.address) }}"
+{% if 'tls-san' in k8s_engine_vars.rke2 %}
 tls-san:
-  {% for san in rke2_vars['tls-san'] %}
+  {% for san in k8s_engine_vars.rke2['tls-san'] %}
   - "{{ san }}"
   {% endfor %}
 {% endif %}

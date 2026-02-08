@@ -1,5 +1,12 @@
 # code: language=ansible
+- name: Restart K3S
+  ansible.builtin.service:
+    name: k3s
+    state: restarted
+    enabled: true
+
 - name: Restart RKE2
   ansible.builtin.service:
     name: rke2-server
     state: restarted
+    enabled: true

@@ -15,7 +15,6 @@ common_defaults:
 
     # Required for Ansible remote execution
     - python3-kubernetes
-    - python3-libdnf5
 
 
   # --------------------------------------------------------------------------

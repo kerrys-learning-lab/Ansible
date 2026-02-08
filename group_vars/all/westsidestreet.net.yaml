@@ -1,7 +1,15 @@
 # code: language=ansible
 
-westsidestreetnet_rke2:
-  registries:
-    registry.westsidestreet.net:
-      username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.username }}"
-      password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.password }}"
+westsidestreetnet_k8s_engine:
+  k3s:
+    registries:
+      registry.westsidestreet.net:
+        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.username }}"
+        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.password }}"
+
+  # NOTE: Only one host left using 'rke2' (elitedesk)
+  rke2:
+    registries:
+      registry.westsidestreet.net:
+        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.username }}"
+        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.password }}"

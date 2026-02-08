@@ -36,6 +36,25 @@ k8s_engine_defaults:
         group: cluster-operators
 
 
+  k3s:
+    # --------------------------------------------------------------------------
+    # K3S Installer Configuration
+    # --------------------------------------------------------------------------
+    installer:
+      url: https://get.k3s.io
+      creates: /usr/local/bin/k3s
+
+    # --------------------------------------------------------------------------
+    # Kubeconfig and kubectl paths
+    # --------------------------------------------------------------------------
+    kubeconfig:
+      src: /etc/rancher/k3s/k3s.yaml
+      dest: /etc/kubeconfig
+    kubectl:
+      src: /var/lib/rancher/k3s/bin/kubectl
+      dest: /usr/bin/kubectl
+
+
   rke2:
     # --------------------------------------------------------------------------
     # RKE2 Installer Configuration
@@ -69,7 +88,7 @@ k8s_engine_defaults:
     owner: "{{ lookup('ansible.builtin.vars', 'global').owner }}"
     group: "{{ lookup('ansible.builtin.vars', 'global').group }}"
     mode: "{{ lookup('ansible.builtin.vars', 'global').mode }}"
-    downloads: "{{ lookup('ansible.builtin.vars', 'global').working }}/downloads"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').working }}/downloads/{{ role_name }}"
     working: "{{ lookup('ansible.builtin.vars', 'global').working }}/{{ role_name }}"
     install: "{{ lookup('ansible.builtin.vars', 'global').install }}"
     source: "{{ lookup('ansible.builtin.vars', 'global').source }}"

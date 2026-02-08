@@ -2,7 +2,7 @@
 - name: Certificates - Check Cluster Issuer Configuration
   ansible.builtin.fail:
     msg: "A ClusterIssuer must be configured (via *_k8s.cluster_cert_issuer) in order to issue certificates"
-  when: k8s_vars.certificates and not k8s_vars.cluster_cert_issuer
+  when: (k8s_vars.certificates | length > 0) and (k8s_vars.cluster_cert_issuer | length == 0)
 
 - name: Certificates - Install Cluster Cert Issuer
   kubernetes.core.k8s:

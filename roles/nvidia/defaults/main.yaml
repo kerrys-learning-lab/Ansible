@@ -7,28 +7,42 @@
 nvidia_defaults:
 
   # --------------------------------------------------------------------------
-  # NVIDIA GPU Driver (RPM Fusion approach)
-  # Reference: https://rpmfusion.org/Howto/NVIDIA
+  # NVIDIA GPU Driver
   #
-  # Uses RPM Fusion nonfree repo. The akmod-nvidia package automatically
-  # builds kernel modules when the kernel is updated.
-  # For Turing+ GPUs, open kernel modules are selected by default.
+  # Debian/Ubuntu:
+  #   Uses `ubuntu-drivers autoinstall` to detect and install the appropriate
+  #   driver for the GPU.  Requires `ubuntu-drivers-common` package.
+  #   Reference: https://ubuntu.com/server/docs/nvidia-drivers-installation
+  #
+  # RedHat/Fedora:
+  #   Uses RPM Fusion nonfree repo. The akmod-nvidia package automatically
+  #   builds kernel modules when the kernel is updated.
+  #   Reference: https://rpmfusion.org/Howto/NVIDIA
   driver:
-    repos:
-      - "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm"
-      - "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}.noarch.rpm"
-    packages:
-      - akmod-nvidia
-      - xorg-x11-drv-nvidia-cuda
+    debian:
+      packages:
+        - ubuntu-drivers-common
+    redhat:
+      repos:
+        - "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm"
+        - "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}.noarch.rpm"
+      packages:
+        - akmod-nvidia
+        - xorg-x11-drv-nvidia-cuda
 
 
   # --------------------------------------------------------------------------
   # NVIDIA Container Toolkit
   # Reference: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
   container_toolkit:
-    repo:
-      name: nvidia-container-toolkit
-      url: "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
+    debian:
+      gpg_key_url: https://nvidia.github.io/libnvidia-container/gpgkey
+      keyring: /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+      repo: "deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://nvidia.github.io/libnvidia-container/stable/deb/{{ ansible_local['arch']['dpkg'] }} /"
+    redhat:
+      repo:
+        name: nvidia-container-toolkit
+        url: "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
     packages:
       - nvidia-container-toolkit
 

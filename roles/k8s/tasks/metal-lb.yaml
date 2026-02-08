@@ -5,8 +5,8 @@
     namespace: "{{ k8s_vars.metallb.namespace | default('metallb-system') }}"
     chart_repo_url: "{{ k8s_vars.metallb.chart.url }}"
     chart_version: "{{ k8s_vars.metallb.chart.version }}"
-    chart_ref: "{{ k8s_vars.metallb.chart.ref | default('cert-manager') }}"
-    values_files: "{{ k8s_csi_helm_values_path }}"
+    chart_ref: "{{ k8s_vars.metallb.chart.ref | default('metallb') }}"
+    release_values: "{{ k8s_vars.metallb.chart.helm_values }}"
     create_namespace: true
     kubeconfig: "{{ k8s_vars.global.kubeconfig }}"
     wait: true
@@ -22,12 +22,12 @@
       kind: IPAddressPool
       metadata:
         name: metal-lb-address-pool
-        namespace: infrastructure
+        namespace: "{{ k8s_vars.metallb.namespace | default('metallb-system') }}"
       spec:
         addresses: "{{ k8s_vars.metallb.pool }}"
         autoAssign: true
     kubeconfig: "{{ k8s_vars.global.kubeconfig }}"
-  when: k8s_vars.metallb.pool
+  when: k8s_vars.metallb.pool | length > 0
 
 - name: MetalLB - Create L2 Advertisement Metal
   kubernetes.core.k8s:
@@ -38,9 +38,9 @@
       kind: L2Advertisement
       metadata:
         name: metal-lb-l2-advertisement
-        namespace: infrastructure
+        namespace: "{{ k8s_vars.metallb.namespace | default('metallb-system') }}"
       spec:
         ipAddressPools:
           - metal-lb-address-pool
     kubeconfig: "{{ k8s_vars.global.kubeconfig }}"
-  when: k8s_vars.metallb.pool
+  when: k8s_vars.metallb.pool | length > 0

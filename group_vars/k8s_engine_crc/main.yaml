@@ -1,6 +1,6 @@
 # code: language=ansible
 k8s_engine:
-  role: crc
+  engine: crc
   needs:
     cert_manager: false
     metallb: false

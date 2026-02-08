@@ -15,13 +15,15 @@ development:
 
 k8s:
   children:
-    rke2:
+    k8s_engine_crc:
       hosts:
-        elitedesk:
-    crc:
+    k8s_engine_k3s:
       hosts:
         asus:
         nvidia-5080:
+    k8s_engine_rke2:
+      hosts:
+        elitedesk:
 
 gitlab:
   hosts:
@@ -31,6 +33,7 @@ gpu:
   children:
     nvidia:
       hosts:
+        asus:
         nvidia-5080:
 
 argocd:
