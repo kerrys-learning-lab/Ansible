@@ -35,7 +35,7 @@ options:
         description: Path to link the kubeconfig file to.
         type: path
       mode:
-        description: File mode (e.g. "0644") for the source kubeconfig.
+        description: File mode (octal like "0644" or symbolic like "a=rX") for the source kubeconfig.
         type: str
   crc_path:
     description: Path to the crc executable.
@@ -67,6 +67,7 @@ msg:
 from ansible.module_utils.basic import AnsibleModule
 import os
 import pwd
+import tempfile
 
 class CRCManager:
     DEFAULTS = {
@@ -219,10 +220,8 @@ class CRCManager:
             kubeconfig_path = os.path.join(home, '.kube', 'config')
 
             if os.path.exists(kubeconfig_path):
-                if (os.stat(kubeconfig_path).st_mode & 0o777) != mode:
-                    if not self.module.check_mode:
-                        os.chmod(kubeconfig_path, mode)
-                    return True
+                cmd = ['chmod', mode, kubeconfig_path]
+                self.module.run_command(cmd)
         except Exception as e:
             self.module.warn("Failed to set permissions on kubeconfig: {}".format(e))
         return False
@@ -295,13 +294,11 @@ def main():
     if kubeconfig_param:
         mode_arg = kubeconfig_param.get('mode')
         if mode_arg:
-            try:
-                mode = int(mode_arg, 8)
-                if crc.ensure_kubeconfig_permissions(mode):
-                    result['changed'] = True
-                    result['msg'].append("Updated kubeconfig permissions to {}".format(mode_arg))
-            except ValueError:
-                module.fail_json(msg="Invalid mode: '{}'. Must be an octal string (e.g. '0644').".format(mode_arg))
+            # normalize_mode handles both symbolic (a=rX) and octal (0644) formats
+            mode = crc.normalize_mode(mode_arg, is_dir=False)
+            if crc.ensure_kubeconfig_permissions(mode):
+                result['changed'] = True
+                result['msg'].append("Updated kubeconfig permissions to {}".format(mode_arg))
 
         link_arg = kubeconfig_param.get('link')
         if link_arg:

@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Install/Configure GitLab Operator via Helm
   kubernetes.core.helm:
     name: "{{ gitlab.operator.name }}"
@@ -91,4 +92,3 @@
           version: "{{ gitlab.application.version }}"
           values: "{{ gitlab.application.crd_values }}"
     kubeconfig: /etc/kubeconfig
-

@@ -1,3 +1,4 @@
+# code: language=ansible
 # NOTE: I never ended up using MLFlow (using GitLab instead)
 mlflow_k8s:
   # certificates:

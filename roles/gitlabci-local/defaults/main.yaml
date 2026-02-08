@@ -1,3 +1,4 @@
+# code: language=ansible
 gitlabci_local_defaults:
   apt:
     repo: https://gitlab-ci-local-ppa.firecow.dk/gitlab-ci-local.sources

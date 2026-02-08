@@ -1,0 +1,11 @@
+global:
+  owner: root
+  group: root
+  mode: a=rX
+  working: /var/lib/ansible
+  install: /usr/local/install
+  source: /usr/local/src
+  secrets: /usr/local/secrets
+  kubeconfig: /etc/kubeconfig
+  warning: "⚠️ WARNING"
+  error: "❌ ERROR"

@@ -1,10 +1,19 @@
-- name: Set NVIDIA Base Facts
+# code: language=ansible
+- name: Merge NVIDIA Configuration
   ansible.builtin.set_fact:
-    nvidia_container_toolkit_version: "{{ nvidia.container_toolkit.version | default(nvidia_defaults.container_toolkit.version) }}"
-    nvidia_container_toolkit_packages: "{{ nvidia.container_toolkit.packages | default(nvidia_defaults.container_toolkit.packages) }}"
+    nvidia_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_nvidia',
+                pattern_type='suffix',
+                initial_value=nvidia_defaults,
+                override='ignore') }}
 
-- name: Ensure NVIDIA Container Toolkit Packages Installed
-  ansible.builtin.apt:
-    name: "{{ item }}={{ nvidia_container_toolkit_version }}"
-    state: present
-  loop: "{{ nvidia_container_toolkit_packages }}"
+- name: Install NVIDIA GPU Drivers
+  ansible.builtin.include_tasks: driver.yaml
+  tags:
+    - driver
+
+- name: Install NVIDIA Container Toolkit
+  ansible.builtin.include_tasks: container-toolkit.yaml
+  tags:
+    - container-toolkit

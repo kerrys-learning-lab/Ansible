@@ -1,0 +1,31 @@
+# code: language=ansible
+- name: Merge k8s-tools Variables
+  ansible.builtin.set_fact:
+    k8s_tools_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_k8s_tools',
+                initial_value=k8s_tools_defaults,
+                pattern_type='suffix') }}
+  tags:
+    - always
+
+- name: Install k9s CLI
+  ansible.builtin.import_tasks: k9s.yaml
+  tags:
+    - k9s
+
+- name: Install Helm CLI
+  ansible.builtin.import_tasks: helm.yaml
+  tags:
+    - helm
+
+- name: Install ArgoCD CLI
+  ansible.builtin.import_tasks: argocd-cli.yaml
+  tags:
+    - argocd
+
+- name: Install Kubeseal CLI
+  ansible.builtin.import_tasks: kubeseal.yaml
+  tags:
+    - kubeseal
+    - sealed-secrets

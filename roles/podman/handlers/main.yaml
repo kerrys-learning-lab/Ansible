@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Reload Podman service
   ansible.builtin.systemd:
     name: "{{ podman_vars.service.name }}"

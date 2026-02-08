@@ -1,0 +1,15 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: "{{ item.key }}"
+  namespace: "{{ item.value.namespace }}"
+{% if 'target_namespaces' in item.value or 'match_labels' in item.value %}
+spec:
+  {% if 'target_namespaces' in item.value %}
+  targetNamespaces: "{{ item.value.target_namespaces }}"
+  {% endif %}
+  {% if 'match_labels' in item.value %}
+  selector:
+    matchLabels: "{{ item.value.match_labels }}"
+  {% endif %}
+{% endif %}

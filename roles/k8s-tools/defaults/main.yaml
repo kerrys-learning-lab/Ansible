@@ -1,0 +1,31 @@
+# code: language=ansible
+k8s_tools_defaults:
+
+  helm:
+    version: v3.20.0
+    url_prefix: https://get.helm.sh
+    bin: /usr/local/bin/helm
+
+  k9s:
+    version: v0.50.18
+    url_prefix: https://github.com/derailed/k9s/releases/download
+    bin: /usr/local/bin/k9s
+
+  argocd:
+    version: v2.14.11
+    url_prefix: https://github.com/argoproj/argo-cd/releases/download
+    bin: /usr/local/bin/argocd
+
+  kubeseal:
+    version: 0.32.2
+    url_prefix: https://github.com/bitnami-labs/sealed-secrets/releases/download
+    bin: /usr/local/bin/kubeseal
+
+  global:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').working | default('/var/lib/ansible') }}/downloads"
+    install: "{{ lookup('ansible.builtin.vars', 'global').install | default('/usr/local/install') }}"
+    source: "{{ lookup('ansible.builtin.vars', 'global').source | default('/usr/local/src') }}"
+    secrets: "{{ lookup('ansible.builtin.vars', 'global').secrets | default('/usr/local/secrets') }}"

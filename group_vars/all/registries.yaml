@@ -1,4 +1,5 @@
+# code: language=ansible
 registries:
   ephemeral-registry:
-    url: nas.westsidestreet.net:5555
+    url: "{{ lookup('ansible.builtin.vars', 'lan').endpoint.nas }}"
     insecure: "true"

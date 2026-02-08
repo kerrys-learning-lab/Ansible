@@ -1,15 +1,5 @@
+# code: language=ansible
 helm_applications_defaults:
-  - name: metal-lb
-    value:
-      namespace: infrastructure
-      url: https://metallb.github.io/metallb
-      ref: metallb
-      version: v0.14.9
-      helm_values:
-        labels:
-          pod-security.kubernetes.io/enforce: privileged
-          pod-security.kubernetes.io/audit: privileged
-          pod-security.kubernetes.io/warn: privileged
 
   # NOTE: The 2.2.6 version of the MySQL operator has been removed from the
   #       Oracle helm repository.  BUT, the 2.2.7 version fails because the
@@ -35,11 +25,3 @@ helm_applications_defaults:
         nfs:
           server: "{{ lookup('ansible.builtin.vars', 'nfs').host }}"
           path: /volume2/kubernetes
-
-  - name: sealed-secrets
-    value:
-      namespace: infrastructure
-      url:  https://bitnami-labs.github.io/sealed-secrets
-      version: 2.17.9
-      ref: sealed-secrets
-      helm_values: {}

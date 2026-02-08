@@ -1,3 +1,4 @@
+# code: language=ansible
 k8s_share:
   fetch:
     owner: kerry
@@ -6,5 +7,5 @@ k8s_share:
     owner: kerry
     group: kerry
   hosts:
-    - dev-vm
-  domain: westsidestreet.net
+    - "{{ lookup('ansible.builtin.vars', 'lan').hosts.ansible }}"
+  domain: "{{ lookup('ansible.builtin.vars', 'lan').domain }}"

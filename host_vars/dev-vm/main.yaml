@@ -1,8 +1,0 @@
-
-host:
-
-  helm_applications: []
-
-
-ansible_fqdn: dev-vm.westsidestreet.net
-ansible_host: dev-vm.westsidestreet.net

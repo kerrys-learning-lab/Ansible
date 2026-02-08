@@ -1,0 +1,33 @@
+# code: language=ansible
+- name: Set Helm Derived Facts
+  ansible.builtin.set_fact:
+    k8s_tools_helm_filename: "helm-{{ k8s_tools_vars.helm.version }}-{{ ansible_system | lower }}-{{ ansible_local['arch']['container'] }}.tar.gz"
+    k8s_tools_helm_version_path: "{{ k8s_tools_vars.global.install }}/helm/{{ k8s_tools_vars.helm.version }}"
+    k8s_tools_helm_url: "{{ k8s_tools_vars.helm.url_prefix }}/helm-{{ k8s_tools_vars.helm.version }}-{{ ansible_system | lower }}-{{ ansible_local['arch']['container'] }}.tar.gz"
+
+- name: Ensure Helm install directory
+  ansible.builtin.file:
+    path: "{{ k8s_tools_helm_version_path }}"
+    state: directory
+    owner: "{{ k8s_tools_vars.global.owner }}"
+    group: "{{ k8s_tools_vars.global.group }}"
+    mode: "{{ k8s_tools_vars.global.mode }}"
+
+- name: Download Helm
+  ansible.builtin.get_url:
+    url: "{{ k8s_tools_helm_url }}"
+    dest: "{{ k8s_tools_vars.global.downloads }}/{{ k8s_tools_helm_filename }}"
+    mode: "0644"
+
+- name: Extract Helm
+  ansible.builtin.unarchive:
+    src: "{{ k8s_tools_vars.global.downloads }}/{{ k8s_tools_helm_filename }}"
+    dest: "{{ k8s_tools_helm_version_path }}"
+    remote_src: true
+    creates: "{{ k8s_tools_helm_version_path }}/{{ ansible_system | lower }}-{{ ansible_local['arch']['container'] }}/helm"
+
+- name: Link Helm binary
+  ansible.builtin.file:
+    src: "{{ k8s_tools_helm_version_path }}/{{ ansible_system | lower }}-{{ ansible_local['arch']['container'] }}/helm"
+    dest: "{{ k8s_tools_vars.helm.bin }}"
+    state: link

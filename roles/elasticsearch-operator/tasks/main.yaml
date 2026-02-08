@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Set Elasticsearch Operator Base Facts
   ansible.builtin.set_fact:
     elasticsearch_operator_version: "{{ elasticsearch_operator.version | default(elasticsearch_operator_defaults.version) }}"

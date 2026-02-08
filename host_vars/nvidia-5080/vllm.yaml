@@ -1,0 +1,7 @@
+nvidia5080_vllm:
+  helm_values:
+    secrets:
+      s3endpoint: "{{ lookup('ansible.builtin.vars', 'lan').endpoint.nas_minio }}"
+      s3bucketname: machine-learning-model
+      s3accesskeyid: "{{ lookup('ansible.builtin.vars', 'secret_vault').vllm.minio.access }}"
+      s3accesskey: "{{ lookup('ansible.builtin.vars', 'secret_vault').vllm.minio.key }}"

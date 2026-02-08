@@ -1,26 +1,14 @@
 # code: language=ansible
-- name: Install/Configure Container Storage Interface (CSI) Using Helm
-  kubernetes.core.helm:
-    name: "{{ k8s_vars.storage.csi.name | default('csi-driver') }}"
-    namespace: "{{ k8s_vars.storage.csi.namespace | default('infrastructure') }}"
-    chart_repo_url: "{{ k8s_vars.storage.csi.chart.url }}"
-    chart_version: "{{ k8s_vars.storage.csi.chart.version }}"
-    chart_ref: "{{ k8s_vars.storage.csi.chart.ref | default('cert-manager') }}"
-    release_values: "{{ k8s_vars.storage.csi.helm_values }}"
-    create_namespace: true
-    kubeconfig: "{{ k8s_vars.global.paths.kubeconfig }}"
-    wait: true
-
-- name: Create Kubernetes YAML Files Location
+- name: Create Parent Directory for Kubernetes StringData Secrets
   ansible.builtin.file:
-    path: "{{ k8s_vars.global.paths.ansible }}"
+    path: "{{ k8s_vars.global.working }}"
     state: directory
     mode: "{{ k8s_vars.global.mode }}"
 
-- name: Create Kubernetes Storage Class YAML Files
+- name: Storage - Create Kubernetes StorageClass YAML Files
   ansible.builtin.template:
     src: storage/storage-class.j2.yaml
-    dest: "{{ k8s_vars.global.paths.ansible }}/{{ item.key }}-storage-class.yaml"
+    dest: "{{ k8s_vars.global.working }}/{{ item.key }}--storage-class.yaml"
     mode: "{{ k8s_vars.global.mode }}"
   vars:
     storage_class_name: "{{ item.key }}"
@@ -29,20 +17,20 @@
   loop_control:
     label: "{{ item.key }}"
 
-- name: Create Kubernetes Storage Class Objects
+- name: Storage - Create Kubernetes StorageClass Objects
   kubernetes.core.k8s:
     state: present
     apply: true
-    src: "{{ k8s_vars.global.paths.ansible }}/{{ item.key }}-storage-class.yaml"
-    kubeconfig: "{{ k8s_vars.global.paths.kubeconfig }}"
+    src: "{{ k8s_vars.global.working }}/{{ item.key }}--storage-class.yaml"
+    kubeconfig: "{{ k8s_vars.global.kubeconfig }}"
   loop: "{{ k8s_vars.storage.classes | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
 # We create the parent directories with less restrictive access
-- name: Create Local Kubernetes Volume Directory Parents
+- name: Storage - Create Local Kubernetes Volume Directory Parents
   ansible.builtin.file:
-    path: "{{ item.value.root_dir | default(k8s_vars.global.paths.local_volumes) }}/{{ item.value.path | dirname }}"
+    path: "{{ item.value.root_dir | default(k8s_vars.global.local_volumes) }}/{{ item.value.path | dirname }}"
     state: directory
     owner: "{{ item.value.owner | default(k8s_vars.global.owner) }}"
     group: "{{ item.value.group | default(k8s_vars.global.group) }}"
@@ -51,9 +39,9 @@
   loop_control:
     label: "{{ item.key }}"
 
-- name: Create Local Kubernetes Volume Directories
+- name: Storage - Create Local Kubernetes Volume Directories
   ansible.builtin.file:
-    path: "{{ item.value.root_dir | default(k8s_vars.global.paths.local_volumes) }}/{{ item.value.path }}"
+    path: "{{ item.value.root_dir | default(k8s_vars.global.local_volumes) }}/{{ item.value.path }}"
     state: directory
     owner: "{{ item.value.owner | default(k8s_vars.global.owner) }}"
     group: "{{ item.value.group | default(k8s_vars.global.group) }}"
@@ -62,7 +50,7 @@
   loop_control:
     label: "{{ item.key }}"
 
-- name: Create Local Kubernetes PV(s)
+- name: Storage - Create Local Kubernetes PV(s)
   kubernetes.core.k8s:
     state: present
     apply: true
@@ -81,8 +69,8 @@
         persistentVolumeReclaimPolicy: "{{ item.value.reclaimPolicy | default('Retain') }}"
         storageClassName: local
         hostPath:
-          path: "{{ item.value.root_dir | default(k8s_vars.global.paths.local_volumes) }}/{{ item.value.path }}"
-    kubeconfig: "{{ k8s_vars.global.paths.kubeconfig }}"
+          path: "{{ item.value.root_dir | default(k8s_vars.global.local_volumes) }}/{{ item.value.path }}"
+    kubeconfig: "{{ k8s_vars.global.kubeconfig }}"
   loop: "{{ k8s_vars.storage.local_volumes | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

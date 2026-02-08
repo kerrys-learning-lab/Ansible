@@ -1,0 +1,77 @@
+# code: language=ansible
+k8s_engine_defaults:
+  crc:
+    remote:
+      version: 2.57.0
+      url_prefix: https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/crc
+      filename: crc-linux-amd64.tar.xz
+    bin: /usr/local/bin/crc
+    packages:
+      - libvirt
+      - NetworkManager
+      - virtiofsd
+
+    users: {}
+
+    operator_groups:
+      cluster-operators:
+        namespace: cluster-operators
+      metallb-operator:
+        namespace: metallb-system
+
+
+    operators:
+      cert-manager:
+        group: cluster-operators
+        source: community-operators
+      metallb-operator:
+        group: metallb-operator
+      percona-server-mysql-operator:
+        group: cluster-operators
+        source: community-operators
+      percona-postgresql-operator:
+        group: cluster-operators
+        source: community-operators
+      smb-csi-driver-operator:
+        group: cluster-operators
+
+
+  rke2:
+    # --------------------------------------------------------------------------
+    # RKE2 Installer Configuration
+    # --------------------------------------------------------------------------
+    installer:
+      url: https://get.rke2.io
+      creates: /usr/local/bin/rke2
+
+    # --------------------------------------------------------------------------
+    # Kubeconfig and kubectl paths
+    # --------------------------------------------------------------------------
+    kubeconfig:
+      src: /etc/rancher/rke2/rke2.yaml
+      dest: /etc/kubeconfig
+    kubectl:
+      src: /var/lib/rancher/rke2/bin/kubectl
+      dest: /usr/bin/kubectl
+
+    # --------------------------------------------------------------------------
+    # RKE2 Configuration Options
+    # These can be overridden in group_vars or host_vars
+    # Reference: https://docs.rke2.io/install/configuration
+    # --------------------------------------------------------------------------
+    # server: null        # Optional: URL of RKE2 server (for agent nodes)
+    # token: null         # Optional: Shared secret for cluster authentication
+    # address: null       # Optional: Advertise address (defaults to ansible_default_ipv4.address)
+    # tls-san: []         # Optional: Additional hostnames/IPs for TLS certificate
+    # registries: {}      # Optional: Private container registry configurations
+
+  global:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode }}"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').working }}/downloads"
+    working: "{{ lookup('ansible.builtin.vars', 'global').working }}/{{ role_name }}"
+    install: "{{ lookup('ansible.builtin.vars', 'global').install }}"
+    source: "{{ lookup('ansible.builtin.vars', 'global').source }}"
+    secrets: "{{ lookup('ansible.builtin.vars', 'global').secrets }}/{{ role_name }}"
+    kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig }}"

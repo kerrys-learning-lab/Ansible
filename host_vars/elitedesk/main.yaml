@@ -1,10 +1,11 @@
+# code: language=ansible
 host:
   packages:
     - ntfs-3g
   argocd:
     helm_values:
       global:
-        domain: argocd.westsidestreet.net
+        domain: "{{ lookup('ansible.builtin.vars', 'lan').hosts.argocd }}"
       server:
         ingress:
           enabled: true

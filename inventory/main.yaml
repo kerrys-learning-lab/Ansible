@@ -1,7 +1,12 @@
 all:
   hosts:
     asus:
+    elitedesk:
     nvidia-5080:
+
+ansible:
+  hosts:
+    asus:
 
 development:
   hosts:
@@ -9,18 +14,24 @@ development:
     nvidia-5080:
 
 k8s:
-  hosts:
-    asus:
-    elitedesk:
-    nvidia-5080:
+  children:
+    rke2:
+      hosts:
+        elitedesk:
+    crc:
+      hosts:
+        asus:
+        nvidia-5080:
 
 gitlab:
   hosts:
     elitedesk:
 
-mlflow:
-  hosts:
-    elitedesk:
+gpu:
+  children:
+    nvidia:
+      hosts:
+        nvidia-5080:
 
 argocd:
   hosts:

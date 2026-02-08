@@ -10,6 +10,10 @@
   loop_control:
     label: "{{ item.key }}"
 
+- name: OS Settings - Set FQDN
+  ansible.builtin.hostname:
+    name: "{{ common_vars.fqdn }}"
+
 - name: OS Settings - Set Timezone
   community.general.timezone:
     name: "{{ common_vars.settings.timezone }}"

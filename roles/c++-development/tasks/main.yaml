@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Set C++ Development Base Facts
   ansible.builtin.set_fact:
     cpp_dev_packages: "{{ (cpp_development.packages | default([])) + (cpp_development_defaults.packages | default([])) }}"

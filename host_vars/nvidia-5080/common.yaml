@@ -1,3 +1,5 @@
-nvidi5080_common:
+# code: language=ansible
+nvidia5080_common:
+  fqdn: nvidia-5080.westsidestreet.net
   resolve:
     link: 2

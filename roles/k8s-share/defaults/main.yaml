@@ -1,3 +1,4 @@
+# code: language=ansible
 k8s_share_defaults:
   fetch:
     remote_path: /etc/kubeconfig

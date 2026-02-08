@@ -1,3 +1,4 @@
+# code: language=ansible
 gitlab:
   operator:
     name: gitlab-ci
@@ -11,9 +12,9 @@ gitlab:
     crd_values:
       global:
         hosts:
-          domain: westsidestreet.net
+          domain: "{{ lookup('ansible.builtin.vars', 'lan').domain }}"
           pages:
-            name: pages.westsidestreet.net
+            name: "{{ lookup('ansible.builtin.vars', 'lan').hosts.pages }}"
         ingress:
           # Use the Cluster cert-manager (vice the built-in GitLab issuer)
           # See https://docs.gitlab.com/charts/charts/globals/#globalingressconfigurecertmanager

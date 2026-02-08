@@ -1,7 +1,8 @@
+# code: language=ansible
 argocd_server:
   helm:
     global:
-      domain: argocd.westsidestreet.net
+      domain: argocd.{{ lookup('ansible.builtin.vars', 'lan').domain }}
     server:
       ingress:
         enabled: true
@@ -18,7 +19,7 @@ argocd_server:
           sshPrivateKey: |
             {{ lookup('ansible.builtin.vars', 'secrets_vault').ssh.privateKey }}
         kerrys-learning-lab-helm:
-          url: https://gitlab.westsidestreet.net/api/v4
+          url: https://{{ lookup('ansible.builtin.vars', 'lan').hosts.gitlab }}/api/v4
           username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.username }}"
           password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.password }}"
       repositories:

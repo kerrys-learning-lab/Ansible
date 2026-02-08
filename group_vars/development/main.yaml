@@ -1,3 +1,4 @@
+# code: language=ansible
 dev:
   directories:
     /var/lib/k8s-local-pv:

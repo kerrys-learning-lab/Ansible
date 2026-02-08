@@ -1,3 +1,0 @@
-aws_development:
-  paths:
-    download: "{{ lookup('ansible.builtin.vars', 'paths').download }}"

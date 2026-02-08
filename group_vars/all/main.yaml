@@ -1,12 +1,19 @@
-paths:
-  facts: /var/lib/ansible/facts.d
-  download: /usr/local/downloads
-
-dns:
-  subdomain: westsidestreet.net
-  nameserver: 192.168.0.3
-
-nfs:
-  host: 192.168.0.3
-
+# code: language=ansible
 ansible_python_interpreter: auto_silent
+
+lan:
+  domain: westsidestreet.net
+  ip:
+    ansible: asus
+    nfs: 192.168.0.3
+    smb: 192.168.0.3
+    nameserver: 192.168.0.3
+  fqdn:
+    argocd: argocd.westsidestreet.net
+    gitlab: gitlab.westsidestreet.net
+    minio: minio.westsidestreet.net # This is the GitLab minio
+    pages: pages.westsidestreet.net
+    registry: registry.westsidestreet.net
+  endpoint:
+    nas: nas.westsidestreet.net:5555
+    nas_minio: nas-minio.westsidestreet.net:9000 # This is the "ephemeral registry"

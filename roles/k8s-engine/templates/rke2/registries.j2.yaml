@@ -1,0 +1,12 @@
+# code: language=ansible
+configs:
+{% for key, value in registries.items() %}
+  {{ key }}:
+    auth:
+      username: {{ value.username }}
+{% if 'password' in value %}
+      password: {{ value.password }}
+{% else %}
+      token: {{ value.token }}
+{% endif %}
+{% endfor %}

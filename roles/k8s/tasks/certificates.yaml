@@ -1,44 +1,21 @@
 # code: language=ansible
-- name: Install/Configure CertManager Using Helm
-  kubernetes.core.helm:
-    name: "{{ k8s_vars.cert_manager.name | default('cert-manager') }}"
-    namespace: "{{ k8s_vars.cert_manager.namespace | default('infrastructure') }}"
-    chart_repo_url: "{{ k8s_vars.cert_manager.chart.url }}"
-    chart_version: "{{ k8s_vars.cert_manager.chart.version }}"
-    chart_ref: "{{ k8s_vars.cert_manager.chart.ref | default('cert-manager') }}"
-    release_values: "{{ k8s_vars.cert_manager.helm_values }}"
-    create_namespace: true
-    kubeconfig: "{{ k8s_vars.global.paths.kubeconfig }}"
-    wait: true
+- name: Certificates - Check Cluster Issuer Configuration
+  ansible.builtin.fail:
+    msg: "A ClusterIssuer must be configured (via *_k8s.cluster_cert_issuer) in order to issue certificates"
+  when: k8s_vars.certificates and not k8s_vars.cluster_cert_issuer
 
-- name: Install Cert Manager Cluster Issuer
+- name: Certificates - Install Cluster Cert Issuer
   kubernetes.core.k8s:
     state: present
     apply: true
     definition:
       apiVersion: cert-manager.io/v1
-      kind: "{{ k8s_vars.cert_manager.issuer.type | default('ClusterIssuer') }}"
+      kind: ClusterIssuer
       metadata:
-        name: "{{ k8s_vars.cert_manager.issuer.name | default('letsencrypt') }}"
-        namespace: "{{ k8s_vars.cert_manager.namespace }}"
-      spec:
-        acme:
-          email: "{{ k8s_vars.cert_manager.email | default(secrets.email) }}"
-          server: "{{ k8s_vars.cert_manager.server }}"
-          privateKeySecretRef:
-            name: "{{ k8s_vars.cert_manager.issuer.name }}-cluster-issuer"
-          solvers:
-            - dns01:
-                route53:
-                  hostedZoneID: "{{ k8s_vars.cert_manager.aws.route53.zoneId | default(secrets.aws.route53.zoneId) }}"
-                  region: "{{ k8s_vars.cert_manager.aws.route53.region | default('us-east-1') }}"
-                  accessKeyIDSecretRef:
-                    name: aws
-                    key: username
-                  secretAccessKeySecretRef:
-                    name: aws
-                    key: password
-    kubeconfig: "{{ k8s_vars.global.paths.kubeconfig }}"
+        name: "{{ k8s_vars.cluster_cert_issuer.name }}"
+        namespace: "{{ k8s_vars.cluster_cert_issuer.namespace | default('infrastructure') }}"
+      spec: "{{ k8s_vars.cluster_cert_issuer.spec }}"
+    kubeconfig: "{{ k8s_vars.global.kubeconfig }}"
 
 - name: Create K8s Certificate(s)
   kubernetes.core.k8s:
@@ -49,14 +26,14 @@
       kind: Certificate
       metadata:
         name: "{{ item.key }}"
-        namespace: "{{ item.value.namespace | default(k8s_certificates_vars.global.namespace) }}"
+        namespace: "{{ item.value.namespace }}"
       spec:
         secretName: "{{ item.key }}-tls"
         dnsNames: "{{ item.value.dnsNames }}"
         issuerRef:
-          name: "{{ k8s_vars.cert_manager.issuer.name }}"
-          kind: "{{ k8s_vars.cert_manager.issuer.type }}"
-    kubeconfig: "{{ k8s_vars.global.paths.kubeconfig }}"
+          name: "{{ k8s_vars.cluster_cert_issuer.name }}"
+          kind: ClusterIssuer
+    kubeconfig: "{{ k8s_vars.global.kubeconfig }}"
   loop: "{{ k8s_vars.certificates | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

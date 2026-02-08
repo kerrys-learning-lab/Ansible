@@ -1,0 +1,33 @@
+# code: language=ansible
+- name: Set Kubeseal Derived Facts
+  ansible.builtin.set_fact:
+    k8s_tools_kubeseal_filename: "kubeseal-{{ k8s_tools_vars.kubeseal.version }}-{{ ansible_system | lower }}-{{ ansible_local['arch']['dpkg'] }}.tar.gz"
+    k8s_tools_kubeseal_version_path: "{{ k8s_tools_vars.global.install }}/kubeseal/{{ k8s_tools_vars.kubeseal.version }}"
+    k8s_tools_kubeseal_url: "{{ k8s_tools_vars.kubeseal.url_prefix }}/v{{ k8s_tools_vars.kubeseal.version }}/kubeseal-{{ k8s_tools_vars.kubeseal.version }}-{{ ansible_system | lower }}-{{ ansible_local['arch']['dpkg'] }}.tar.gz"
+
+- name: Ensure Kubeseal install directory
+  ansible.builtin.file:
+    path: "{{ k8s_tools_kubeseal_version_path }}"
+    state: directory
+    owner: "{{ k8s_tools_vars.global.owner }}"
+    group: "{{ k8s_tools_vars.global.group }}"
+    mode: "{{ k8s_tools_vars.global.mode }}"
+
+- name: Download Kubeseal
+  ansible.builtin.get_url:
+    url: "{{ k8s_tools_kubeseal_url }}"
+    dest: "{{ k8s_tools_vars.global.downloads }}/{{ k8s_tools_kubeseal_filename }}"
+    mode: "0644"
+
+- name: Extract Kubeseal
+  ansible.builtin.unarchive:
+    src: "{{ k8s_tools_vars.global.downloads }}/{{ k8s_tools_kubeseal_filename }}"
+    dest: "{{ k8s_tools_kubeseal_version_path }}"
+    remote_src: true
+    creates: "{{ k8s_tools_kubeseal_version_path }}/kubeseal"
+
+- name: Link Kubeseal binary
+  ansible.builtin.file:
+    src: "{{ k8s_tools_kubeseal_version_path }}/kubeseal"
+    dest: "{{ k8s_tools_vars.kubeseal.bin }}"
+    state: link

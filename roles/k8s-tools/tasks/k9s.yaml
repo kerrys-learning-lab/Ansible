@@ -1,0 +1,37 @@
+# code: language=ansible
+- name: Set k9s Derived Facts (1 of 2)
+  ansible.builtin.set_fact:
+    k8s_tools_k9s_remote_filename: "k9s_{{ ansible_system }}_{{ ansible_local['arch']['container'] }}.tar.gz"
+    k8s_tools_k9s_version_path: "{{ k8s_tools_vars.global.install }}/k9s/{{ k8s_tools_vars.k9s.version }}"
+
+- name: Set k9s Derived Facts (2 of 2)
+  ansible.builtin.set_fact:
+    k8s_tools_k9s_url: "{{ k8s_tools_vars.k9s.url_prefix }}/{{ k8s_tools_vars.k9s.version }}/{{ k8s_tools_k9s_remote_filename }}"
+    k8s_tools_k9s_local_filename: "{{ k8s_tools_k9s_remote_filename | replace('k9s_', 'k9s_' + k8s_tools_vars.k9s.version + '_') }}"
+
+- name: Ensure k9s install directory
+  ansible.builtin.file:
+    path: "{{ k8s_tools_k9s_version_path }}"
+    state: directory
+    owner: "{{ k8s_tools_vars.global.owner }}"
+    group: "{{ k8s_tools_vars.global.group }}"
+    mode: "{{ k8s_tools_vars.global.mode }}"
+
+- name: Download k9s
+  ansible.builtin.get_url:
+    url: "{{ k8s_tools_k9s_url }}"
+    dest: "{{ k8s_tools_vars.global.downloads }}/{{ k8s_tools_k9s_local_filename }}"
+    mode: "0644"
+
+- name: Extract k9s
+  ansible.builtin.unarchive:
+    src: "{{ k8s_tools_vars.global.downloads }}/{{ k8s_tools_k9s_local_filename }}"
+    dest: "{{ k8s_tools_k9s_version_path }}"
+    remote_src: true
+    creates: "{{ k8s_tools_k9s_version_path }}/k9s"
+
+- name: Link k9s binary
+  ansible.builtin.file:
+    src: "{{ k8s_tools_k9s_version_path }}/k9s"
+    dest: "{{ k8s_tools_vars.k9s.bin }}"
+    state: link

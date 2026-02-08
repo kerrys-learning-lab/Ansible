@@ -1,3 +1,4 @@
+# code: language=ansible
 
 westsidestreetnet_rke2:
   registries:

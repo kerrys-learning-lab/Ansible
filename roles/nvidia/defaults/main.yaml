@@ -1,8 +1,42 @@
+# code: language=ansible
+#
+# NVIDIA GPU Driver and Container Toolkit defaults.
+# Values can be changed globally by updating group_vars/all/global.yaml
+# or overridden per-group/host via the Variable Merge Pattern.
+#
 nvidia_defaults:
-  container_toolkit:
-    version: 1.18.1-1
+
+  # --------------------------------------------------------------------------
+  # NVIDIA GPU Driver (RPM Fusion approach)
+  # Reference: https://rpmfusion.org/Howto/NVIDIA
+  #
+  # Uses RPM Fusion nonfree repo. The akmod-nvidia package automatically
+  # builds kernel modules when the kernel is updated.
+  # For Turing+ GPUs, open kernel modules are selected by default.
+  driver:
+    repos:
+      - "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm"
+      - "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}.noarch.rpm"
     packages:
-      - nvidia-container-toolkit  # ${NVIDIA_CONTAINER_TOOLKIT_VERSION}
-      - nvidia-container-toolkit  # base=${NVIDIA_CONTAINER_TOOLKIT_VERSION}
-      - libnvidia-container-tools # ${NVIDIA_CONTAINER_TOOLKIT_VERSION}
-      - libnvidia-container1      # =${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+      - akmod-nvidia
+      - xorg-x11-drv-nvidia-cuda
+
+
+  # --------------------------------------------------------------------------
+  # NVIDIA Container Toolkit
+  # Reference: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+  container_toolkit:
+    repo:
+      name: nvidia-container-toolkit
+      url: "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
+    packages:
+      - nvidia-container-toolkit
+
+
+  # --------------------------------------------------------------------------
+  global:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').working | default('/var/lib/ansible') }}/downloads"
+    working: "{{ lookup('ansible.builtin.vars', 'global').working | default('/var/lib/ansible') }}/{{ role_name }}"

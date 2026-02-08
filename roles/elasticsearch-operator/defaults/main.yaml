@@ -1,3 +1,4 @@
+# code: language=ansible
 elasticsearch_operator_defaults:
   version: 3.1.0
   url:

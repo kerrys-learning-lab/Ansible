@@ -1,3 +1,4 @@
+# code: language=ansible
 argocd_server_defaults:
   k8s:
     name: argo-cd

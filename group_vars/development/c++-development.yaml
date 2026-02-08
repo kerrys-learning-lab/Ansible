@@ -1,3 +1,4 @@
+# code: language=ansible
 cpp_development_os_packages:
   packages:
     - clangd-20
@@ -26,5 +27,3 @@ cpp_development:
       version: 3.4.0
       url: https://github.com/google-deepmind/mujoco/releases/download/3.4.0/mujoco-3.4.0-linux-x86_64.tar.gz
       extract: true
-  paths:
-    download: /usr/local/downloads

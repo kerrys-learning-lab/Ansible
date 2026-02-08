@@ -1,3 +1,4 @@
+# code: language=ansible
 common_defaults:
 
   # --------------------------------------------------------------------------
@@ -6,9 +7,15 @@ common_defaults:
   #                  packages used by Ansible and/or for
   #                  debugging/trouble-shooting
   packages:
+    - bash-completion
+    - cifs-utils
     - gnupg2
     - traceroute
     - vim
+
+    # Required for Ansible remote execution
+    - python3-kubernetes
+    - python3-libdnf5
 
 
   # --------------------------------------------------------------------------
@@ -34,3 +41,13 @@ common_defaults:
   users_and_groups:
     users: {}
     groups: []
+
+  global:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').working | default('/var/lib/ansible') }}/downloads"
+    facts: "{{ lookup('ansible.builtin.vars', 'global').facts | default('/etc/ansible/facts.d') }}"
+    install: "{{ lookup('ansible.builtin.vars', 'global').install | default('/usr/local/install') }}"
+    source: "{{ lookup('ansible.builtin.vars', 'global').source | default('/usr/local/src') }}"
+    secrets: "{{ lookup('ansible.builtin.vars', 'global').secrets | default('/usr/local/secrets') }}"

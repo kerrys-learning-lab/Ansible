@@ -8,5 +8,5 @@
       kind: Namespace
       metadata:
         name: "{{ item }}"
-    kubeconfig: "{{ k8s_vars.global.paths.kubeconfig }}"
+    kubeconfig: "{{ k8s_vars.global.kubeconfig }}"
   loop: "{{ k8s_vars.namespaces | default([]) }}"

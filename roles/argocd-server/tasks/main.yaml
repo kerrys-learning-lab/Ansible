@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Set ArgoCD Server Base Facts
   ansible.builtin.set_fact:
     argocd_server_chart_ref: "{{ argocd_server.chart.ref | default(argocd_server_defaults.chart.ref) }}"

@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Install/Configure GitLab Runner via Helm
   kubernetes.core.helm:
     name: "{{ gitlab_runner.helm.name }}"
@@ -16,7 +17,7 @@
     inferred_gitlab_runner_tags:
       - "{{ ansible_architecture }}"
       - "{{ inventory_hostname }}"
-      - "{{ ansible_local['dpkg']['arch'] }}"
+      - "{{ ansible_local['arch']['dpkg'] }}"
       - "{{ ansible_distribution | lower }}"
       - "{{ ansible_distribution_release | lower }}"
 

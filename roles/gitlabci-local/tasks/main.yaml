@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: GitLab CI Local - Merge Variables
   ansible.builtin.set_fact:
     gitlabci_local_vars: |

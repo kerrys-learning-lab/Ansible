@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Set Dependabot Base Facts
   ansible.builtin.set_fact:
     dependabot_gitlab_chart_ref: "{{ dependabot_gitlab.chart.ref | default(dependabot_gitlab_defaults.chart.ref) }}"

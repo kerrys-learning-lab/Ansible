@@ -1,11 +1,3 @@
-host:
-  mounts:
-    ml-models:
-      src: UUID="5f2d5d4c-18bf-4f48-9475-33472f871395"
-      type: ext4
-      owner: root
-      group: podman
-      mode: 775
-
+# code: language=ansible
 ansible_fqdn: nvidia-5080.westsidestreet.net
 ansible_host: nvidia-5080.westsidestreet.net

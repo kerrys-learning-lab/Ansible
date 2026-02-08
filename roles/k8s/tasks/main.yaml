@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Merge k8s Variables
   ansible.builtin.set_fact:
     k8s_vars: |
@@ -8,10 +9,18 @@
 
 - name: Set k8s Environment
   ansible.builtin.copy:
-    dest: "{{ k8s_vars.global.paths.env }}"
+    dest: "{{ k8s_vars.global.env }}"
     content: |
-      export KUBECONFIG={{ k8s_vars.global.paths.kubeconfig }}
+      export KUBECONFIG={{ k8s_vars.global.kubeconfig }}
     mode: "{{ k8s_vars.global.mode }}"
+
+- name: Role Prerequisites
+  ansible.builtin.file:
+    path: "{{  k8s_vars.global.downloads }}"
+    state: directory
+    owner: "{{  k8s_vars.global.owner }}"
+    group: "{{  k8s_vars.global.group }}"
+    mode: "{{  k8s_vars.global.mode }}"
 
 - name: Configure k8s Namespaces
   ansible.builtin.include_tasks: namespaces.yaml
@@ -20,6 +29,14 @@
     - namespace
     - ns
 
+- name: Configure k8s CSI Driver for SMB
+  ansible.builtin.include_tasks: csi-driver-smb.yaml
+  tags:
+    - k8s
+    - smb
+    - storage
+  when: k8s_engine.needs.smb_driver | default(true)
+
 - name: Configure k8s Storage
   ansible.builtin.include_tasks: storage.yaml
   tags:
@@ -27,31 +44,36 @@
     - pv
     - storage
 
-- name: Configure k8s Sealed Secrets
-  ansible.builtin.include_tasks: sealed-secrets.yaml
-  tags:
-    - k8s
-    - sealed-secrets
-    - secret
-    - secrets
-
 - name: Configure k8s Secrets
   ansible.builtin.include_tasks: secrets.yaml
   tags:
     - k8s
-    - pv
     - secret
 
-- name: Configure k8s Certificate Manager and Certificates
+- name: Install Sealed Secrets Controller
+  ansible.builtin.include_tasks: sealed-secrets.yaml
+  tags:
+    - k8s
+    - sealed-secrets
+    - secrets
+
+- name: Configure k8s Certificate Manager
+  ansible.builtin.include_tasks: cert-manager.yaml
+  tags:
+    - cert
+    - certs
+    - k8s
+  when: k8s_engine.needs.cert_manager | default(true)
+
+- name: Configure k8s Certificates
   ansible.builtin.include_tasks: certificates.yaml
   tags:
     - cert
     - certs
     - k8s
 
-- name: Configure k8s Metal Load Balancer
-  ansible.builtin.include_tasks: metal-lb.yaml
+- name: Configure MetalLB
+  ansible.builtin.import_tasks: metal-lb.yaml
   tags:
-    - k8s
     - metal
     - metal-lb

@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Set K8s Share Base Facts
   ansible.builtin.set_fact:
     k8s_share_fetch_remote_path: "{{ k8s_share.fetch.remote_path | default(k8s_share_defaults.fetch.remote_path) }}"

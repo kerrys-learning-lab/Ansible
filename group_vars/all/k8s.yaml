@@ -1,3 +1,23 @@
+# code: language=ansible
 all_k8s:
   namespaces:
     - infrastructure
+  cluster_cert_issuer:
+    name: acme-letsencrypt-cluster-issuer
+    spec:
+      acme:
+        email: "{{ lookup('ansible.builtin.vars', 'secrets_vault').email }}"
+        server: https://acme-v02.api.letsencrypt.org/directory
+        privateKeySecretRef:
+          name: acme-letsencrypt-cluster-issuer"
+        solvers:
+          - dns01:
+              route53:
+                hostedZoneID: "{{ lookup('ansible.builtin.vars', 'secrets_vault').aws.route53.zoneId }}"
+                region: us-east-1
+                accessKeyIDSecretRef:
+                  name: aws
+                  key: username
+                secretAccessKeySecretRef:
+                  name: aws
+                  key: password

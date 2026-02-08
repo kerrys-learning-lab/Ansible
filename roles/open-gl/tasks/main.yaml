@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Set OpenGL Base Facts
   ansible.builtin.set_fact:
     open_gl_packages: "{{ (open_gl.packages | default([])) + open_gl_defaults.packages }}"

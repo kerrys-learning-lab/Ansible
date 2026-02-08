@@ -1,13 +1,19 @@
+# code: language=ansible
+- name: Bootstrap the Ansible Host
+  become: true
+  hosts:
+    - ansible
+  roles:
+    - role: ansible
+  tags:
+    - ansible
+
 - name: Common Configuration for all Linux Hosts
   become: true
   hosts:
     - all
   roles:
     - role: common
-    - role: synology-backup
-      tags:
-        - backup
-        - synology
   tags:
     - base
     - common
@@ -15,7 +21,22 @@
     - packages
   any_errors_fatal: true
 
-- name: Install/Configure k8s
+- name: GPU Drivers and Services
+  become: true
+  hosts:
+    - nvidia
+  pre_tasks:
+    - name: Setup Ansible facts
+      ansible.builtin.setup:
+      tags:
+        - always
+  roles:
+    - role: nvidia
+      tags:
+        - gpu
+        - nvidia
+
+- name: Install/Configure Kubernetes
   become: true
   hosts: k8s
   pre_tasks:
@@ -24,14 +45,12 @@
       tags:
         - always
   roles:
-    - role: crc # (CodeReady Containers)
+    - role: k8s-engine
       tags:
-        - crc
-      when: ansible_distribution == "Fedora"
-    - role: rke2
-      when: ansible_distribution == "Ubuntu"
+        - k8s-engine
+    - role: k8s-tools
       tags:
-        - rke2
+        - k8s-tools
     - role: k8s
   tags:
     - k8s
@@ -47,18 +66,10 @@
       tags:
         - always
   roles:
-    - role: argocd-cli
-      when: argocd_cli is defined
-      tags:
-        - argocd
-    - role: aws-development
-      when: aws_development is defined
+    - role: aws-cli
+      when: aws_cli is defined
       tags:
         - aws
-    - role: helm-cli
-      when: helm_cli is defined
-      tags:
-        - helm
     - role: c++-development
       when: cpp_development is defined
       tags:
@@ -69,10 +80,6 @@
         - gitlabci
         - gitlab-ci
         - gitlabci-local
-    - role: k9s
-      when: k9s is defined
-      tags:
-        - k9s
     - role: open-gl
       when: open_gl is defined
       tags:
@@ -93,10 +100,6 @@
   hosts:
     - k8s
   roles:
-    - role: k8s
-      when: k8s is defined
-      tags:
-        - k8s
     - role: elasticsearch-operator
       when: elasticsearch_operator is defined
       tags:
@@ -124,7 +127,8 @@
   hosts:
     - all
   pre_tasks:
-    - ansible.builtin.setup:
+    - name: Setup Ansible facts
+      ansible.builtin.setup:
       tags:
         - always
   roles:
@@ -146,18 +150,3 @@
       when: helm_applications is defined or helm_applications_defaults is defined
       tags:
         - helm
-
-- name: GPU Applications and Services
-  become: true
-  hosts:
-    - all
-  pre_tasks:
-    - ansible.builtin.setup:
-      tags:
-        - always
-  roles:
-    - role: nvidia
-      when: nvidia is defined
-      tags:
-        - gpu
-        - nvidia

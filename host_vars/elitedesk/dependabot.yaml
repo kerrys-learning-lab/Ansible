@@ -1,3 +1,4 @@
+# code: language=ansible
 # NOTE: Dependabot is not fully implemented
 dependabot_k8s:
   secrets:

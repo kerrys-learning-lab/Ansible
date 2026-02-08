@@ -1,3 +1,4 @@
+# code: language=ansible
 - name: Upgrade the OS (apt-get upgrade)
   ansible.builtin.apt:
     update_cache: true

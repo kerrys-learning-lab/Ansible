@@ -1,5 +1,0 @@
-devvm_rke2:
-  tls-san:
-    - dev-vm
-    - dev-vm.westsidestreet.net
-    - 192.168.0.163
