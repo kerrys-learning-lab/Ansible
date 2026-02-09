@@ -1,4 +1,18 @@
 # code: language=ansible
+#
+# ============================================================================
+# TEMPORARY: GitLab configuration for nvidia-5080
+#
+# This file exists to temporarily host GitLab on nvidia-5080 while elitedesk
+# is rebuilt.  When elitedesk is ready to host GitLab again:
+#
+#   1. Remove this file
+#   2. Remove nvidia-5080 from the 'gitlab' group in inventory/main.yaml
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# GitLab Role Configuration
+# ---------------------------------------------------------------------------
 gitlab:
   operator:
     name: gitlab-ci
@@ -8,24 +22,18 @@ gitlab:
     version: 2.8.2
     helm_values: {}
   application:
+    name: gitlab-rehost
     version: 9.8.2
     crd_values:
       global:
         hosts:
           domain: "{{ lookup('ansible.builtin.vars', 'lan').domain }}"
-          pages:
-            name: "{{ lookup('ansible.builtin.vars', 'lan').hosts.pages }}"
+          hostSuffix: rehost
         ingress:
+          class: gitlab-nginx
           # Use the Cluster cert-manager (vice the built-in GitLab issuer)
           # See https://docs.gitlab.com/charts/charts/globals/#globalingressconfigurecertmanager
           configureCertmanager: false
-          annotations:
-            cert-manager.io/issuer: acme-letsencrypt-cluster-issuer
-            kubernetes.io/ingress.provider: nginx\
-            nginx.ingress.kubernetes.io/proxy-body-size: 1024m
-            nginx.ingress.kubernetes.io/proxy-connect-timeout: 15
-            nginx.ingress.kubernetes.io/proxy-read-timeout: 600
-            nginx.ingress.kubernetes.io/service-upstream: true
         appConfig:
           backups:
             bucket: gitlab-backup
@@ -52,7 +60,7 @@ gitlab:
         webservice:
           ingress:
             tls:
-              secretName: gitlab-ingress-tls
+              secretName: gitlab-rehost-ingress-tls
       gitlab-pages:
         ingress:
           tls:
@@ -60,20 +68,20 @@ gitlab:
       minio:
         ingress:
           tls:
-            secretName: gitlab-ingress-tls
+            secretName: gitlab-rehost-ingress-tls
       registry:
         enabled: true
         ingress:
           enabled: true
           tls:
-            secretName: gitlab-ingress-tls
+            secretName: gitlab-rehost-ingress-tls
         database:
           configure: true
           enabled: true
           name: registry
           user: registry
           password:
-            secret: gitlab-registry-database-password
+            secret: gitlab-rehost-registry-database-password
             key: password
           migrations:
             enabled: true
@@ -85,9 +93,6 @@ gitlab:
   k8s:
     claims:
       local:
-        # NOTE: Update to GitLab 18.x also required updating Postgres to 16.x
-        #       So, changed the name of the PV and the directory (see
-        #       k8s-local-volumes.yaml)
         postgresql:
           volume: gitlab-18.x-postgresql-16.x
           capacity: 100Gi
@@ -99,28 +104,30 @@ gitlab:
       https: false
       access: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.backups.minio.access }}"
 
+
+# ---------------------------------------------------------------------------
+# K8s Role Configuration (merged via variable merge pattern, suffix '_k8s')
+# ---------------------------------------------------------------------------
 gitlab_k8s:
+  namespaces:
+    - gitlab-system
+
   certificates:
-    gitlab-ingress:
+    gitlab-rehost-ingress:
       namespace: gitlab-system
       dnsNames:
-        - gitlab.westsidestreet.net
-        - registry.westsidestreet.net
-        - minio.westsidestreet.net
-        - kas.westsidestreet.net
+        - gitlab-rehost.westsidestreet.net
+        - registry-rehost.westsidestreet.net
+        - minio-rehost.westsidestreet.net
+        - kas-rehost.westsidestreet.net
     gitlab-pages:
       namespace: gitlab-system
       dnsNames:
-        - pages.westsidestreet.net
+        - pages-rehost.westsidestreet.net
         - "*.pages.westsidestreet.net"
+
   storage:
     local_volumes:
-      gitlab-postgresql:
-        capacity: 100Gi
-        path: gitlab/postgresql
-        owner: 1001
-        group: 1001
-        mode: u=rwx,go=rx
       gitlab-18.x-postgresql-16.x:
         capacity: 100Gi
         path: gitlab-18.x/postgresql-16.x
@@ -132,10 +139,4 @@ gitlab_k8s:
         path: gitlab/gitaly
         owner: 1000
         group: 1000
-        mode: u=rwx,go=rx
-      gitlab-dependabot-mongodb:
-        capacity: 10Gi
-        path: gitlab/dependabot/mongodb
-        owner: 1001
-        group: 0
         mode: u=rwx,go=rx

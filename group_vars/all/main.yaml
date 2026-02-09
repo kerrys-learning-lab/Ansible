@@ -11,6 +11,7 @@ lan:
   fqdn:
     argocd: argocd.westsidestreet.net
     gitlab: gitlab.westsidestreet.net
+    gitlab_rehost: gitlab-rehost.westsidestreet.net
     minio: minio.westsidestreet.net # This is the GitLab minio
     pages: pages.westsidestreet.net
     registry: registry.westsidestreet.net

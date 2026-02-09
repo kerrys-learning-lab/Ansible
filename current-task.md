@@ -54,7 +54,28 @@ utilize the Nvidia 5080.
 ### Side Goal: Temporarily Host GitLab
 
 A side-goal is to temporarily host a GitLab instance in the host's k3s cluster
-so that I can rebuild the current GitLab host.
+so that I can rebuild the current GitLab host (`elitedesk`).
+
+#### Temporary Changes for GitLab Re-host
+
+The following changes are **temporary** and should be reverted once `elitedesk`
+is rebuilt and ready to host GitLab again:
+
+| File | Change | Revert Action |
+|------|--------|---------------|
+| `inventory/main.yaml` | Added `nvidia-5080` to `gitlab` group | Remove `nvidia-5080:` line from `gitlab.hosts` |
+| `host_vars/nvidia-5080/gitlab.yaml` | New file: GitLab role config + k8s resources | Delete entire file |
+
+#### DNS Requirement
+
+The following FQDNs must resolve to an IP in nvidia-5080's MetalLB pool
+(`192.168.0.200-210`) while GitLab is hosted there:
+
+- `gitlab.westsidestreet.net`
+- `registry.westsidestreet.net`
+- `minio.westsidestreet.net`
+- `kas.westsidestreet.net`
+- `pages.westsidestreet.net`
 
 ## Key Files
 

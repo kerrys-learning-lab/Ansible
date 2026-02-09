@@ -131,3 +131,4 @@ k8s_defaults:
     source: "{{ lookup('ansible.builtin.vars', 'global').source | default('/usr/local/src') }}"
     secrets: "{{ lookup('ansible.builtin.vars', 'global').secrets | default('/usr/local/secrets') }}"
     kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"
+    local_volumes: /var/lib/k8s-local-pv

@@ -28,6 +28,7 @@ k8s:
 gitlab:
   hosts:
     elitedesk:
+    nvidia-5080:  # TEMPORARY: hosting GitLab while elitedesk is rebuilt
 
 gpu:
   children:
@@ -39,6 +40,12 @@ gpu:
 argocd:
   hosts:
     elitedesk:
+
+ubuntu:
+  hosts:
+    asus:
+    elitedesk:
+    nvidia-5080:
 
 raspberry_pi:
   hosts:

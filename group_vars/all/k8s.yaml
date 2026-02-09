@@ -9,7 +9,7 @@ all_k8s:
         email: "{{ lookup('ansible.builtin.vars', 'secrets_vault').email }}"
         server: https://acme-v02.api.letsencrypt.org/directory
         privateKeySecretRef:
-          name: acme-letsencrypt-cluster-issuer"
+          name: acme-letsencrypt-cluster-issuer
         solvers:
           - dns01:
               route53:

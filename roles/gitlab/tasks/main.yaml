@@ -46,7 +46,7 @@
       apiVersion: v1
       kind: Secret
       metadata:
-        name: gitlab-registry-database-password
+        name: "{{ gitlab.application.name | default('gitlab') }}-registry-database-password"
         namespace: gitlab-system
       type: kubernetes.io/basic-auth
       stringData:
@@ -85,7 +85,7 @@
       apiVersion: apps.gitlab.com/v1beta1
       kind: GitLab
       metadata:
-        name: gitlab
+        name: "{{ gitlab.application.name | default('gitlab') }}"
         namespace: gitlab-system
       spec:
         chart:
