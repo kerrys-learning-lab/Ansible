@@ -1,83 +1,309 @@
-# Task: Apply Ansible to Host `nvidia-5080.westsidestreet.net`
+# Suspended Task: Refactor Ansible Playbook and Roles
 
+## 1. Objective
 
-## Situation
+Refactor the existing Ansible repository to improve maintainability,
+scalability, and usability. The primary mechanism for configuration
+management will be the **Variable Merge Pattern**, allowing hierarchical
+overrides and extensions of role configurations via Group and Host variables.
 
-The `nvidia-5080.westsidestreet.net` has a Nvidia 5080 GPU and will serve as a
-Kubernetes node for running LLM workloads.
+**Success Criteria:**
+- [ ] All roles utilize the standard Variable Merge Pattern.
+- [ ] Roles are self-contained yet composable.
+- [ ] Playbooks support granular execution via `--tags` and `--limit`.
+- [ ] Documentation exists for the repository and complex roles.
 
-After an unsuccessful attempt using Fedora + CRC (CodeReady Containers) -- the
-GPU could not be passed through to the CRC VM -- the host has been rebuilt with
-**Ubuntu Server**.  The `asus` host is now running **Ubuntu Desktop**.
+## 2. Design Standards & Patterns
 
-The host is accessible by FQDN and at IP address `192.168.0.45` and is in the
-Ansible inventory.
+### 2.1 Variable Merge Pattern
 
-My user (`kerry`) exists on the machine and has `sudo` privileges.
+To allow flexible configuration (e.g., adding packages in `group_vars/all` and
+then adding more in `host_vars/specific_host`), we use
+`community.general.merge_variables`.
 
-## Objective
+#### 2.1.1 Role Defaults
 
-Use Ansible to automate the configuration of `nvidia-5080`, focusing on three
-areas:
+- Defined in `roles/<role>/defaults/main.yaml`.
+- Variable Name: `<role>_defaults`
+- Content: The baseline configuration (dictionaries, lists).
 
-### 1. Ubuntu Support in `common` Role
+#### 2.1.2 Overriding/Extending a Role's Variables
 
-Update the `common` role (and any other affected roles) to properly support
-Ubuntu.  Both `nvidia-5080` (Ubuntu Server) and `asus` (Ubuntu Desktop) run
-Ubuntu, so changes should work for both hosts.
+- Groups and hosts may override/extend role variables by following the
+  variable naming convention: `<group-name>_<role>` or `<host-name>_<role>`
+  (incorporated by community.general.merge_variables by suffix matching)
 
-### 2. Nvidia GPU Drivers for Ubuntu
+- Groups and hosts should follow the file naming convention
+  `group_vars/<role>.yaml` or `host_vars/<role>.yaml` to make it easy to
+  locate related variables
 
-Install and configure the appropriate Nvidia drivers for Ubuntu (replacing any
-Fedora-specific driver configuration from the previous attempt).
+- Examples:
+  - Extending variables for the `common` role:
+    - File: `host_vars/dev-vm/common.yaml`
+      Variable: `devvm_common`
+    - File: `group_vars/development/common.yaml`
+      Variable: `development_common`
 
-### 3. k3s as the Kubernetes Engine
+#### 2.1.3 Task Implementation
 
-Use **k3s** as the Kubernetes distribution on `nvidia-5080`.  The inventory
-already reflects this (`nvidia-5080` is listed under the `k3s` group).  The
-goal is to get k3s running with GPU access so that workloads like vLLM can
-utilize the Nvidia 5080.
+- The first task in `roles/<role>/tasks/main.yaml` is usually the merge
+  operation.
 
-### Important Considerations
+- If a role is split across multiple task file, each file containing
+  sub-tasks is associated to a similarly named key nested within the
+  role's vars.
 
-- The host will serve Large Language Models (LLMs) for usage by other clients
-  on the same LAN
+  - Example: `roles/common` has a collection of sub-tasks in
+    `roles/common/tasks/resolve.yaml`.  The variables for these sub-tasks
+    are found in `common_vars.resolve`
 
-- Ideally, the LLMs will be served by vLLM running in the k3s cluster.  If we
-  can't get this working, the fallback is Llama.cpp
+- Target Variable: `<role>_vars` or `<role>_<sub-category>_vars`
 
-- We will only run Ansible on the `nvidia-5080.westsidestreet.net` host during
-  this effort (i.e., `--limit nvidia-5080`).  This serves the dual purpose of
-  reducing the amount of time it takes to determine whether changes to Ansible
-  are correct and also narrows the scope of the work.
+  - Example:
+    ```yaml
+    - name: "Merge <role> Configuration"
+      set_fact:
+        <role>_vars: |
+          {{ lookup('community.general.merge_variables',
+                    '_<role>',
+                    pattern_type='suffix',
+                    initial_value=<role>_defaults,
+                    override='ignore') }}
+    ```
 
-### Side Goal: Temporarily Host GitLab
+### 2.2 Role Structure
 
-A side-goal is to temporarily host a GitLab instance in the host's k3s cluster
-so that I can rebuild the current GitLab host (`elitedesk`).
+- Split complex logic into separate files included by `main.yaml`.
+- **Tags:**
+  - Every task in a role should inherit the role's name as a tag (applied in
+    the playbook).
+  - Specific sub-tasks can have granular tags (e.g., `install`, `config`).
+- **Idempotency:** Ensure tasks check state before changing it (especially
+  `command`/`shell` modules).
+- **Derived Facts:**
+  - Create new facts (`set_fact`) if:
+    - They **combine** multiple existing facts, OR
+    - They're **used in multiple places** (DRY principle)
+  - Do not create facts that simply rename or transform a single existing fact that's only used once
+  - All facts created in a role must be prefixed with the role name (e.g., `k8s_` for the k8s role)
+  - **Examples - Valid derived facts:**
+    ```yaml
+    # Combines version + system + architecture (used in multiple places)
+    k8s_helm_filename: "helm-{{ k8s_vars.helm.version }}-{{ ansible_system | lower }}-{{ ansible_local['arch']['container'] }}.tar.gz"
 
-#### Temporary Changes for GitLab Re-host
+    # Combines install path + version (used in multiple places)
+    k8s_helm_version_path: "{{ k8s_vars.global.paths.install }}/{{ k8s_vars.helm.version }}"
+    ```
+  - **Example - Invalid (simple renaming used once):**
+    ```yaml
+    # Don't do this - just use ansible_system | lower directly where needed
+    k8s_helm_system: "{{ ansible_system | lower }}"
+    ```
 
-The following changes are **temporary** and should be reverted once `elitedesk`
-is rebuilt and ready to host GitLab again:
+### 2.3 Self-Contained Roles
 
-| File | Change | Revert Action |
-|------|--------|---------------|
-| `inventory/main.yaml` | Added `nvidia-5080` to `gitlab` group | Remove `nvidia-5080:` line from `gitlab.hosts` |
-| `host_vars/nvidia-5080/gitlab.yaml` | New file: GitLab role config + k8s resources | Delete entire file |
+- Roles must manage their own dependencies. I.e, do not rely on `common` or
+  other roles to install prerequisites.
+- **Implementation:**
+  - Include package installation tasks within the role (e.g., `c++-development`
+    installs `build-essential`).
+  - **Benefit:** Allows running specific roles via `--tags`
+    (e.g., `--tags c++`) without breaking due to missing dependencies, while
+    Ansible's idempotency prevents redundant operations.
 
-#### DNS Requirement
+### 2.4 Inventory Organization
 
-The following FQDNs must resolve to an IP in nvidia-5080's MetalLB pool
-(`192.168.0.200-210`) while GitLab is hosted there:
+- Use Ansible groups to express "what hosts are" rather than variables
+- For components with multiple implementations (e.g., Kubernetes distributions),
+  use nested groups:
+  - Parent group: `k8s` (all Kubernetes hosts)
+  - Child groups: `k8s-engine-rke2`, `crc` (specific distributions)
+- **Benefits:**
+  - Self-documenting inventory
+  - No validation/assertion logic needed in playbooks
+  - Clear separation in playbook structure
+  - Easy to add new implementations (e.g., `k3s`, `microk8s`)
 
-- `gitlab.westsidestreet.net`
-- `registry.westsidestreet.net`
-- `minio.westsidestreet.net`
-- `kas.westsidestreet.net`
-- `pages.westsidestreet.net`
+### 2.5 Network Topology Variables
 
-## Key Files
+Network topology information is defined in the `lan` variable. Within that variable, the following structure applies:
 
-In addition to the Ansible files themselves, the `./README.md` file contains
-design and implementation guidance for updating the Ansible scripts.
+- **`lan.ip`**: Key/value pairs mapping "short name" to IP address
+  - Example: `lan.ip.gateway: "192.168.0.1"`
+- **`lan.fqdn`**: Key/value pairs mapping "short name" to fully qualified domain name
+  - Example: `lan.fqdn.elitedesk: "elitedesk.westsidestreet.net"`
+- **`lan.endpoint`**: Key/value pairs mapping "short name" to host:port
+  - Example: `lan.endpoint.nas: "nas.westsidestreet.net:445"`
+
+This centralized approach allows roles to reference network locations using lookups:
+```yaml
+host: "{{ lookup('ansible.builtin.vars', 'lan').fqdn.nas }}"
+```
+
+### 2.6 K8s Role Organization: Engine, Tools, Configuration
+
+Kubernetes functionality is split across three roles to separate concerns:
+
+**`k8s-engine` - Distribution Installation:**
+- Installs the Kubernetes distribution (RKE2, CRC, K3s, etc.)
+- Uses `include_role` to delegate to specific engine implementations
+- Just installation, no configuration
+
+**`k8s-tools` - Operational Tools:**
+- CLI tools needed to operate and manage Kubernetes clusters
+- Installed on all k8s hosts immediately after engine installation
+- Tools:
+  - **Helm CLI** - Required for deploying k8s infrastructure components
+  - **k9s** - Terminal UI for cluster management and debugging
+  - Future: kubectl, kubectx, kubens, stern, etc.
+
+**`k8s` - Cluster Configuration:**
+- Configures the Kubernetes cluster infrastructure
+- Uses Helm (installed by k8s-tools) to deploy infrastructure components
+- Native K8s resources (namespaces, storage classes, secrets, certificates)
+- Infrastructure components that enable core resources:
+  - cert-manager (infrastructure for TLS/certificates)
+  - CSI drivers (infrastructure for storage)
+
+**Separate roles for extensions:**
+- Sealed Secrets (encrypted secrets operator)
+- Metal-LB (load balancer implementation)
+- ArgoCD, GitLab, etc. (cluster applications)
+
+**Rationale:**
+- Conceptual clarity: `k8s` = "prepare cluster for standard K8s usage"
+- Optional extensions: Not all clusters need all tools
+- Follows existing pattern: Applications are separate roles
+- Clean conditionals: Roles handle their own skip logic internally
+
+## 3. Refactoring Roadmap
+
+### Phase 1: Base System (Linux Hosts)
+- [x] **common** (Refactored)
+- [ ] **nvidia** (Drivers/GPU setup) (Deferred)
+
+### Phase 2: Kubernetes Infrastructure (Cluster Nodes)
+- [x] **k8s-engine-rke2** (The K8s Engine) (Refactored)
+- [x] **k8s** (Cluster configuration, Storage Classes, CSI) (Refactored)
+- [ ] **k8s-share** (Kubeconfig distribution)
+
+### Phase 3: Development Environment (Workstations)
+- [ ] Collapse the separate development roles where it makes sense
+  - [ ] Discuss a `k8s-development` role which captures (for example)
+    `argocd-cli`, `helm-cli`, etc
+- [ ] **argocd-cli**
+- [ ] **helm-cli**
+- [ ] **k9s**
+- [ ] **podman**
+- [ ] **aws-development**
+- [ ] **c++-development**
+- [ ] **gitlabci-local**
+- [ ] **open-gl**
+
+### Phase 4: Cluster Services (K8s Workloads)
+- [ ] **helm-applications** (Generic Helm installer)
+- [ ] **argocd-server**
+- [ ] **gitlab** (The big one)
+- [ ] **dependabot-gitlab**
+- [ ] **elasticsearch-operator**
+
+## 4. Current Focus
+
+**Recently Completed:**
+
+1. **`k8s-engine-rke2` role refactoring** ✓
+   - Implemented Variable Merge Pattern (already in place)
+   - Fixed variable naming conventions (elitedesk_rke2, nvidia5080_rke2)
+   - Expanded defaults with documented configuration options
+   - Removed leftover group_vars/rke2/main.yaml
+
+2. **Inventory restructuring** ✓
+   - Replaced `k8s_engine` variable approach with group-based pattern
+   - Created `rke2` and `crc` groups as children of `k8s`
+   - Updated playbook to use group membership instead of conditionals
+   - Removed validation assertions (no longer needed)
+
+3. **`k8s` role consolidation and refactoring** ✓
+   - Consolidated 4 roles (k8s-certificates, k8s-csi-storage, k8s-local-volumes, k8s-secrets) into unified k8s role
+   - Extracted extensions (sealed-secrets, metal-lb) to separate roles
+   - Migrated all variables to Variable Merge Pattern
+   - Deleted old role directories and redundant variable files
+   - Documented infrastructure vs extensions pattern
+
+**Next Up:** `k8s-share` role refactoring
+
+**Follow-up Tasks:**
+- [x] Delete `os` role and related variable files (fully replaced by `common`)
+  - Deleted: `roles/os/`
+  - Deleted: `group_vars/all/os.yaml`
+  - Deleted: `group_vars/dev/os.yaml`
+  - Deleted: `group_vars/development/os.yaml`
+
+- [x] Delete `resolve` role and duplicate variable files (fully replaced by `common`)
+  - Deleted: `roles/resolve/`
+  - Deleted: `group_vars/all/resolve.yaml` (duplicate of common_defaults.resolve)
+  - Deleted: `host_vars/elitedesk/resolve.yaml` (already in elitedesk_common.resolve)
+  - Deleted: `host_vars/nvidia-5080/resolve.yaml` (already in nvidia5080_common.resolve)
+  - Fixed: Typo in `host_vars/nvidia-5080/common.yaml` (nvidi5080 → nvidia5080)
+
+- [x] Delete leftover `group_vars/dev/` directory (group renamed to `development`)
+  - Deleted entire directory: `group_vars/dev/`
+  - All configs already exist in `group_vars/development/` with correct naming
+  - Fixed: K8s role merge error caused by old `k8s:` variable naming
+
+- [ ] **Migrate packages from deleted OS files to common role:**
+  - **From os_defaults:** `bat`, `speedtest-cli`
+  - **From group_vars/all:** `jq`, `smbclient`, `pigz`, `tree`, `unzip`
+  - **From group_vars/dev:** `age`, `python3-tk`, `gitlab-ci-local`, python3 packages, `swig`, `bash-completions`
+  - **From group_vars/development:** `age`, `ansible`, `bat`, `jq`, python3 packages, `swig`, `tree`, `unzip`
+  - **Action needed:** Create appropriate `group_vars/*/common.yaml` files with `<group>_common.packages`
+
+- [ ] **Migrate users/groups from deleted OS files to common role:**
+  - **From group_vars/dev & development:** podman group, kerry user → podman group
+  - **Action needed:** Add to `group_vars/dev/common.yaml` and `group_vars/development/common.yaml` using `<group>_common.users_and_groups`
+
+- [ ] **Replace hard-coded domain names with `lan` variable references:**
+  - **Find and replace:** Hard-coded `westsidestreet.net` domain names
+  - **Find and replace:** Hard-coded LAN FQDNs (e.g., `elitedesk.westsidestreet.net`)
+  - **Action needed:** Use `lan.domain`, `lan.fqdn.*`, `lan.ip.*`, and `lan.endpoint.*` lookups instead
+  - **Locations to check:** Role defaults, host_vars, group_vars, templates
+  - **Example:** `elitedesk.westsidestreet.net` → `{{ lookup('ansible.builtin.vars', 'lan').fqdn.elitedesk }}`
+
+- [ ] **Standardize role defaults to use optional global references:**
+  - **Pattern:** All roles should have a `global` section in `<role>_defaults`
+  - **Implementation:** Reference `group_vars/all/global` with fallback defaults
+  - **Example:**
+    ```yaml
+    <role>_defaults:
+      global:
+        owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+        group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
+        mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
+        working: "{{ lookup('ansible.builtin.vars', 'global').working | default('/var/lib/ansible') }}"
+        install: "{{ lookup('ansible.builtin.vars', 'global').install | default('/usr/local/src') }}"
+    ```
+  - **Roles to update:** All roles with owner/group/mode/paths configurations
+  - **Benefit:** DRY principle with optional dependencies - roles remain self-contained
+
+- [ ] **For each role's defaults, add a note that the values can be changed globally by updating `group_vars/all/globals.yaml`**
+
+**Note on Self-Containment:**
+Roles can assume basic bootstrapping from `common` role (system utilities like
+curl, network config, standard paths). Roles should only handle their specific
+domain dependencies.
+
+## 5. Verification & Testing
+
+Some of the variables are encrypted using Ansible Vault.  I've created a
+wrapper script that incorporates the Ansible Vault password automatically:
+
+```bash
+# 1. Run all Ansible tasks against all hosts
+ansible.sh
+
+# 2. Run all Ansible tasks against the `asus` host only:
+ansible.sh --limit asus
+
+# 3. Run a subset of tasks against the `asus` host
+ansible.sh --limit asus --tags <role_name>
+```

@@ -10,20 +10,9 @@
 #   2. Remove nvidia-5080 from the 'gitlab' group in inventory/main.yaml
 # ============================================================================
 
-# ---------------------------------------------------------------------------
-# GitLab Role Configuration
-# ---------------------------------------------------------------------------
-gitlab:
-  operator:
-    name: gitlab-ci
-    namespace: gitlab-system
-    url: https://charts.gitlab.io
-    ref: gitlab-operator
-    version: 2.8.2
-    helm_values: {}
+nvidia5080_gitlab:
   application:
     name: gitlab-rehost
-    version: 9.8.2
     crd_values:
       global:
         hosts:
@@ -103,15 +92,6 @@ gitlab:
       location: us-east-1
       https: false
       access: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.backups.minio.access }}"
-
-
-# ---------------------------------------------------------------------------
-# K8s Role Configuration (merged via variable merge pattern, suffix '_k8s')
-# ---------------------------------------------------------------------------
-gitlab_k8s:
-  namespaces:
-    - gitlab-system
-
   certificates:
     gitlab-rehost-ingress:
       namespace: gitlab-system
@@ -125,7 +105,6 @@ gitlab_k8s:
       dnsNames:
         - pages-rehost.westsidestreet.net
         - "*.pages.westsidestreet.net"
-
   storage:
     local_volumes:
       gitlab-18.x-postgresql-16.x:

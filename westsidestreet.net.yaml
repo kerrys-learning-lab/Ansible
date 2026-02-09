@@ -140,7 +140,7 @@
         - dependabot-gitlab
         - gitlab
     - role: gitlab
-      when: gitlab is defined
+      when: "'gitlab' in group_names"
       tags:
         - gitlab
     - role: helm-applications

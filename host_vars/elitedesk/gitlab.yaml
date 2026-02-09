@@ -1,14 +1,6 @@
 # code: language=ansible
-gitlab:
-  operator:
-    name: gitlab-ci
-    namespace: gitlab-system
-    url: https://charts.gitlab.io
-    ref: gitlab-operator
-    version: 2.8.2
-    helm_values: {}
+elitedesk_gitlab:
   application:
-    version: 9.8.2
     crd_values:
       global:
         hosts:
@@ -86,8 +78,7 @@ gitlab:
     claims:
       local:
         # NOTE: Update to GitLab 18.x also required updating Postgres to 16.x
-        #       So, changed the name of the PV and the directory (see
-        #       k8s-local-volumes.yaml)
+        #       So, changed the name of the PV and the directory
         postgresql:
           volume: gitlab-18.x-postgresql-16.x
           capacity: 100Gi
@@ -98,8 +89,6 @@ gitlab:
       location: us-east-1
       https: false
       access: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.backups.minio.access }}"
-
-gitlab_k8s:
   certificates:
     gitlab-ingress:
       namespace: gitlab-system

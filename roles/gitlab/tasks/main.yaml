@@ -1,14 +1,132 @@
 # code: language=ansible
+- name: Merge gitlab Configuration
+  ansible.builtin.set_fact:
+    gitlab_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_gitlab',
+                pattern_type='suffix',
+                initial_value=gitlab_defaults,
+                override='ignore') }}
+
+# ---------------------------------------------------------------------------
+# Infrastructure: Namespace, Storage, Certificates
+# ---------------------------------------------------------------------------
+
+- name: Create GitLab Namespace
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ gitlab_vars.operator.namespace }}"
+    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+
+- name: Storage - Create Local Volume Directory Parents
+  ansible.builtin.file:
+    path: "{{ gitlab_vars.global.local_volumes }}/{{ item.value.path | dirname }}"
+    state: directory
+    owner: "{{ item.value.owner | default(gitlab_vars.global.owner) }}"
+    group: "{{ item.value.group | default(gitlab_vars.global.group) }}"
+    mode: "{{ gitlab_vars.global.mode }}"
+  loop: "{{ gitlab_vars.storage.local_volumes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Storage - Create Local Volume Directories
+  ansible.builtin.file:
+    path: "{{ gitlab_vars.global.local_volumes }}/{{ item.value.path }}"
+    state: directory
+    owner: "{{ item.value.owner | default(gitlab_vars.global.owner) }}"
+    group: "{{ item.value.group | default(gitlab_vars.global.group) }}"
+    mode: "{{ item.value.mode | default(gitlab_vars.global.mode) }}"
+  loop: "{{ gitlab_vars.storage.local_volumes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Storage - Create Local Persistent Volume(s)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ item.key }}"
+        labels:
+          owner: "{{ item.key }}"
+      spec:
+        capacity:
+          storage: "{{ item.value.capacity | default('10Gi') }}"
+        accessModes:
+          - "{{ item.value.accessMode | default('ReadWriteOnce') }}"
+        persistentVolumeReclaimPolicy: "{{ item.value.reclaimPolicy | default('Retain') }}"
+        storageClassName: local
+        hostPath:
+          path: "{{ gitlab_vars.global.local_volumes }}/{{ item.value.path }}"
+    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+  loop: "{{ gitlab_vars.storage.local_volumes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Certificates - Create TLS Certificate(s)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: "{{ item.key }}"
+        namespace: "{{ item.value.namespace }}"
+      spec:
+        secretName: "{{ item.key }}-tls"
+        dnsNames: "{{ item.value.dnsNames }}"
+        issuerRef:
+          name: "{{ gitlab_vars.cluster_cert_issuer.name }}"
+          kind: "{{ gitlab_vars.cluster_cert_issuer.kind }}"
+    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+  loop: "{{ gitlab_vars.certificates | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+# ---------------------------------------------------------------------------
+# GitLab Operator and Application
+# ---------------------------------------------------------------------------
+
+- name: Storage - Create Local Persistent Volume Claim(s)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: "{{ item.key }}"
+        namespace: "{{ item.value.namespace | default(gitlab_vars.operator.namespace) }}"
+      spec:
+        resources:
+          requests:
+            storage: "{{ item.value.capacity | default('10Gi') }}"
+        accessModes:
+          - "{{ item.value.accessMode | default('ReadWriteOnce') }}"
+        volumeName: "{{ item.value.volume }}"
+        storageClassName: local
+    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+  loop: "{{ gitlab_vars.k8s.claims.local | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
 - name: Install/Configure GitLab Operator via Helm
   kubernetes.core.helm:
-    name: "{{ gitlab.operator.name }}"
-    namespace: "{{ gitlab.operator.namespace }}"
-    chart_repo_url: "{{ gitlab.operator.url }}"
-    chart_version: "{{ gitlab.operator.version }}"
-    chart_ref: "{{ gitlab.operator.ref }}"
-    release_values: "{{ gitlab.operator.helm_values }}"
-    create_namespace: true
-    kubeconfig: /etc/kubeconfig
+    name: "{{ gitlab_vars.operator.name }}"
+    namespace: "{{ gitlab_vars.operator.namespace }}"
+    chart_repo_url: "{{ gitlab_vars.operator.url }}"
+    chart_version: "{{ gitlab_vars.operator.version }}"
+    chart_ref: "{{ gitlab_vars.operator.ref }}"
+    release_values: "{{ gitlab_vars.operator.helm_values }}"
+    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
   notify:
     - Wait for GitLab Operator to be Installed
 
@@ -24,18 +142,17 @@
       kind: Secret
       metadata:
         name: external-backup-s3cfg
-        namespace: gitlab-system
+        namespace: "{{ gitlab_vars.operator.namespace }}"
       stringData:
         config: |
-          host_base = {{ gitlab.backups.minio.base }}
-          host_bucket = {{ gitlab.backups.minio.bucket }}
-          bucket_location = {{ gitlab.backups.minio.location }}
-          use_https = {{ gitlab.backups.minio.https }}
-          access_key = {{ gitlab.backups.minio.access }}
+          host_base = {{ gitlab_vars.backups.minio.base }}
+          host_bucket = {{ gitlab_vars.backups.minio.bucket }}
+          bucket_location = {{ gitlab_vars.backups.minio.location }}
+          use_https = {{ gitlab_vars.backups.minio.https }}
+          access_key = {{ gitlab_vars.backups.minio.access }}
           secret_key = {{ gitlab_secrets.backups.minio.key }}
           signature_v2 = False
-    kubeconfig: /etc/kubeconfig
-
+    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
 
 # NOTE: See https://docs.gitlab.com/charts/charts/registry/metadata_database
 - name: Create GitLab Registry PostgreSQL Secret
@@ -46,36 +163,13 @@
       apiVersion: v1
       kind: Secret
       metadata:
-        name: "{{ gitlab.application.name | default('gitlab') }}-registry-database-password"
-        namespace: gitlab-system
+        name: "{{ gitlab_vars.application.name }}-registry-database-password"
+        namespace: "{{ gitlab_vars.operator.namespace }}"
       type: kubernetes.io/basic-auth
       stringData:
         username: "{{ gitlab_secrets.registry.postgresql.username }}"
         password: "{{ gitlab_secrets.registry.postgresql.password }}"
-    kubeconfig: /etc/kubeconfig
-
-- name: Create Local Kubernetes Claim(s) for GitLab
-  kubernetes.core.k8s:
-    state: present
-    apply: true
-    definition:
-      apiVersion: v1
-      kind: PersistentVolumeClaim
-      metadata:
-        name: "{{ item.key }}"
-        namespace: "{{ item.value.namespace | default('gitlab-system') }}"
-      spec:
-        resources:
-          requests:
-            storage: "{{ item.value.capacity | default('10Gi') }}"
-        accessModes:
-          - "{{ item.value.accessMode | default('ReadWriteOnce') }}"
-        volumeName: "{{ item.value.volume }}"
-        storageClassName: local
-    kubeconfig: /etc/kubeconfig
-  loop: "{{ gitlab.k8s.claims.local | default({}) |dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
+    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
 
 - name: Apply GitLab CRD
   kubernetes.core.k8s:
@@ -85,10 +179,10 @@
       apiVersion: apps.gitlab.com/v1beta1
       kind: GitLab
       metadata:
-        name: "{{ gitlab.application.name | default('gitlab') }}"
-        namespace: gitlab-system
+        name: "{{ gitlab_vars.application.name }}"
+        namespace: "{{ gitlab_vars.operator.namespace }}"
       spec:
         chart:
-          version: "{{ gitlab.application.version }}"
-          values: "{{ gitlab.application.crd_values }}"
-    kubeconfig: /etc/kubeconfig
+          version: "{{ gitlab_vars.application.version }}"
+          values: "{{ gitlab_vars.application.crd_values }}"
+    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
