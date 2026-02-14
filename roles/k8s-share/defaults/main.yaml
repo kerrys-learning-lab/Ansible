@@ -1,14 +1,9 @@
 # code: language=ansible
 k8s_share_defaults:
-  fetch:
-    remote_path: /etc/kubeconfig
-    local_path_prefix: /var/lib/ansible/hosts.d
-    owner: root
-    group: root
-    mode: ug=rwX,o=rX
-  share:
-    remote_path_prefix: /var/lib/ansible/kubeconfig.d
-    owner: root
-    group: root
-    mode: ug=rwX,o=rX
-  hosts: []
+  role:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').downloads | default('/var/lib/ansible/downloads') }}/{{ role_name }}"
+    share: "{{ lookup('ansible.builtin.vars', 'global').share | default('/usr/local/share') }}/kubeconfig.d"
+    kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"

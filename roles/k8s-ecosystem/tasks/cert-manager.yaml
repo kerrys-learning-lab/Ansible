@@ -1,0 +1,12 @@
+# code: language=ansible
+- name: Install/Configure CertManager Using Helm
+  kubernetes.core.helm:
+    name: "{{ k8s_ecosystem_vars.cert_manager.name | default('cert-manager') }}"
+    namespace: "{{ k8s_ecosystem_vars.cert_manager.namespace | default('infrastructure') }}"
+    chart_repo_url: "{{ k8s_ecosystem_vars.cert_manager.chart.url }}"
+    chart_version: "{{ k8s_ecosystem_vars.cert_manager.chart.version }}"
+    chart_ref: "{{ k8s_ecosystem_vars.cert_manager.chart.ref | default('cert-manager') }}"
+    release_values: "{{ k8s_ecosystem_vars.cert_manager.helm_values }}"
+    create_namespace: true
+    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+    wait: true

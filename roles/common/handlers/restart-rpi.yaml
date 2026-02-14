@@ -1,3 +1,0 @@
-# code: language=ansible
-- name: Restart rpi
-  ansible.builtin.reboot:

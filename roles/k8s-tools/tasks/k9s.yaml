@@ -2,7 +2,8 @@
 - name: Set k9s Derived Facts (1 of 2)
   ansible.builtin.set_fact:
     k8s_tools_k9s_remote_filename: "k9s_{{ ansible_system }}_{{ ansible_local['arch']['container'] }}.tar.gz"
-    k8s_tools_k9s_version_path: "{{ k8s_tools_vars.global.install }}/k9s/{{ k8s_tools_vars.k9s.version }}"
+    k8s_tools_k9s_download_path: "{{ k8s_tools_vars.role.downloads }}/k9s/{{ k8s_tools_vars.k9s.version }}"
+    k8s_tools_k9s_install_path: "{{ k8s_tools_vars.role.install }}/k9s-{{ k8s_tools_vars.k9s.version }}"
 
 - name: Set k9s Derived Facts (2 of 2)
   ansible.builtin.set_fact:
@@ -11,27 +12,30 @@
 
 - name: Ensure k9s install directory
   ansible.builtin.file:
-    path: "{{ k8s_tools_k9s_version_path }}"
+    path: "{{ item }}"
     state: directory
-    owner: "{{ k8s_tools_vars.global.owner }}"
-    group: "{{ k8s_tools_vars.global.group }}"
-    mode: "{{ k8s_tools_vars.global.mode }}"
+    owner: "{{ k8s_tools_vars.role.owner }}"
+    group: "{{ k8s_tools_vars.role.group }}"
+    mode: "{{ k8s_tools_vars.role.mode }}"
+  loop:
+    - "{{ k8s_tools_k9s_download_path }}"
+    - "{{ k8s_tools_k9s_install_path }}"
 
 - name: Download k9s
   ansible.builtin.get_url:
     url: "{{ k8s_tools_k9s_url }}"
-    dest: "{{ k8s_tools_vars.global.downloads }}/{{ k8s_tools_k9s_local_filename }}"
+    dest: "{{ k8s_tools_k9s_download_path }}/{{ k8s_tools_k9s_local_filename }}"
     mode: "0644"
 
 - name: Extract k9s
   ansible.builtin.unarchive:
-    src: "{{ k8s_tools_vars.global.downloads }}/{{ k8s_tools_k9s_local_filename }}"
-    dest: "{{ k8s_tools_k9s_version_path }}"
+    src: "{{ k8s_tools_k9s_download_path }}/{{ k8s_tools_k9s_local_filename }}"
+    dest: "{{ k8s_tools_k9s_install_path }}"
     remote_src: true
-    creates: "{{ k8s_tools_k9s_version_path }}/k9s"
+    creates: "{{ k8s_tools_k9s_install_path }}/k9s"
 
 - name: Link k9s binary
   ansible.builtin.file:
-    src: "{{ k8s_tools_k9s_version_path }}/k9s"
+    src: "{{ k8s_tools_k9s_install_path }}/k9s"
     dest: "{{ k8s_tools_vars.k9s.bin }}"
     state: link

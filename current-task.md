@@ -187,48 +187,27 @@ Kubernetes functionality is split across three roles to separate concerns:
 - [x] **k8s** (Cluster configuration, Storage Classes, CSI) (Refactored)
 - [ ] **k8s-share** (Kubeconfig distribution)
 
-### Phase 3: Development Environment (Workstations)
-- [ ] Collapse the separate development roles where it makes sense
-  - [ ] Discuss a `k8s-development` role which captures (for example)
-    `argocd-cli`, `helm-cli`, etc
-- [ ] **argocd-cli**
-- [ ] **helm-cli**
-- [ ] **k9s**
-- [ ] **podman**
-- [ ] **aws-development**
-- [ ] **c++-development**
-- [ ] **gitlabci-local**
-- [ ] **open-gl**
+### Phase 3: Development Environment (Dev Toolss)
+- [x] **workstation** (Consolidated from separate dev roles; renamed from `development` to avoid collision with `development` group)
 
 ### Phase 4: Cluster Services (K8s Workloads)
 - [ ] **helm-applications** (Generic Helm installer)
 - [ ] **argocd-server**
 - [ ] **gitlab** (The big one)
-- [ ] **dependabot-gitlab**
 - [ ] **elasticsearch-operator**
 
 ## 4. Current Focus
 
 **Recently Completed:**
 
-1. **`k8s-engine-rke2` role refactoring** ✓
-   - Implemented Variable Merge Pattern (already in place)
-   - Fixed variable naming conventions (elitedesk_rke2, nvidia5080_rke2)
-   - Expanded defaults with documented configuration options
-   - Removed leftover group_vars/rke2/main.yaml
-
-2. **Inventory restructuring** ✓
-   - Replaced `k8s_engine` variable approach with group-based pattern
-   - Created `rke2` and `crc` groups as children of `k8s`
-   - Updated playbook to use group membership instead of conditionals
-   - Removed validation assertions (no longer needed)
-
-3. **`k8s` role consolidation and refactoring** ✓
-   - Consolidated 4 roles (k8s-certificates, k8s-csi-storage, k8s-local-volumes, k8s-secrets) into unified k8s role
-   - Extracted extensions (sealed-secrets, metal-lb) to separate roles
-   - Migrated all variables to Variable Merge Pattern
-   - Deleted old role directories and redundant variable files
-   - Documented infrastructure vs extensions pattern
+4. **Renamed `development` role to `workstation`** ✓
+   - Resolved naming collision: `development` group vs `development` role
+   - `development` group: extends other roles (k8s, etc.) for development hosts
+   - `workstation` role: provisions a machine as a developer workstation
+   - Renamed: `development_defaults` → `workstation_defaults`, `development_vars` → `workstation_vars`
+   - Merge suffix: `_development` → `_workstation`
+   - Updated: `group_vars/development/main.yaml` → `group_vars/development/workstation.yaml` with `development_workstation` variable
+   - Fixed: handler bug referencing undefined `podman_vars` → `workstation_vars.podman`
 
 **Next Up:** `k8s-share` role refactoring
 
@@ -252,10 +231,9 @@ Kubernetes functionality is split across three roles to separate concerns:
   - Fixed: K8s role merge error caused by old `k8s:` variable naming
 
 - [ ] **Migrate packages from deleted OS files to common role:**
-  - **From os_defaults:** `bat`, `speedtest-cli`
-  - **From group_vars/all:** `jq`, `smbclient`, `pigz`, `tree`, `unzip`
+  - **From group_vars/all:** `smbclient`, `pigz`
   - **From group_vars/dev:** `age`, `python3-tk`, `gitlab-ci-local`, python3 packages, `swig`, `bash-completions`
-  - **From group_vars/development:** `age`, `ansible`, `bat`, `jq`, python3 packages, `swig`, `tree`, `unzip`
+  - **From group_vars/development:** `age`, python3 packages, `swig`,
   - **Action needed:** Create appropriate `group_vars/*/common.yaml` files with `<group>_common.packages`
 
 - [ ] **Migrate users/groups from deleted OS files to common role:**

@@ -32,6 +32,13 @@
     - dns
     - resolve
 
+- name: Disk Management (partitions, LVM, filesystems)
+  ansible.builtin.include_tasks: disk-management.yaml
+  tags:
+    - disk
+    - lvm
+    - filesystem
+
 - name: Filesystem Table (fstab)
   ansible.builtin.include_tasks: fstab.yaml
   tags:

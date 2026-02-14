@@ -1,0 +1,14 @@
+# code: language=ansible
+k8s_applications_defaults:
+  elastic_operator:
+    version: 3.3.0
+    url:
+      prefix: https://download.elastic.co/downloads/eck
+      resources:
+        - crds.yaml
+        - operator.yaml
+
+  helm: {}
+
+  role:
+    kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"

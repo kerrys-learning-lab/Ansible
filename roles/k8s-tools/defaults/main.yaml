@@ -21,11 +21,11 @@ k8s_tools_defaults:
     url_prefix: https://github.com/bitnami-labs/sealed-secrets/releases/download
     bin: /usr/local/bin/kubeseal
 
-  global:
+  role:
     owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
     group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
     mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
-    downloads: "{{ lookup('ansible.builtin.vars', 'global').working | default('/var/lib/ansible') }}/downloads"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').working | default('/var/lib/ansible') }}/downloads/{{ role_name }}"
     install: "{{ lookup('ansible.builtin.vars', 'global').install | default('/usr/local/install') }}"
     source: "{{ lookup('ansible.builtin.vars', 'global').source | default('/usr/local/src') }}"
     secrets: "{{ lookup('ansible.builtin.vars', 'global').secrets | default('/usr/local/secrets') }}"

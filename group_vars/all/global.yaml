@@ -2,6 +2,7 @@ global:
   owner: root
   group: root
   mode: a=rX
+  bin: /usr/local/bin
   working: /var/lib/ansible
   install: /usr/local/install
   source: /usr/local/src

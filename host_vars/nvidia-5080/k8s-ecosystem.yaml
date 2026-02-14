@@ -1,0 +1,8 @@
+# code: language=ansible
+nvidia5080_k8s_ecosystem:
+
+  metallb:
+    pool:
+      # NOTE: Reserved these in the Netgear router by setting the upper
+      #       limit of the router's IP range to a.b.c.199
+      - 192.168.0.200-192.168.0.210

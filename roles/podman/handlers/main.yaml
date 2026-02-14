@@ -1,6 +1,0 @@
-# code: language=ansible
-- name: Reload Podman service
-  ansible.builtin.systemd:
-    name: "{{ podman_vars.service.name }}"
-    state: restarted
-    daemon_reload: true

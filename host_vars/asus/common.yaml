@@ -3,3 +3,5 @@ asus_common:
   fqdn: asus.westsidestreet.net
   resolve:
     link: 3
+  packages:
+    - zsh

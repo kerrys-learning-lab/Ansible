@@ -1,0 +1,14 @@
+# code: language=ansible
+- name: GitLab CI Local - Add Apt Repository
+  ansible.builtin.get_url:
+    url: "{{ devtools_vars.gitlabci_local.apt.repo }}"
+    dest: "{{ os.package.sources_dir }}/gitlab-ci-local.sources"
+    mode: a=r
+
+- name: GitLab CI Local - Update Apt
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: GitLab CI Local - Install OS packages
+  ansible.builtin.package:
+    name: "{{ devtools_vars.gitlabci_local.packages }}"

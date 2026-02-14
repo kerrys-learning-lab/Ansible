@@ -37,11 +37,6 @@ Replace manual version checking with Renovate bot for automated dependency updat
 
 Clean up partially-started but never-completed Dependabot configuration.
 
-**Tasks:**
-- [ ] Search for and remove `.github/dependabot.yml` (if exists)
-- [ ] Remove any Dependabot-related workflow files
-- [ ] Check for Dependabot configuration in GitLab settings and remove
-
 **Note:** This is a prerequisite cleanup before implementing Renovate above.
 
 ---

@@ -1,0 +1,118 @@
+# code: language=ansible
+devtools_defaults:
+  packages:
+    # Convenience
+    - bat
+    - jq
+    - speedtest-cli
+    - tree
+    - unzip
+
+    # For certain CLI integrations (like continue, below)
+    - npm
+
+    # UX
+    - gnome-shell-extension-manager
+    - gnome-shell-ubuntu-extensions
+    - gnome-shell-extension-status-icons
+    - gnome-shell-extension-system-monitor
+  npm:
+    - "@continuedev/cli"
+
+  aws:
+    cli:
+      url_prefix: https://awscli.amazonaws.com/awscli-exe-{{ ansible_system | lower }}-{{ ansible_architecture | lower }}
+      # version: 2.25.1
+      version: 2.33.21
+    bin: /usr/local/bin/aws
+
+  claude:
+    installer:
+      url: https://claude.ai/install.sh
+      creates: /usr/local/bin/claude
+
+
+  cpp:
+    debs:
+      - https://github.com/bazelbuild/bazel/releases/download/8.5.0/bazel_8.5.0-linux-x86_64.deb
+    packages:
+      - cmake
+      - gdb
+      - gcovr
+      - lcov
+
+      # Clang
+      - clangd-20
+      - clang-format-20
+      - clang-tidy-20
+
+      # OpenGL runtime
+      - libglfw3
+      - libglfw3-dev
+      - libgl1
+      - libglx-mesa0
+
+      # Pistache (CPP REST Server, for OpenAPI code-gen)
+      - libpistache-dev
+
+      # Protobuf
+      - libprotobuf-c-dev
+      - protobuf-c-compiler
+
+    sources: {}
+
+    tools:
+      bazel-compile-commands:
+        version: 0.20.1
+        url: https://github.com/kiron1/bazel-compile-commands/releases/download/v0.20.1/bazel-compile-commands_0.20.1-linux_amd64.zip
+        dest: /
+        extract: true
+        links:
+          bazel-clangd-wrapper: usr/bin/bazel-clangd-wrapper
+          bazel-compile-commands: usr/bin/bazel-compile-commands
+      bazelisk:
+        version: v1.28.1
+        url: https://github.com/bazelbuild/bazelisk/releases/download/v1.28.1/bazelisk-linux-amd64
+        rcopy: true
+        modes:
+          bazelisk-linux-amd64: a=rx
+        links:
+          bazelisk: bazelisk-linux-amd64
+      buildifier:
+        version: v8.2.1
+        url: https://github.com/bazelbuild/buildtools/releases/download/v8.2.1/buildifier-linux-amd64
+        rcopy: true
+        modes:
+          buildifier-linux-amd64: a=rx
+        links:
+          bazel-buildifier: buildifier-linux-amd64
+
+  gitlabci_local:
+    apt:
+      repo: https://gitlab-ci-local-ppa.firecow.dk/gitlab-ci-local.sources
+    packages:
+      - gitlab-ci-local
+
+
+  podman:
+    packages:
+      - podman
+      - podman-compose
+      - podman-docker
+    service:
+      name: podman.service
+      enabled: false
+      unit_path: /usr/lib/systemd/system/podman.service
+    users: {}
+    group: podman
+    registries: {}
+
+
+  global:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode }}"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').working }}/downloads/{{ role_name }}"
+    install: "{{ lookup('ansible.builtin.vars', 'global').install }}"
+    source: /usr/local/src
+    bin: /usr/local/bin

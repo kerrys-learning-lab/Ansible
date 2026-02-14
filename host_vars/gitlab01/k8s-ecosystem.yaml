@@ -1,0 +1,28 @@
+# code: language=ansible
+gitlab01_k8s_ecosystem:
+
+  metallb:
+    pool:
+      # NOTE: Reserved these in the Netgear router by setting the upper
+      #       limit of the router's IP range to a.b.c.199
+      - 192.168.0.235-192.168.0.244
+
+  k3s:
+    tls-san:
+      - gitlab01
+      - gitlab01.westsidestreet.net
+      - 192.168.0.38
+
+  secrets:
+    aws:
+      type: kubernetes.io/basic-auth
+      namespace: infrastructure
+      stringData:
+        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').aws.account.username }}"
+        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').aws.account.password }}"
+    nas--smb:
+      type: kubernetes.io/basic-auth
+      namespace: infrastructure
+      stringData:
+        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').smb.username }}"
+        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').smb.password }}"

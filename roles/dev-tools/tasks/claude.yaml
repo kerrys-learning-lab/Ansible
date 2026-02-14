@@ -1,0 +1,17 @@
+# code: language=ansible
+- name: Claude Code - Ensure Download Path
+  ansible.builtin.file:
+    name: "{{ devtools_vars.global.downloads }}"
+    state: directory
+    mode: a=rX
+
+- name: Claude Code - Download Installer
+  ansible.builtin.get_url:
+    url: "{{ devtools_vars.claude.installer.url }}"
+    dest: "{{ devtools_vars.global.downloads }}/claude-installer.sh"
+    mode: a=rx
+
+- name: Claude Code - Run Installer
+  ansible.builtin.command: "{{ devtools_vars.global.downloads }}/claude-installer.sh"
+  args:
+    creates: "{{ devtools_vars.claude.installer.creates }}"

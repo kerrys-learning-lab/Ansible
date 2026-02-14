@@ -1,9 +1,0 @@
-# code: language=ansible
-aws_cli_defaults:
-  cli:
-    url_prefix: https://awscli.amazonaws.com/awscli-exe-{{ ansible_system | lower }}-{{ ansible_architecture | lower }}
-    version: 2.25.1
-  bin: /usr/local/bin/aws
-  owner: root
-  group: root
-  mode: a=rx

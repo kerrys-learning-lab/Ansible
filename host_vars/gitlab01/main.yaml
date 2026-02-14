@@ -1,0 +1,23 @@
+# code: language=ansible
+host:
+  packages:
+    - ntfs-3g
+  # argocd:
+  #   helm_values:
+  #     global:
+  #       domain: "{{ lookup('ansible.builtin.vars', 'lan').fqdn.argocd }}"
+  #     server:
+  #       ingress:
+  #         enabled: true
+  #         tls: true
+  #         ingressClassName: gitlab-nginx
+  #       service:
+  #         type: LoadBalancer
+
+  # mounts: {}
+  # k8s:
+  #   namespaces:
+  #     - mlflow
+
+ansible_fqdn: gitlab01.westsidestreet.net
+ansible_host: gitlab01.westsidestreet.net

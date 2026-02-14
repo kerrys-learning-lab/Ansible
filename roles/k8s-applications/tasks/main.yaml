@@ -1,0 +1,29 @@
+# code: language=ansible
+- name: Merge K8S Applications Variables
+  ansible.builtin.set_fact:
+    k8s_applications_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_k8s_applications',
+                initial_value=k8s_applications_defaults,
+                pattern_type='suffix') }}
+
+- name: Install Elasticsearch Operator
+  ansible.builtin.import_tasks: elastic-operator.yaml
+  when: k8s_applications_vars.elastic_operator.enabled | default(false)
+  tags:
+    - elasticsearch
+
+- name: Install/Configure Applications Using Helm
+  kubernetes.core.helm:
+    name: "{{ item.key }}"
+    namespace: "{{ item.value.namespace }}"
+    chart_repo_url: "{{ item.value.chart.url }}"
+    chart_version: "{{ item.value.chart.version }}"
+    chart_ref: "{{ item.value.chart.ref }}"
+    release_values: "{{ item.value.helm_values }}"
+    create_namespace: true
+    kubeconfig: "{{ k8s_applications_vars.role.kubeconfig }}"
+    wait: true
+  loop: "{{ k8s_applications_vars.helm | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}-{{ item.value.chart.version }}"

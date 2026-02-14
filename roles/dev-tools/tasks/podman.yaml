@@ -1,0 +1,38 @@
+# code: language=ansible
+- name: Podman - Install OS Packages
+  ansible.builtin.package:
+    name: "{{ devtools_vars.podman.packages }}"
+
+- name: Podman - Configure Podman Registries
+  ansible.builtin.template:
+    src: podman/registry.j2.conf
+    dest: /etc/containers/registries.conf.d/{{ item.key }}.conf
+    mode: "{{ devtools_vars.global.mode }}"
+  loop: "{{ devtools_vars.podman.registries | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Podman - Configure Systemd Service
+  ansible.builtin.template:
+    src: podman/podman.j2.service
+    dest: "{{ devtools_vars.podman.service.unit_path }}"
+    mode: "{{ devtools_vars.global.mode }}"
+  when: devtools_vars.podman.service.enabled | default(false)
+  notify:
+    - Reload Podman service
+
+- name: Podman - Start/Enable Systemd Service
+  ansible.builtin.systemd:
+    name: "{{ devtools_vars.podman.service.name }}"
+    state: started
+    enabled: true
+  when: devtools_vars.podman.service.enabled | default(false)
+
+- name: Podman - Configure Users
+  ansible.builtin.user:
+    name: "{{ item.key }}"
+    groups: "{{ devtools_vars.podman.group }}"
+    append: true
+  loop: "{{ devtools_vars.podman.users | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

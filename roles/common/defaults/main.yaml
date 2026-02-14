@@ -3,18 +3,21 @@ common_defaults:
 
   # --------------------------------------------------------------------------
   # OS Packages
-  # Design Decision: Only very low-level packages are in the 'defaults'.  I.e.,
-  #                  packages used by Ansible and/or for
-  #                  debugging/trouble-shooting
   packages:
     - bash-completion
     - cifs-utils
     - gnupg2
     - traceroute
+    - tree
     - vim
 
     # Required for Ansible remote execution
     - python3-kubernetes
+
+    # Required for automated disk management
+    - lvm2
+    - parted
+    - python3-parted
 
 
   # --------------------------------------------------------------------------
@@ -40,6 +43,12 @@ common_defaults:
   users_and_groups:
     users: {}
     groups: []
+
+  # --------------------------------------------------------------------------
+  # Disk Management (partitions, LVM, filesystems, mounts)
+  disk_management:
+    disks: {}
+    volume_groups: {}
 
   global:
     owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"

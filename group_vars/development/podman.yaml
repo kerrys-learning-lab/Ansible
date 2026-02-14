@@ -1,4 +1,0 @@
-# code: language=ansible
-development_podman:
-  users:
-    - kerry

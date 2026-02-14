@@ -17,7 +17,7 @@ gitlab_defaults:
     mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
     working: "{{ lookup('ansible.builtin.vars', 'global').working | default('/var/lib/ansible') }}/{{ role_name }}"
     kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"
-    local_volumes: /var/lib/k8s-local-pv
+    local_volumes: /var/lib/k8s-local-volumes
 
   operator:
     name: gitlab-ci

@@ -1,0 +1,39 @@
+# code: language=ansible
+- name: C++ Sources - Create Download Directory for {{ source.key }}-{{ source.value.version }}
+  ansible.builtin.file:
+    path: "{{ devtools_vars.global.downloads }}/{{ source.key }}/{{ source.value.version }}"
+    state: directory
+    owner: "{{ source.value.owner | default(devtools_vars.global.owner) }}"
+    group: "{{ source.value.group | default(devtools_vars.global.group) }}"
+    mode: "{{ source.value.mode | default(devtools_vars.global.mode) }}"
+
+- name: C++ Sources - Download {{ source.key }}-{{ source.value.version }}
+  ansible.builtin.get_url:
+    url: "{{ source.value.url }}"
+    dest: "{{ devtools_vars.global.downloads }}/{{ source.key }}/{{ source.value.version }}"
+    mode: "{{ source.value.mode | default(devtools_vars.global.mode) }}"
+  register: devtools_cpp_source_downloaded
+
+- name: C++ Sources - Create Source Directory for {{ source.key }}-{{ source.value.version }}
+  ansible.builtin.file:
+    path: "{{ devtools_vars.global.source }}/{{ source.key }}-{{ source.value.version }}"
+    state: directory
+    owner: "{{ source.value.owner | default(devtools_vars.global.owner) }}"
+    group: "{{ source.value.group | default(devtools_vars.global.group) }}"
+    mode: "{{ source.value.mode | default(devtools_vars.global.mode) }}"
+
+- name: C++ Sources - Extract {{ source.key }}-{{ source.value.version }} (with parent directory)
+  ansible.builtin.unarchive:
+    src: "{{ devtools_cpp_source_downloaded.dest }}"
+    dest: "{{ devtools_vars.global.source }}/{{ source.key }}-{{ source.value.version }}"
+    remote_src: true
+    mode: "{{ source.value.mode | default(devtools_vars.global.mode) }}"
+  when: source.value.extract is defined and source.value.extract and (source.value.parents | default(false))
+
+- name: C++ Sources - Extract {{ source.key }}-{{ source.value.version }} (without parent directory)
+  ansible.builtin.unarchive:
+    src: "{{ devtools_cpp_source_downloaded.dest }}"
+    dest: "{{ devtools_vars.global.source }}"
+    remote_src: true
+    mode: "{{ source.value.mode | default(devtools_vars.global.mode) }}"
+  when: source.value.extract is defined and source.value.extract and not (source.value.parents | default(false))

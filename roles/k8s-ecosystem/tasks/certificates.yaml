@@ -1,0 +1,39 @@
+# code: language=ansible
+- name: Certificates - Check Cluster Issuer Configuration
+  ansible.builtin.fail:
+    msg: "A ClusterIssuer must be configured (via *_k8s_ecosystem.cluster_cert_issuer) in order to issue certificates"
+  when: (k8s_ecosystem_vars.certificates | length > 0) and (k8s_ecosystem_vars.cluster_cert_issuer | length == 0)
+
+- name: Certificates - Install Cluster Cert Issuer
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      metadata:
+        name: "{{ k8s_ecosystem_vars.cluster_cert_issuer.name }}"
+        namespace: "{{ k8s_ecosystem_vars.cluster_cert_issuer.namespace | default('infrastructure') }}"
+      spec: "{{ k8s_ecosystem_vars.cluster_cert_issuer.spec }}"
+    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+
+- name: Create K8s Certificate(s)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: "{{ item.key }}"
+        namespace: "{{ item.value.namespace }}"
+      spec:
+        secretName: "{{ item.key }}-tls"
+        dnsNames: "{{ item.value.dnsNames }}"
+        issuerRef:
+          name: "{{ k8s_ecosystem_vars.cluster_cert_issuer.name }}"
+          kind: ClusterIssuer
+    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+  loop: "{{ k8s_ecosystem_vars.certificates | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

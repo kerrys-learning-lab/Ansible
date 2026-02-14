@@ -2,32 +2,24 @@ all:
   hosts:
     asus:
     elitedesk:
+    gitlab01:
     nvidia-5080:
 
 ansible:
   hosts:
     asus:
 
+argocd:
+  hosts:
+    gitlab01:
+
 development:
   hosts:
     asus:
-    nvidia-5080:
-
-k8s:
-  children:
-    k8s_engine_crc:
-      hosts:
-    k8s_engine_k3s:
-      hosts:
-        asus:
-        nvidia-5080:
-    k8s_engine_rke2:
-      hosts:
-        elitedesk:
 
 gitlab:
   hosts:
-    elitedesk:
+    gitlab01:
     nvidia-5080:  # TEMPORARY: hosting GitLab while elitedesk is rebuilt
 
 gpu:
@@ -37,18 +29,28 @@ gpu:
         asus:
         nvidia-5080:
 
-argocd:
+proxmox:
   hosts:
     elitedesk:
+
+k8s:
+  children:
+    k8s_engine_crc:
+      hosts:
+    k8s_engine_k3s:
+      hosts:
+        asus:
+        gitlab01:
+        nvidia-5080:
+
+raspberry_pi:
+  hosts: {}
+    # raspberrypi5-01:
+    # raspberrypi5-02:
+    # raspberrypi4-01:
 
 ubuntu:
   hosts:
     asus:
-    elitedesk:
+    gitlab01:
     nvidia-5080:
-
-raspberry_pi:
-  hosts:
-    # raspberrypi5-01:
-    # raspberrypi5-02:
-    # raspberrypi4-01:

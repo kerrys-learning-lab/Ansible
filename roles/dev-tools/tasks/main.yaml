@@ -1,0 +1,46 @@
+# code: language=ansible
+- name: Merge Dev Tools Variables
+  ansible.builtin.set_fact:
+    devtools_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_devtools',
+                initial_value=devtools_defaults,
+                pattern_type='suffix') }}
+- name: OS Packages
+  ansible.builtin.package:
+    name: "{{ devtools_vars.packages }}"
+
+
+- name: Role Prerequisites
+  ansible.builtin.file:
+    path: "{{  devtools_vars.global.downloads }}"
+    state: directory
+    owner: "{{  devtools_vars.global.owner }}"
+    group: "{{  devtools_vars.global.group }}"
+    mode: "{{  devtools_vars.global.mode }}"
+
+- name: Configure AWS CLI
+  ansible.builtin.import_tasks: aws-cli.yaml
+  tags:
+    - aws
+
+- name: Configure C++ Development Tools
+  ansible.builtin.import_tasks: c++/main.yaml
+  tags:
+    - c++
+
+- name: Configure GitLabCI Local
+  ansible.builtin.import_tasks: gitlabci-local.yaml
+  tags:
+    - gitlabci-local
+
+- name: Configure Podman
+  ansible.builtin.import_tasks: podman.yaml
+  tags:
+    - podman
+
+- name: Configure Global Tools via NPM
+  community.general.npm:
+    name: "{{ item }}"
+    global: true
+  loop: "{{ devtools_vars.npm }}"

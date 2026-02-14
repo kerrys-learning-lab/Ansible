@@ -5,16 +5,15 @@ lan:
   domain: westsidestreet.net
   ip:
     ansible: asus
-    nfs: 192.168.0.3
     smb: 192.168.0.3
     nameserver: 192.168.0.3
   fqdn:
     argocd: argocd.westsidestreet.net
     gitlab: gitlab.westsidestreet.net
     gitlab_rehost: gitlab-rehost.westsidestreet.net
-    minio: minio.westsidestreet.net # This is the GitLab minio
+    minio: minio.westsidestreet.net               # This is the GitLab minio
     pages: pages.westsidestreet.net
     registry: registry.westsidestreet.net
   endpoint:
     nas: nas.westsidestreet.net:5555
-    nas_minio: nas-minio.westsidestreet.net:9000 # This is the "ephemeral registry"
+    nas_minio: nas-minio.westsidestreet.net:9000  # This is the "ephemeral registry" minio

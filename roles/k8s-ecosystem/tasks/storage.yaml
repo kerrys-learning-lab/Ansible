@@ -1,0 +1,76 @@
+# code: language=ansible
+- name: Create Parent Directory for Kubernetes StringData Secrets
+  ansible.builtin.file:
+    path: "{{ k8s_ecosystem_vars.global.working }}"
+    state: directory
+    mode: "{{ k8s_ecosystem_vars.global.mode }}"
+
+- name: Storage - Create Kubernetes StorageClass YAML Files
+  ansible.builtin.template:
+    src: storage/storage-class.j2.yaml
+    dest: "{{ k8s_ecosystem_vars.global.working }}/{{ item.key }}--storage-class.yaml"
+    mode: "{{ k8s_ecosystem_vars.global.mode }}"
+  vars:
+    storage_class_name: "{{ item.key }}"
+    spec: "{{ item.value }}"
+  loop: "{{ k8s_ecosystem_vars.storage.classes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Storage - Create Kubernetes StorageClass Objects
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    src: "{{ k8s_ecosystem_vars.global.working }}/{{ item.key }}--storage-class.yaml"
+    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+  loop: "{{ k8s_ecosystem_vars.storage.classes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+# We create the parent directories with less restrictive access
+- name: Storage - Create Local Kubernetes Volume Directory Parents
+  ansible.builtin.file:
+    path: "{{ item.value.root_dir | default(k8s_ecosystem_vars.global.local_volumes) }}/{{ item.value.path | dirname }}"
+    state: directory
+    owner: "{{ item.value.owner | default(k8s_ecosystem_vars.global.owner) }}"
+    group: "{{ item.value.group | default(k8s_ecosystem_vars.global.group) }}"
+    mode: "{{ k8s_ecosystem_vars.global.mode }}"
+  loop: "{{ k8s_ecosystem_vars.storage.local_volumes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Storage - Create Local Kubernetes Volume Directories
+  ansible.builtin.file:
+    path: "{{ item.value.root_dir | default(k8s_ecosystem_vars.global.local_volumes) }}/{{ item.value.path }}"
+    state: directory
+    owner: "{{ item.value.owner | default(k8s_ecosystem_vars.global.owner) }}"
+    group: "{{ item.value.group | default(k8s_ecosystem_vars.global.group) }}"
+    mode: "{{ item.value.mode | default(k8s_ecosystem_vars.global.mode) }}"
+  loop: "{{ k8s_ecosystem_vars.storage.local_volumes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Storage - Create Local Kubernetes PV(s)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ item.key }}"
+        labels:
+          owner: "{{ item.key }}"
+      spec:
+        capacity:
+          storage: "{{ item.value.capacity | default('10Gi') }}"
+        accessModes:
+          - "{{ item.value.accessMode | default('ReadWriteOnce') }}"
+        persistentVolumeReclaimPolicy: "{{ item.value.reclaimPolicy | default('Retain') }}"
+        storageClassName: local
+        hostPath:
+          path: "{{ item.value.root_dir | default(k8s_ecosystem_vars.global.local_volumes) }}/{{ item.value.path }}"
+    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+  loop: "{{ k8s_ecosystem_vars.storage.local_volumes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

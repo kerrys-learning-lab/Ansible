@@ -1,5 +1,31 @@
 # code: language=ansible
 elitedesk_common:
   fqdn: elitedesk.westsidestreet.net
-  resolve:
-    link: 2
+  disk_management:
+    disks:
+      /dev/sda:
+        label: gpt
+        force: true
+        partitions:
+          - number: 1
+            size: 100%
+            flags: [lvm]
+
+      /dev/sdb:
+        label: gpt
+        force: true
+        partitions:
+          - number: 1
+            size: 100%
+            flags: [lvm]
+
+    volume_groups:
+      vg_sda:
+        pvs:
+          - /dev/sda1
+        thinpool: data
+
+      vg_sdb:
+        pvs:
+          - /dev/sdb1
+        thinpool: data

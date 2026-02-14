@@ -1,6 +1,11 @@
 # code: language=ansible
 - name: Bootstrap the Ansible Host
   become: true
+  pre_tasks:
+    - name: Setup Ansible facts
+      ansible.builtin.setup:
+      tags:
+        - always
   hosts:
     - ansible
   roles:
@@ -10,6 +15,11 @@
 
 - name: Common Configuration for all Linux Hosts
   become: true
+  pre_tasks:
+    - name: Setup Ansible facts
+      ansible.builtin.setup:
+      tags:
+        - always
   hosts:
     - all
   roles:
@@ -36,7 +46,7 @@
         - gpu
         - nvidia
 
-- name: Install/Configure Kubernetes
+- name: Install/Configure Kubernetes and Kubernetes Applications
   become: true
   hosts: k8s
   pre_tasks:
@@ -51,7 +61,23 @@
     - role: k8s-tools
       tags:
         - k8s-tools
-    - role: k8s
+    - role: k8s-ecosystem
+      tags:
+        - k8s-ecosystem
+    - role: k8s-applications
+      tags:
+        - k8s-applications
+    - role: k8s-share
+      tags:
+        - share
+    - role: argocd-server
+      when: argocd_server is defined
+      tags:
+        - argocd
+    - role: gitlab
+      when: "'gitlab' in group_names"
+      tags:
+        - gitlab
   tags:
     - k8s
     - kubernetes
@@ -66,84 +92,10 @@
       tags:
         - always
   roles:
-    - role: aws-cli
-      when: aws_cli is defined
-      tags:
-        - aws
-    - role: c++-development
-      when: cpp_development is defined
-      tags:
-        - c++
-    - role: gitlabci-local
-      tags:
-        - gitlab
-        - gitlabci
-        - gitlab-ci
-        - gitlabci-local
-    - role: open-gl
-      when: open_gl is defined
-      tags:
-        - open-gl
-        - opengl
-    - role: podman
-      when: podman is defined
-      tags:
-        - podman
+    - role: dev-tools
   tags:
+    - aws
     - dev
     - development
+    - dev-tools
   any_errors_fatal: true
-
-
-- name: Kubernetes
-  become: true
-  hosts:
-    - k8s
-  roles:
-    - role: elasticsearch-operator
-      when: elasticsearch_operator is defined
-      tags:
-        - elasticsearch
-  tags:
-    - k8s
-  any_errors_fatal: true
-
-- name: Remote Access to Other K8s Clusters
-  become: true
-  hosts:
-    - all
-  roles:
-    - role: k8s-share
-      when: k8s_share is defined
-      tags:
-        - share
-  any_errors_fatal: true
-
-- name: Cluster Applications and Services
-  become: true
-  hosts:
-    - all
-  pre_tasks:
-    - name: Setup Ansible facts
-      ansible.builtin.setup:
-      tags:
-        - always
-  roles:
-    - role: argocd-server
-      when: argocd_server is defined
-      tags:
-        - argocd
-    - role: dependabot-gitlab
-      when: dependabot_gitlab is defined
-      tags:
-        - dependabot
-        - dependabot-gitlab
-        - gitlab
-    - role: gitlab
-      when: "'gitlab' in group_names"
-      tags:
-        - gitlab
-    - role: helm-applications
-      when: helm_applications is defined or helm_applications_defaults is defined
-      tags:
-        - helm

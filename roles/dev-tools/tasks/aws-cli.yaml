@@ -1,0 +1,46 @@
+# code: language=ansible
+- name: AWS CLI - Set Derived Facts (1 of 2)
+  ansible.builtin.set_fact:
+    aws_cli_download_path: "{{ devtools_vars.global.downloads }}/aws-cli/{{ devtools_vars.aws.cli.version }}"
+    aws_cli_install_path: "{{ devtools_vars.global.install }}/aws-cli-{{ devtools_vars.aws.cli.version }}"
+
+- name: AWS CLI - Set Derived Facts (2 of 2)
+  ansible.builtin.set_fact:
+    aws_cli_download_filename: "aws-cli-{{ ansible_system | lower }}-{{ ansible_architecture | lower }}.zip"
+
+- name: AWS CLI - Ensure Directories
+  ansible.builtin.file:
+    name: "{{ item }}"
+    state: directory
+    owner: "{{ devtools_vars.global.owner }}"
+    group: "{{ devtools_vars.global.group }}"
+    mode: "{{ devtools_vars.global.mode }}"
+  loop:
+    - "{{ aws_cli_download_path }}"
+    - "{{ aws_cli_install_path }}"
+
+- name: AWS CLI - Download
+  ansible.builtin.get_url:
+    url: "{{ devtools_vars.aws.cli.url_prefix }}-{{ devtools_vars.aws.cli.version }}.zip"
+    dest: "{{ aws_cli_download_path }}/{{ aws_cli_download_filename }}"
+    mode: "{{ devtools_vars.global.mode }}"
+
+- name: AWS CLI - Extract
+  ansible.builtin.unarchive:
+    src: "{{ aws_cli_download_path }}/{{ aws_cli_download_filename }}"
+    dest: "{{ aws_cli_download_path }}"
+    remote_src: true
+    mode: "{{ devtools_vars.global.mode }}"
+
+- name: AWS CLI - Test Installation
+  ansible.builtin.stat:
+    path: "{{ devtools_vars.aws.bin }}"
+  register: devtools_aws_test_installation
+
+- name: AWS CLI - Install
+  ansible.builtin.shell: # noqa: command-instead-of-shell
+    cmd: |
+      {{ aws_cli_download_path }}/aws/install --install-dir {{ aws_cli_install_path }}
+  when: |
+    not devtools_aws_test_installation.stat.exists
+    or  devtools_vars.aws.cli.version not in devtools_aws_test_installation.stat.lnk_target

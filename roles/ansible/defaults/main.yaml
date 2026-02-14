@@ -1,13 +1,7 @@
 # code: language=ansible
 ansible_defaults:
   packages:
-    - ansible-builder
-    - ansible-collection-ansible-netcommon
-    - ansible-collection-ansible-utils
-    - ansible-collection-ansible-posix
-    - ansible-collection-kubernetes-core
-    - ansible-collection-community-general
-    - python3-ansible-lint
+    - ansible-lint
     - python3-kubernetes
-    - vim-ansible
     - yamllint
+    - yq

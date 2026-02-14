@@ -18,6 +18,7 @@ This repository contains Ansible playbooks and roles for managing a homelab infr
 - [Operational Notes](#operational-notes)
   - [ArgoCD Cluster Management](#argocd-cluster-management)
   - [GitLab Upgrades](#gitlab-upgrades)
+  - [Proxmox Storage Setup](#proxmox-storage-setup)
 
 ---
 
@@ -181,6 +182,24 @@ k8s:  # Parent group: all Kubernetes hosts
 - Clear separation in playbook structure
 - Easy to add new implementations (e.g., `k3s`, `microk8s`)
 
+#### Host Type Groups
+
+Groups can also express host-level characteristics that affect connection or
+behavior. For example, the `proxmox` group captures Proxmox VE hosts which
+require root SSH and no `become`/sudo:
+
+```yaml
+proxmox:
+  hosts:
+    elitedesk:
+```
+
+Group-level connection overrides in `group_vars/proxmox/main.yaml`:
+```yaml
+ansible_user: root
+ansible_become: false    # Overrides play-level become: true
+```
+
 ### Network Topology Variables
 
 Network topology information is centralized in the `lan` variable with the following structure:
@@ -224,6 +243,26 @@ The `k8s` role focuses on **core Kubernetes infrastructure** - enabling standard
 ## Getting Started
 
 ### Prerequisites
+
+#### User Creation
+
+User must have password-less SSH to the target machine and must be able to
+execute 'sudo' without requiring a password.
+
+**Exception: Proxmox hosts** connect as `root` directly (no sudo). See
+`group_vars/proxmox/main.yaml` for connection settings (`ansible_user: root`,
+`ansible_become: false`).
+
+#### Ansible Galaxy Collections
+
+How to update all collections:
+
+```bash
+for collection in $(ansible-galaxy collection list --format=json | jq -r '.["/usr/lib/python3/dist-packages/ansible_collections"] | keys[]'); do
+  echo "Updating collection: ${collection}"
+  ansible-galaxy collection install ${collection} --upgrade
+done
+```
 
 #### RKE2 Installation
 
@@ -323,6 +362,23 @@ Run from a machine with cluster access (e.g., `elitedesk`):
 curl -s "https://gitlab.com/gitlab-org/charts/gitlab/-/raw/${GITLAB_RELEASE}/scripts/database-upgrade" | \
   bash -s -- -n gitlab-system pre
 ```
+
+### Proxmox Storage Setup
+
+After Ansible provisions disk partitions and LVM volume groups on a Proxmox host
+(via the `common` role's `disk-management.yaml`), register the VGs as Proxmox
+LVM-thin storage backends:
+
+```bash
+# Register storage backends in Proxmox
+pvesm add lvmthin local-sda --vgname vg_sda --thinpool data --content images,rootdir
+pvesm add lvmthin local-sdb --vgname vg_sdb --thinpool data --content images,rootdir
+```
+
+The new storage pools will then appear in the Proxmox UI when creating VMs.
+
+See [disk-management-plan.md](disk-management-plan.md) for the full design and
+variable schema.
 
 ---
 
