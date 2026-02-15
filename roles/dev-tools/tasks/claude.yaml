@@ -1,17 +1,19 @@
 # code: language=ansible
 - name: Claude Code - Ensure Download Path
   ansible.builtin.file:
-    name: "{{ devtools_vars.inherited.downloads }}"
+    name: "{{ devtools_vars.inherited.install }}/claude"
     state: directory
     mode: a=rX
 
 - name: Claude Code - Download Installer
   ansible.builtin.get_url:
     url: "{{ devtools_vars.claude.installer.url }}"
-    dest: "{{ devtools_vars.inherited.downloads }}/claude-installer.sh"
+    dest: "{{ devtools_vars.inherited.install }}/claude/install.sh"
     mode: a=rx
 
-- name: Claude Code - Run Installer
-  ansible.builtin.command: "{{ devtools_vars.inherited.downloads }}/claude-installer.sh"
-  args:
-    creates: "{{ devtools_vars.claude.installer.creates }}"
+- name: Claude Code - Installation Instructions
+  ansible.builtin.debug:
+    msg: "{{ item }}"
+  loop:
+    - Claude Code must be installed individually
+    - Run "{{ devtools_vars.inherited.install }}/claude/install.sh"

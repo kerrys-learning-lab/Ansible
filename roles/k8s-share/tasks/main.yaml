@@ -36,7 +36,7 @@
 - name: Transform and Share Kubeconfig
   kubeconfig_transform:
     src: "{{ k8s_share_vars.inherited.downloads }}/kubeconfig.{{ inventory_hostname }}-loopback.yaml"
-    dest: "{{ k8s_share_vars.inherited.share }}/kubeconfig.{{ inventory_hostname }}.yaml"
+    dest: "{{ k8s_share_vars.inherited.share }}/kubeconfig.d/kubeconfig.{{ inventory_hostname }}.yaml"
     server: "{{ ansible_fqdn }}"
     name: "{{ inventory_hostname }}"
     owner: "{{ k8s_share_vars.inherited.owner }}"
@@ -46,8 +46,8 @@
 
 - name: Merge All Kubeconfigs
   kubeconfig_merge:
-    src_dir: "{{ k8s_share_vars.inherited.share }}"
-    dest: "{{ k8s_share_vars.inherited.share }}/kubeconfig.merged.yaml"
+    src_dir: "{{ k8s_share_vars.inherited.share }}/kubeconfig.d"
+    dest: "{{ k8s_share_vars.inherited.share }}/kubeconfig.all.yaml"
     owner: "{{ k8s_share_vars.inherited.owner }}"
     group: "{{ k8s_share_vars.inherited.group }}"
     mode: "{{ k8s_share_vars.inherited.mode }}"
@@ -56,6 +56,6 @@
 
 - name: Link System kubeconfig (Overrides K3S kubeconfig with shared)
   ansible.builtin.file:
-    src: "{{ k8s_share_vars.inherited.share }}/kubeconfig.merged.yaml"
+    src: "{{ k8s_share_vars.inherited.share }}/kubeconfig.all.yaml"
     path: "{{ k8s_engine_vars.inherited.kubeconfig }}"
     state: link

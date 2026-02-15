@@ -31,10 +31,7 @@ devtools_defaults:
       url: https://claude.ai/install.sh
       creates: /usr/local/bin/claude
 
-
   cpp:
-    debs:
-      - https://github.com/bazelbuild/bazel/releases/download/8.5.0/bazel_8.5.0-linux-x86_64.deb
     packages:
       - cmake
       - gdb
@@ -87,6 +84,10 @@ devtools_defaults:
         links:
           bazel-buildifier: buildifier-linux-amd64
 
+  debs:
+    - https://github.com/bazelbuild/bazel/releases/download/8.5.0/bazel_8.5.0-linux-x86_64.deb
+    - https://github.com/Eugeny/tabby/releases/download/v1.0.230/tabby-1.0.230-linux-x64.deb
+
   gitlabci_local:
     apt:
       repo: https://gitlab-ci-local-ppa.firecow.dk/gitlab-ci-local.sources
@@ -106,7 +107,6 @@ devtools_defaults:
     users: {}
     group: podman
     registries: {}
-
 
   inherited:
     owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"

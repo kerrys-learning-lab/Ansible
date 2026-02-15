@@ -5,5 +5,5 @@ k8s_share_defaults:
     group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
     mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
     downloads: "{{ lookup('ansible.builtin.vars', 'global').downloads | default('/var/lib/ansible/downloads') }}/{{ role_name }}"
-    share: "{{ lookup('ansible.builtin.vars', 'global').share | default('/usr/local/share') }}/kubeconfig.d"
+    share: "{{ lookup('ansible.builtin.vars', 'global').share | default('/usr/local/share') }}"
     kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"
