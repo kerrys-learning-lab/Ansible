@@ -10,10 +10,6 @@ argocd_server:
         ingressClassName: gitlab-nginx
         annotations:
           cert-manager.io/cluster-issuer: acme-letsencrypt-cluster-issuer
-        extraTls:
-          - secretName: argocd-server-tls
-            hosts:
-              - argocd.westsidestreet.net
       service:
         type: LoadBalancer
     configs:
