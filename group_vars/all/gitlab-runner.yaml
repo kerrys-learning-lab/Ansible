@@ -1,10 +1,10 @@
 all_gitlab_runner:
-  gitlab_url: "{{ lookup('ansible.builtin.var', 'lan').fqdn.gitlab }}"
+  gitlab_url: "{{ lookup('ansible.builtin.vars', 'lan').fqdn.gitlab }}"
   config:
     s3:
       server_address: nas.westsidestreet.net:9001
       bucket:
         name: gitlab-runner-cache
         location: us-east-1
-      access_key: "{{ lookup('ansible.builtin.var', 'secrets_vault').gitlab_runner.cache_bucket.access_key }}"
-      secret_key: "{{ lookup('ansible.builtin.var', 'secrets_vault').gitlab_runner.cache_bucket.secret_key }}"
+      access_key: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab_runner.cache_bucket.access_key }}"
+      secret_key: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab_runner.cache_bucket.secret_key }}"

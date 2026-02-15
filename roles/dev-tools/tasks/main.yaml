@@ -45,3 +45,8 @@
     name: "{{ item }}"
     global: true
   loop: "{{ devtools_vars.npm }}"
+
+- name: Install Claude Code
+  ansible.builtin.import_tasks: claude.yaml
+  tags:
+    - podman

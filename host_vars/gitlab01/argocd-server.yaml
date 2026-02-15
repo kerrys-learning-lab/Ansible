@@ -20,8 +20,8 @@ argocd_server:
             {{ lookup('ansible.builtin.vars', 'secrets_vault').ssh.privateKey }}
         kerrys-learning-lab-helm:
           url: https://{{ lookup('ansible.builtin.vars', 'lan').fqdn.gitlab }}/api/v4
-          username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.username }}"
-          password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.password }}"
+          username: argocd
+          password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').argocd.glpat }}"
       repositories:
         argo-cd:
           name: argo-cd

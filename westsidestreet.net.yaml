@@ -25,10 +25,7 @@
   roles:
     - role: common
   tags:
-    - base
     - common
-    - os
-    - packages
   any_errors_fatal: true
 
 - name: GPU Drivers and Services
@@ -80,6 +77,9 @@
         - gitlab
     - role: gitlab-runner
       when: "'gitlab_runner' in group_names"
+      tags:
+        - gitlab
+        - gitlab-runner
   tags:
     - k8s
     - kubernetes
@@ -96,8 +96,5 @@
   roles:
     - role: dev-tools
   tags:
-    - aws
-    - dev
-    - development
     - dev-tools
   any_errors_fatal: true

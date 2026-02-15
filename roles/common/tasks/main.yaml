@@ -9,38 +9,38 @@
                 override='ignore') }}
 
 - name: Install/Configure OS Packages
-  ansible.builtin.include_tasks: packages.yaml
+  ansible.builtin.import_tasks: packages.yaml
   tags:
     - os
     - packages
 
 - name: Install/Configure OS Settings
-  ansible.builtin.include_tasks: settings.yaml
+  ansible.builtin.import_tasks: settings.yaml
   tags:
     - os
     - settings
 
 - name: Configure Users and Groups
-  ansible.builtin.include_tasks: users-and-groups.yaml
+  ansible.builtin.import_tasks: users-and-groups.yaml
   tags:
     - users
     - groups
 
 - name: Configure Name Resolution
-  ansible.builtin.include_tasks: resolve.yaml
+  ansible.builtin.import_tasks: resolve.yaml
   tags:
     - dns
     - resolve
 
 - name: Disk Management (partitions, LVM, filesystems)
-  ansible.builtin.include_tasks: disk-management.yaml
+  ansible.builtin.import_tasks: disk-management.yaml
   tags:
     - disk
     - lvm
     - filesystem
 
 - name: Filesystem Table (fstab)
-  ansible.builtin.include_tasks: fstab.yaml
+  ansible.builtin.import_tasks: fstab.yaml
   tags:
     - filesystem
     - fstab

@@ -1,5 +1,5 @@
 # code: language=ansible
-- name: Merge Dev Tools Variables
+- name: Merge GitLab Runner Variables
   ansible.builtin.set_fact:
     gitlab_runner_vars: |
       {{ lookup('community.general.merge_variables',
@@ -22,21 +22,13 @@
   ansible.builtin.set_fact:
     gitlab_runner_helm_values: "{{ lookup('ansible.builtin.template', 'values.j2.yaml') }}"
 
-- name: "!!!!! Debug"
-  ansible.builtin.debug:
-    var: gitlab_runner_helm_values
-
-- name: "Deliberate fail"
-  ansible.builtin.fail:
-    msg: foo
-
 - name: Install/Configure GitLab Runner via Helm
   kubernetes.core.helm:
-    name: "{{ gitlab_runner.helm.name }}"
-    namespace: "{{ gitlab_runner.helm.namespace }}"
-    chart_repo_url: "{{ gitlab_runner.helm.chart.url }}"
-    chart_version: "{{ gitlab_runner.helm.chart.version }}"
-    chart_ref: "{{ gitlab_runner.helm.chart.ref }}"
-    release_values: "{{ gitlab_runner.helm.helm_values }}"
+    name: "{{ gitlab_runner_vars.helm.name }}"
+    namespace: "{{ gitlab_runner_vars.helm.namespace }}"
+    chart_repo_url: "{{ gitlab_runner_vars.helm.chart.url }}"
+    chart_version: "{{ gitlab_runner_vars.helm.chart.version }}"
+    chart_ref: "{{ gitlab_runner_vars.helm.chart.ref }}"
+    release_values: "{{ gitlab_runner_helm_values | from_yaml }}"
     create_namespace: true
-    kubeconfig: "{{ gitlab_runner.role.kubeconfig }}"
+    kubeconfig: "{{ gitlab_runner_vars.role.kubeconfig }}"

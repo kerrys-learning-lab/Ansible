@@ -1,9 +1,0 @@
-# code: language=ansible
-asus_k8s_applications:
-  helm:
-    renovate:
-      namespace: renovate-system
-      chart:
-        oci: oci://ghcr.io/renovatebot/charts/renovate
-        version: 46.14.0
-      helm_values: {}

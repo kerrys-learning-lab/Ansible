@@ -25,6 +25,7 @@ gitlab:
 gitlab_runner:
   hosts:
     gitlab01:
+    nvidia-5080:
 
 gpu:
   children:

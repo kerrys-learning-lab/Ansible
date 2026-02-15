@@ -1,15 +1,10 @@
 # code: language=ansible
-
 westsidestreetnet_k8s_engine:
   k3s:
+    disable:
+      # K3S loadbalancer conflicts with MetalLB
+      - servicelb
     registries:
       registry.westsidestreet.net:
-        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.username }}"
-        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.password }}"
-
-  # NOTE: Only one host left using 'rke2' (elitedesk)
-  rke2:
-    registries:
-      registry.westsidestreet.net:
-        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.username }}"
-        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.glpat.password }}"
+        username: k8s-cluster
+        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').k8s.glpat }}"

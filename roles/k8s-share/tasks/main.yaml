@@ -43,3 +43,13 @@
     group: "{{ k8s_share_vars.role.group }}"
     mode: "{{ k8s_share_vars.role.mode }}"
   delegate_to: localhost
+
+- name: Merge All Kubeconfigs
+  kubeconfig_merge:
+    src_dir: "{{ k8s_share_vars.role.share }}"
+    dest: "{{ k8s_share_vars.role.merged }}"
+    owner: "{{ k8s_share_vars.role.owner }}"
+    group: "{{ k8s_share_vars.role.group }}"
+    mode: "{{ k8s_share_vars.role.mode }}"
+  delegate_to: localhost
+  run_once: true

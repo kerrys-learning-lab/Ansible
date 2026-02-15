@@ -122,18 +122,28 @@ def transform_kubeconfig(data, server, name):
             cluster_entry["name"] = name
             changes.append("cluster name: default -> {}".format(name))
 
-    # 3. Update contexts
+    # 3. Rename user entries
+    for user_entry in data.get("users", []):
+        if user_entry.get("name") == "default":
+            user_entry["name"] = name
+            changes.append("user name: default -> {}".format(name))
+
+    # 4. Update contexts
     for ctx_entry in data.get("contexts", []):
         ctx = ctx_entry.get("context", {})
         if ctx.get("cluster") == "default":
             ctx["cluster"] = name
             changes.append("context.cluster ref: default -> {}".format(name))
 
+        if ctx.get("user") == "default":
+            ctx["user"] = name
+            changes.append("context.user ref: default -> {}".format(name))
+
         if ctx_entry.get("name") == "default":
             ctx_entry["name"] = name
             changes.append("context name: default -> {}".format(name))
 
-    # 4. Update current-context
+    # 5. Update current-context
     if data.get("current-context") == "default":
         data["current-context"] = name
         changes.append("current-context: default -> {}".format(name))

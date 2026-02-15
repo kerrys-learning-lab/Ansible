@@ -196,6 +196,7 @@ Kubernetes functionality is split across three roles to separate concerns:
 - [ ] **gitlab** (The big one)
 - [ ] **elasticsearch-operator**
 
+
 ## 4. Current Focus
 
 **Recently Completed:**
@@ -264,6 +265,11 @@ Kubernetes functionality is split across three roles to separate concerns:
   - **Benefit:** DRY principle with optional dependencies - roles remain self-contained
 
 - [ ] **For each role's defaults, add a note that the values can be changed globally by updating `group_vars/all/globals.yaml`**
+
+- [ ] **Claude**
+  - [ ] After running `dev-tools` role, still had to invoke Claude installer for myself
+  - [ ] (sudo) npm install -g mcp-server-kubernetes
+  - [ ] claude mcp add kubernetes -- npx mcp-server-kubernetes
 
 **Note on Self-Containment:**
 Roles can assume basic bootstrapping from `common` role (system utilities like

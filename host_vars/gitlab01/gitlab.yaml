@@ -3,6 +3,8 @@ gitlab01_gitlab:
   application:
     crd_values:
       global:
+        common:
+          certmanager.k8s.io/issuer: acme-letsencrypt-cluster-issuer
         hosts:
           domain: "{{ lookup('ansible.builtin.vars', 'lan').domain }}"
           pages:
@@ -13,10 +15,13 @@ gitlab01_gitlab:
           configureCertmanager: false
           annotations:
             kubernetes.io/tls-acme: true
+            cert-manager.io/cluster-issuer: acme-letsencrypt-cluster-issuer
             nginx.ingress.kubernetes.io/proxy-body-size: 1024m
             nginx.ingress.kubernetes.io/proxy-connect-timeout: 15
             nginx.ingress.kubernetes.io/proxy-read-timeout: 600
             nginx.ingress.kubernetes.io/service-upstream: true
+          tls:
+            secretName: gitlab-ingress-tls
         appConfig:
           backups:
             bucket: gitlab-backup
@@ -47,12 +52,17 @@ gitlab01_gitlab:
       gitlab-pages:
         ingress:
           tls:
-            secretName: gitlab-pages-tls
+            secretName: gitlab-ingress-tls
       installCertmanager: false
       minio:
         ingress:
           tls:
             secretName: gitlab-ingress-tls
+      postgresql:
+        install: true
+        primary:
+          persistence:
+            existingClaim: postgresql
       registry:
         enabled: true
         ingress:
@@ -69,11 +79,8 @@ gitlab01_gitlab:
             key: password
           migrations:
             enabled: true
-      postgresql:
-        install: true
-        primary:
-          persistence:
-            existingClaim: postgresql
+      sidekiq:
+        maxReplicas: 4
   k8s:
     claims:
       local:
@@ -96,10 +103,8 @@ gitlab01_gitlab:
         - registry.westsidestreet.net
         - minio.westsidestreet.net
         - kas.westsidestreet.net
-    gitlab-pages:
-      namespace: gitlab-system
-      dnsNames:
         - pages.westsidestreet.net
+        - "*.pages.westsidestreet.net"
   storage:
     local_volumes:
       gitlab-18.x--postgresql:

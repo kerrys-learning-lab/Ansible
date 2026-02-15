@@ -1,5 +1,7 @@
 # GitLab Hostname Aliasing & Migration Plan
 
+https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/releases
+
 ## Problem
 
 Moving GitLab between hosts required a temporary hostname (`gitlab-rehost`) to
@@ -71,7 +73,6 @@ certificates:
     namespace: gitlab-system
     dnsNames:
       - pages.westsidestreet.net
-      - "*.pages.westsidestreet.net"
 ```
 
 This ensures TLS validation succeeds regardless of which hostname is used.
