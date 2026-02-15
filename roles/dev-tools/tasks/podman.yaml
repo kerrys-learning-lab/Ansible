@@ -7,7 +7,7 @@
   ansible.builtin.template:
     src: podman/registry.j2.conf
     dest: /etc/containers/registries.conf.d/{{ item.key }}.conf
-    mode: "{{ devtools_vars.global.mode }}"
+    mode: "{{ devtools_vars.inherited.mode }}"
   loop: "{{ devtools_vars.podman.registries | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -16,7 +16,7 @@
   ansible.builtin.template:
     src: podman/podman.j2.service
     dest: "{{ devtools_vars.podman.service.unit_path }}"
-    mode: "{{ devtools_vars.global.mode }}"
+    mode: "{{ devtools_vars.inherited.mode }}"
   when: devtools_vars.podman.service.enabled | default(false)
   notify:
     - Reload Podman service

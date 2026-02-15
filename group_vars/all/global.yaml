@@ -1,4 +1,4 @@
-global:
+inherited:
   owner: root
   group: root
   mode: a=rX

@@ -1,47 +1,47 @@
 # code: language=ansible
 - name: C++ Tools - Create Download Directory for {{ tool.key }}-{{ tool.value.version }}
   ansible.builtin.file:
-    path: "{{ devtools_vars.global.downloads }}/{{ tool.key }}/{{ tool.value.version }}"
+    path: "{{ devtools_vars.inherited.downloads }}/{{ tool.key }}/{{ tool.value.version }}"
     state: directory
-    owner: "{{ tool.value.owner | default(devtools_vars.global.owner) }}"
-    group: "{{ tool.value.group | default(devtools_vars.global.group) }}"
-    mode: "{{ tool.value.mode | default(devtools_vars.global.mode) }}"
+    owner: "{{ tool.value.owner | default(devtools_vars.inherited.owner) }}"
+    group: "{{ tool.value.group | default(devtools_vars.inherited.group) }}"
+    mode: "{{ tool.value.mode | default(devtools_vars.inherited.mode) }}"
 
 - name: C++ Tools - Download {{ tool.key }}-{{ tool.value.version }}
   ansible.builtin.get_url:
     url: "{{ tool.value.url }}"
-    dest: "{{ devtools_vars.global.downloads }}/{{ tool.key }}/{{ tool.value.version }}"
-    mode: "{{ tool.value.mode | default(devtools_vars.global.mode) }}"
+    dest: "{{ devtools_vars.inherited.downloads }}/{{ tool.key }}/{{ tool.value.version }}"
+    mode: "{{ tool.value.mode | default(devtools_vars.inherited.mode) }}"
   register: devtools_cpp_tool_downloaded
 
 - name: C++ Tools - Create Install Directory for {{ tool.key }}-{{ tool.value.version }}
   ansible.builtin.file:
-    path: "{{ devtools_vars.global.install }}/{{ tool.key }}-{{ tool.value.version }}"
+    path: "{{ devtools_vars.inherited.install }}/{{ tool.key }}-{{ tool.value.version }}"
     state: directory
-    owner: "{{ tool.value.owner | default(devtools_vars.global.owner) }}"
-    group: "{{ tool.value.group | default(devtools_vars.global.group) }}"
-    mode: "{{ tool.value.mode | default(devtools_vars.global.mode) }}"
+    owner: "{{ tool.value.owner | default(devtools_vars.inherited.owner) }}"
+    group: "{{ tool.value.group | default(devtools_vars.inherited.group) }}"
+    mode: "{{ tool.value.mode | default(devtools_vars.inherited.mode) }}"
   # when: tool.value.parents | default(false)
 
 - name: C++ Tools - Extract {{ tool.key }}-{{ tool.value.version }}
   ansible.builtin.unarchive:
     src: "{{ devtools_cpp_tool_downloaded.dest }}"
-    dest: "{{ devtools_vars.global.install }}/{{ tool.key }}-{{ tool.value.version }}"
+    dest: "{{ devtools_vars.inherited.install }}/{{ tool.key }}-{{ tool.value.version }}"
     remote_src: true
-    mode: "{{ devtools_vars.global.mode }}"
+    mode: "{{ devtools_vars.inherited.mode }}"
   when: tool.value.extract | default(false)
 
 - name: C++ Tools - Copy {{ tool.key }}-{{ tool.value.version }}
   ansible.builtin.copy:
     src: "{{ devtools_cpp_tool_downloaded.dest }}"
-    dest: "{{ devtools_vars.global.install }}/{{ tool.key }}-{{ tool.value.version }}"
+    dest: "{{ devtools_vars.inherited.install }}/{{ tool.key }}-{{ tool.value.version }}"
     remote_src: true
-    mode: "{{ devtools_vars.global.mode }}"
+    mode: "{{ devtools_vars.inherited.mode }}"
   when: tool.value.rcopy | default(false)
 
 - name: C++ Tools - Set Permissions for {{ tool.key }}-{{ tool.value.version }}
   ansible.builtin.file:
-    path: "{{ devtools_vars.global.install }}/{{ tool.key }}-{{ tool.value.version }}/{{ item.key }}"
+    path: "{{ devtools_vars.inherited.install }}/{{ tool.key }}-{{ tool.value.version }}/{{ item.key }}"
     mode: "{{ item.value }}"
   loop: "{{ tool.value.modes | default({}) | dict2items }}"
   loop_control:
@@ -49,8 +49,8 @@
 
 - name: C++ Tools - Create Links for {{ tool.key }}-{{ tool.value.version }}
   ansible.builtin.file:
-    name: "{{ devtools_vars.global.bin }}/{{ item.key }}"
-    src: "{{ devtools_vars.global.install }}/{{ tool.key }}-{{ tool.value.version }}/{{ item.value }}"
+    name: "{{ devtools_vars.inherited.bin }}/{{ item.key }}"
+    src: "{{ devtools_vars.inherited.install }}/{{ tool.key }}-{{ tool.value.version }}/{{ item.value }}"
     state: link
   loop: "{{ tool.value.links | default({}) | dict2items }}"
   loop_control:

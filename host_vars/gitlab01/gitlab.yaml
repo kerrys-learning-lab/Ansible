@@ -2,7 +2,7 @@
 gitlab01_gitlab:
   application:
     crd_values:
-      global:
+      inherited:
         common:
           certmanager.k8s.io/issuer: acme-letsencrypt-cluster-issuer
         hosts:

@@ -2,8 +2,8 @@
 - name: ArgoCD CLI - Set Derived Facts (1 of 2)
   ansible.builtin.set_fact:
     k8s_tools_argocd_filename: "argocd-{{ ansible_system | lower }}-{{ ansible_local['arch']['dpkg'] }}"
-    k8s_tools_argocd_download_path: "{{ k8s_tools_vars.role.downloads }}/argocd/{{ k8s_tools_vars.argocd.version }}"
-    k8s_tools_argocd_install_path: "{{ k8s_tools_vars.role.install }}/argocd-{{ k8s_tools_vars.argocd.version }}"
+    k8s_tools_argocd_download_path: "{{ k8s_tools_vars.inherited.downloads }}/argocd/{{ k8s_tools_vars.argocd.version }}"
+    k8s_tools_argocd_install_path: "{{ k8s_tools_vars.inherited.install }}/argocd-{{ k8s_tools_vars.argocd.version }}"
 
 - name: ArgoCD CLI - Set Derived Facts (2 of 2)
   ansible.builtin.set_fact:
@@ -13,9 +13,9 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ k8s_tools_vars.role.owner }}"
-    group: "{{ k8s_tools_vars.role.group }}"
-    mode: "{{ k8s_tools_vars.role.mode }}"
+    owner: "{{ k8s_tools_vars.inherited.owner }}"
+    group: "{{ k8s_tools_vars.inherited.group }}"
+    mode: "{{ k8s_tools_vars.inherited.mode }}"
   loop:
     - "{{ k8s_tools_argocd_download_path }}"
     - "{{ k8s_tools_argocd_install_path }}"
@@ -24,7 +24,7 @@
   ansible.builtin.get_url:
     url: "{{ k8s_tools_argocd_url }}"
     dest: "{{ k8s_tools_argocd_download_path }}/{{ k8s_tools_argocd_filename }}"
-    mode: "{{ k8s_tools_vars.role.mode }}"
+    mode: "{{ k8s_tools_vars.inherited.mode }}"
 
 - name: ArgoCD CLI - Install
   ansible.builtin.copy:

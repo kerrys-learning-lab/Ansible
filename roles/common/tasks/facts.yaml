@@ -1,12 +1,12 @@
 # code: language=ansible
 - name: Create Custom Facts Directory
   ansible.builtin.file:
-    name: "{{ common_vars.global.facts }}"
+    name: "{{ common_vars.inherited.facts }}"
     state: directory
-    mode: "{{ common_vars.global.mode }}"
+    mode: "{{ common_vars.inherited.mode }}"
 
 - name: Create Architecture Mapping Facts Script
   ansible.builtin.copy:
     src: files/arch.fact
-    dest: "{{ common_vars.global.facts }}/arch.fact"
+    dest: "{{ common_vars.inherited.facts }}/arch.fact"
     mode: "0555"

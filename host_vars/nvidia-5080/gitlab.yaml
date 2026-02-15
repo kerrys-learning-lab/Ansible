@@ -14,7 +14,7 @@ nvidia5080_gitlab:
   application:
     name: gitlab-rehost
     crd_values:
-      global:
+      inherited:
         hosts:
           domain: "{{ lookup('ansible.builtin.vars', 'lan').domain }}"
           hostSuffix: rehost

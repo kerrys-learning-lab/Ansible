@@ -16,7 +16,7 @@
       apiVersion: v1
       metadata:
         name: gitlab-runner
-    kubeconfig: "{{ gitlab_runner_vars.role.kubeconfig }}"
+    kubeconfig: "{{ gitlab_runner_vars.inherited.kubeconfig }}"
 
 - name: Render GitLab Runner Helm Configuration
   ansible.builtin.set_fact:
@@ -31,4 +31,4 @@
     chart_ref: "{{ gitlab_runner_vars.helm.chart.ref }}"
     release_values: "{{ gitlab_runner_helm_values | from_yaml }}"
     create_namespace: true
-    kubeconfig: "{{ gitlab_runner_vars.role.kubeconfig }}"
+    kubeconfig: "{{ gitlab_runner_vars.inherited.kubeconfig }}"

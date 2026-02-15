@@ -8,7 +8,7 @@
     chart_ref: "{{ k8s_ecosystem_vars.metallb.chart.ref | default('metallb') }}"
     release_values: "{{ k8s_ecosystem_vars.metallb.chart.helm_values }}"
     create_namespace: true
-    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+    kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
     wait: true
   timeout: 120
   when: k8s_engine.needs.metallb
@@ -26,7 +26,7 @@
       spec:
         addresses: "{{ k8s_ecosystem_vars.metallb.pool }}"
         autoAssign: true
-    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+    kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
   when: k8s_ecosystem_vars.metallb.pool | length > 0
 
 - name: MetalLB - Create L2 Advertisement Metal
@@ -42,5 +42,5 @@
       spec:
         ipAddressPools:
           - metal-lb-address-pool
-    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+    kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
   when: k8s_ecosystem_vars.metallb.pool | length > 0

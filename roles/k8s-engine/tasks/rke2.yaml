@@ -1,18 +1,18 @@
 # code: language=ansible
 - name: RKE2 - Ensure Download Path
   ansible.builtin.file:
-    name: "{{ k8s_engine_vars.global.downloads }}"
+    name: "{{ k8s_engine_vars.inherited.downloads }}"
     state: directory
     mode: a=rX
 
 - name: RKE2 - Download RKE2 Installer
   ansible.builtin.get_url:
     url: "{{ k8s_engine_vars.rke2.installer.url }}"
-    dest: "{{ k8s_engine_vars.global.downloads }}/installer.sh"
+    dest: "{{ k8s_engine_vars.inherited.downloads }}/installer.sh"
     mode: a=rx
 
 - name: RKE2 - Run RKE2 Installer
-  ansible.builtin.command: "{{ k8s_engine_vars.global.downloads }}/installer.sh"
+  ansible.builtin.command: "{{ k8s_engine_vars.inherited.downloads }}/installer.sh"
   args:
     creates: "{{ k8s_engine_vars.rke2.installer.creates }}"
 

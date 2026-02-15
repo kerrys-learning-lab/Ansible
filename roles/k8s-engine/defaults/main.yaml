@@ -84,13 +84,13 @@ k8s_engine_defaults:
     # tls-san: []         # Optional: Additional hostnames/IPs for TLS certificate
     # registries: {}      # Optional: Private container registry configurations
 
-  global:
-    owner: "{{ lookup('ansible.builtin.vars', 'global').owner }}"
-    group: "{{ lookup('ansible.builtin.vars', 'global').group }}"
-    mode: "{{ lookup('ansible.builtin.vars', 'global').mode }}"
-    downloads: "{{ lookup('ansible.builtin.vars', 'global').working }}/downloads/{{ role_name }}"
-    working: "{{ lookup('ansible.builtin.vars', 'global').working }}/{{ role_name }}"
-    install: "{{ lookup('ansible.builtin.vars', 'global').install }}"
-    source: "{{ lookup('ansible.builtin.vars', 'global').source }}"
-    secrets: "{{ lookup('ansible.builtin.vars', 'global').secrets }}/{{ role_name }}"
-    kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig }}"
+  inherited:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').working | default('/var/lib/ansible') }}/downloads/{{ role_name }}"
+    working: "{{ lookup('ansible.builtin.vars', 'global').working | default('/var/lib/ansible') }}/{{ role_name }}"
+    install: "{{ lookup('ansible.builtin.vars', 'global').install | default('/usr/local/install') }}"
+    source: "{{ lookup('ansible.builtin.vars', 'global').source | default('/usr/local/src') }}"
+    secrets: "{{ lookup('ansible.builtin.vars', 'global').secrets | default('/usr/local/secrets') }}/{{ role_name }}"
+    kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"

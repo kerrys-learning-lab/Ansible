@@ -120,7 +120,7 @@ k8s_ecosystem_defaults:
     local_volumes: {}
 
 
-  global:
+  inherited:
     env: /etc/profile.d/kubeconfig.sh
     owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
     group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"

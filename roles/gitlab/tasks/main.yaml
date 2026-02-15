@@ -21,26 +21,26 @@
       kind: Namespace
       metadata:
         name: "{{ gitlab_vars.operator.namespace }}"
-    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+    kubeconfig: "{{ gitlab_vars.inherited.kubeconfig }}"
 
 - name: Storage - Create Local Volume Directory Parents
   ansible.builtin.file:
-    path: "{{ gitlab_vars.global.local_volumes }}/{{ item.value.path | dirname }}"
+    path: "{{ gitlab_vars.inherited.local_volumes }}/{{ item.value.path | dirname }}"
     state: directory
-    owner: "{{ item.value.owner | default(gitlab_vars.global.owner) }}"
-    group: "{{ item.value.group | default(gitlab_vars.global.group) }}"
-    mode: "{{ gitlab_vars.global.mode }}"
+    owner: "{{ item.value.owner | default(gitlab_vars.inherited.owner) }}"
+    group: "{{ item.value.group | default(gitlab_vars.inherited.group) }}"
+    mode: "{{ gitlab_vars.inherited.mode }}"
   loop: "{{ gitlab_vars.storage.local_volumes | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
 - name: Storage - Create Local Volume Directories
   ansible.builtin.file:
-    path: "{{ gitlab_vars.global.local_volumes }}/{{ item.value.path }}"
+    path: "{{ gitlab_vars.inherited.local_volumes }}/{{ item.value.path }}"
     state: directory
-    owner: "{{ item.value.owner | default(gitlab_vars.global.owner) }}"
-    group: "{{ item.value.group | default(gitlab_vars.global.group) }}"
-    mode: "{{ item.value.mode | default(gitlab_vars.global.mode) }}"
+    owner: "{{ item.value.owner | default(gitlab_vars.inherited.owner) }}"
+    group: "{{ item.value.group | default(gitlab_vars.inherited.group) }}"
+    mode: "{{ item.value.mode | default(gitlab_vars.inherited.mode) }}"
   loop: "{{ gitlab_vars.storage.local_volumes | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -64,8 +64,8 @@
         persistentVolumeReclaimPolicy: "{{ item.value.reclaimPolicy | default('Retain') }}"
         storageClassName: local
         hostPath:
-          path: "{{ gitlab_vars.global.local_volumes }}/{{ item.value.path }}"
-    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+          path: "{{ gitlab_vars.inherited.local_volumes }}/{{ item.value.path }}"
+    kubeconfig: "{{ gitlab_vars.inherited.kubeconfig }}"
   loop: "{{ gitlab_vars.storage.local_volumes | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -86,7 +86,7 @@
         issuerRef:
           name: "{{ gitlab_vars.cluster_cert_issuer.name }}"
           kind: "{{ gitlab_vars.cluster_cert_issuer.kind }}"
-    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+    kubeconfig: "{{ gitlab_vars.inherited.kubeconfig }}"
   loop: "{{ gitlab_vars.certificates | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -113,7 +113,7 @@
           - "{{ item.value.accessMode | default('ReadWriteOnce') }}"
         volumeName: "{{ item.value.volume }}"
         storageClassName: local
-    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+    kubeconfig: "{{ gitlab_vars.inherited.kubeconfig }}"
   loop: "{{ gitlab_vars.k8s.claims.local | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -126,7 +126,7 @@
     chart_version: "{{ gitlab_vars.operator.version }}"
     chart_ref: "{{ gitlab_vars.operator.ref }}"
     release_values: "{{ gitlab_vars.operator.helm_values }}"
-    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+    kubeconfig: "{{ gitlab_vars.inherited.kubeconfig }}"
   notify:
     - Wait for GitLab Operator to be Installed
 
@@ -152,7 +152,7 @@
           access_key = {{ gitlab_vars.backups.minio.access }}
           secret_key = {{ gitlab_secrets.backups.minio.key }}
           signature_v2 = False
-    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+    kubeconfig: "{{ gitlab_vars.inherited.kubeconfig }}"
 
 # NOTE: See https://docs.gitlab.com/charts/charts/registry/metadata_database
 - name: Create GitLab Registry PostgreSQL Secret
@@ -169,7 +169,7 @@
       stringData:
         username: "{{ gitlab_secrets.registry.postgresql.username }}"
         password: "{{ gitlab_secrets.registry.postgresql.password }}"
-    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+    kubeconfig: "{{ gitlab_vars.inherited.kubeconfig }}"
 
 - name: Apply GitLab CRD
   kubernetes.core.k8s:
@@ -185,4 +185,4 @@
         chart:
           version: "{{ gitlab_vars.application.version }}"
           values: "{{ gitlab_vars.application.crd_values }}"
-    kubeconfig: "{{ gitlab_vars.global.kubeconfig }}"
+    kubeconfig: "{{ gitlab_vars.inherited.kubeconfig }}"

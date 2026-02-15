@@ -1,7 +1,7 @@
 # code: language=ansible
 argocd_server:
   helm:
-    global:
+    inherited:
       domain: argocd.{{ lookup('ansible.builtin.vars', 'lan').domain }}
     server:
       ingress:

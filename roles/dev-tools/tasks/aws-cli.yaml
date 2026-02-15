@@ -1,8 +1,8 @@
 # code: language=ansible
 - name: AWS CLI - Set Derived Facts (1 of 2)
   ansible.builtin.set_fact:
-    aws_cli_download_path: "{{ devtools_vars.global.downloads }}/aws-cli/{{ devtools_vars.aws.cli.version }}"
-    aws_cli_install_path: "{{ devtools_vars.global.install }}/aws-cli-{{ devtools_vars.aws.cli.version }}"
+    aws_cli_download_path: "{{ devtools_vars.inherited.downloads }}/aws-cli/{{ devtools_vars.aws.cli.version }}"
+    aws_cli_install_path: "{{ devtools_vars.inherited.install }}/aws-cli-{{ devtools_vars.aws.cli.version }}"
 
 - name: AWS CLI - Set Derived Facts (2 of 2)
   ansible.builtin.set_fact:
@@ -12,9 +12,9 @@
   ansible.builtin.file:
     name: "{{ item }}"
     state: directory
-    owner: "{{ devtools_vars.global.owner }}"
-    group: "{{ devtools_vars.global.group }}"
-    mode: "{{ devtools_vars.global.mode }}"
+    owner: "{{ devtools_vars.inherited.owner }}"
+    group: "{{ devtools_vars.inherited.group }}"
+    mode: "{{ devtools_vars.inherited.mode }}"
   loop:
     - "{{ aws_cli_download_path }}"
     - "{{ aws_cli_install_path }}"
@@ -23,14 +23,14 @@
   ansible.builtin.get_url:
     url: "{{ devtools_vars.aws.cli.url_prefix }}-{{ devtools_vars.aws.cli.version }}.zip"
     dest: "{{ aws_cli_download_path }}/{{ aws_cli_download_filename }}"
-    mode: "{{ devtools_vars.global.mode }}"
+    mode: "{{ devtools_vars.inherited.mode }}"
 
 - name: AWS CLI - Extract
   ansible.builtin.unarchive:
     src: "{{ aws_cli_download_path }}/{{ aws_cli_download_filename }}"
     dest: "{{ aws_cli_download_path }}"
     remote_src: true
-    mode: "{{ devtools_vars.global.mode }}"
+    mode: "{{ devtools_vars.inherited.mode }}"
 
 - name: AWS CLI - Test Installation
   ansible.builtin.stat:

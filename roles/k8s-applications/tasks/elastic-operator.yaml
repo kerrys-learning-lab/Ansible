@@ -4,5 +4,5 @@
     state: present
     apply: true
     src: "{{ k8s_applications_vars.elastic_operator.url.prefix }}/{{ k8s_applications_vars.elastic_operator.version }}/{{ item }}"
-    kubeconfig: "{{ k8s_applications_vars.role.kubeconfig }}"
+    kubeconfig: "{{ k8s_applications_vars.inherited.kubeconfig }}"
   loop: "{{ k8s_applications_vars.elastic_operator.url.resources }}"

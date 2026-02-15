@@ -1,18 +1,18 @@
 # code: language=ansible
 - name: K3S - Ensure Download Path
   ansible.builtin.file:
-    name: "{{ k8s_engine_vars.global.downloads }}"
+    name: "{{ k8s_engine_vars.inherited.downloads }}"
     state: directory
     mode: a=rX
 
 - name: K3S - Download K3S Installer
   ansible.builtin.get_url:
     url: "{{ k8s_engine_vars.k3s.installer.url }}"
-    dest: "{{ k8s_engine_vars.global.downloads }}/k3s-installer.sh"
+    dest: "{{ k8s_engine_vars.inherited.downloads }}/k3s-installer.sh"
     mode: a=rx
 
 - name: K3S - Run K3S Installer
-  ansible.builtin.command: "{{ k8s_engine_vars.global.downloads }}/k3s-installer.sh"
+  ansible.builtin.command: "{{ k8s_engine_vars.inherited.downloads }}/k3s-installer.sh"
   args:
     creates: "{{ k8s_engine_vars.k3s.installer.creates }}"
 
@@ -55,6 +55,12 @@
   ansible.builtin.file:
     src: "{{ k8s_engine_vars.k3s.kubeconfig.src }}"
     path: "{{ k8s_engine_vars.k3s.kubeconfig.dest }}"
+    state: link
+
+- name: K3S - Link System kubeconfig
+  ansible.builtin.file:
+    src: "{{ k8s_engine_vars.k3s.kubeconfig.src }}"
+    path: "{{ k8s_engine_vars.inherited.kubeconfig }}"
     state: link
 
 - name: K3S - Link kubectl

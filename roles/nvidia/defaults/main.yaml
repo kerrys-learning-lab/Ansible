@@ -48,7 +48,7 @@ nvidia_defaults:
 
 
   # --------------------------------------------------------------------------
-  global:
+  inherited:
     owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
     group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
     mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"

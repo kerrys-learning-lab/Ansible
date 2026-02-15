@@ -1,15 +1,15 @@
 # code: language=ansible
 - name: Create Parent Directory for Kubernetes StringData Secrets
   ansible.builtin.file:
-    path: "{{ k8s_ecosystem_vars.global.working }}"
+    path: "{{ k8s_ecosystem_vars.inherited.working }}"
     state: directory
-    mode: "{{ k8s_ecosystem_vars.global.mode }}"
+    mode: "{{ k8s_ecosystem_vars.inherited.mode }}"
 
 - name: Storage - Create Kubernetes StorageClass YAML Files
   ansible.builtin.template:
     src: storage/storage-class.j2.yaml
-    dest: "{{ k8s_ecosystem_vars.global.working }}/{{ item.key }}--storage-class.yaml"
-    mode: "{{ k8s_ecosystem_vars.global.mode }}"
+    dest: "{{ k8s_ecosystem_vars.inherited.working }}/{{ item.key }}--storage-class.yaml"
+    mode: "{{ k8s_ecosystem_vars.inherited.mode }}"
   vars:
     storage_class_name: "{{ item.key }}"
     spec: "{{ item.value }}"
@@ -21,8 +21,8 @@
   kubernetes.core.k8s:
     state: present
     apply: true
-    src: "{{ k8s_ecosystem_vars.global.working }}/{{ item.key }}--storage-class.yaml"
-    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+    src: "{{ k8s_ecosystem_vars.inherited.working }}/{{ item.key }}--storage-class.yaml"
+    kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
   loop: "{{ k8s_ecosystem_vars.storage.classes | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -30,22 +30,22 @@
 # We create the parent directories with less restrictive access
 - name: Storage - Create Local Kubernetes Volume Directory Parents
   ansible.builtin.file:
-    path: "{{ item.value.root_dir | default(k8s_ecosystem_vars.global.local_volumes) }}/{{ item.value.path | dirname }}"
+    path: "{{ item.value.root_dir | default(k8s_ecosystem_vars.inherited.local_volumes) }}/{{ item.value.path | dirname }}"
     state: directory
-    owner: "{{ item.value.owner | default(k8s_ecosystem_vars.global.owner) }}"
-    group: "{{ item.value.group | default(k8s_ecosystem_vars.global.group) }}"
-    mode: "{{ k8s_ecosystem_vars.global.mode }}"
+    owner: "{{ item.value.owner | default(k8s_ecosystem_vars.inherited.owner) }}"
+    group: "{{ item.value.group | default(k8s_ecosystem_vars.inherited.group) }}"
+    mode: "{{ k8s_ecosystem_vars.inherited.mode }}"
   loop: "{{ k8s_ecosystem_vars.storage.local_volumes | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
 - name: Storage - Create Local Kubernetes Volume Directories
   ansible.builtin.file:
-    path: "{{ item.value.root_dir | default(k8s_ecosystem_vars.global.local_volumes) }}/{{ item.value.path }}"
+    path: "{{ item.value.root_dir | default(k8s_ecosystem_vars.inherited.local_volumes) }}/{{ item.value.path }}"
     state: directory
-    owner: "{{ item.value.owner | default(k8s_ecosystem_vars.global.owner) }}"
-    group: "{{ item.value.group | default(k8s_ecosystem_vars.global.group) }}"
-    mode: "{{ item.value.mode | default(k8s_ecosystem_vars.global.mode) }}"
+    owner: "{{ item.value.owner | default(k8s_ecosystem_vars.inherited.owner) }}"
+    group: "{{ item.value.group | default(k8s_ecosystem_vars.inherited.group) }}"
+    mode: "{{ item.value.mode | default(k8s_ecosystem_vars.inherited.mode) }}"
   loop: "{{ k8s_ecosystem_vars.storage.local_volumes | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -69,8 +69,8 @@
         persistentVolumeReclaimPolicy: "{{ item.value.reclaimPolicy | default('Retain') }}"
         storageClassName: local
         hostPath:
-          path: "{{ item.value.root_dir | default(k8s_ecosystem_vars.global.local_volumes) }}/{{ item.value.path }}"
-    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+          path: "{{ item.value.root_dir | default(k8s_ecosystem_vars.inherited.local_volumes) }}/{{ item.value.path }}"
+    kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
   loop: "{{ k8s_ecosystem_vars.storage.local_volumes | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

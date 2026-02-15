@@ -70,15 +70,15 @@ Replace hard-coded `/etc/kubeconfig` references with variable lookups.
 
 **Context:**
 - A `global.kubeconfig` variable now exists in `group_vars/all/global.yaml`
-- Roles should reference `{{ <role>_vars.global.kubeconfig }}` instead of hard-coding the path
+- Roles should reference `{{ <role>_vars.inherited.kubeconfig }}` instead of hard-coding the path
 - This follows the optional global standards pattern with fallback defaults
 
 **Tasks:**
 - [ ] Search for hard-coded `/etc/kubeconfig` references across all roles
-- [ ] Replace with variable references (e.g., `k8s_vars.global.kubeconfig`)
+- [ ] Replace with variable references (e.g., `k8s_vars.inherited.kubeconfig`)
 - [ ] Ensure roles have the kubeconfig lookup with fallback in their defaults:
   ```yaml
-  global:
+  inherited:
     kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"
   ```
 

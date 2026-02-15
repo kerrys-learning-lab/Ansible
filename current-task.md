@@ -92,7 +92,7 @@ then adding more in `host_vars/specific_host`), we use
     k8s_helm_filename: "helm-{{ k8s_vars.helm.version }}-{{ ansible_system | lower }}-{{ ansible_local['arch']['container'] }}.tar.gz"
 
     # Combines install path + version (used in multiple places)
-    k8s_helm_version_path: "{{ k8s_vars.global.paths.install }}/{{ k8s_vars.helm.version }}"
+    k8s_helm_version_path: "{{ k8s_vars.inherited.paths.install }}/{{ k8s_vars.helm.version }}"
     ```
   - **Example - Invalid (simple renaming used once):**
     ```yaml
@@ -254,7 +254,7 @@ Kubernetes functionality is split across three roles to separate concerns:
   - **Example:**
     ```yaml
     <role>_defaults:
-      global:
+      inherited:
         owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
         group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
         mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"

@@ -111,7 +111,7 @@ Roles access global variables using the **lookup pattern with fallback defaults*
 ```yaml
 # In roles/<role>/defaults/main.yaml
 <role>_defaults:
-  global:
+  inherited:
     owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
     group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
     mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
@@ -130,10 +130,10 @@ Roles access global variables using the **lookup pattern with fallback defaults*
 - name: Download artifact
   ansible.builtin.get_url:
     url: "{{ tool_url }}"
-    dest: "{{ <role>_vars.global.downloads }}/artifact.tar.gz"
-    owner: "{{ <role>_vars.global.owner }}"
-    group: "{{ <role>_vars.global.group }}"
-    mode: "{{ <role>_vars.global.mode }}"
+    dest: "{{ <role>_vars.inherited.downloads }}/artifact.tar.gz"
+    owner: "{{ <role>_vars.inherited.owner }}"
+    group: "{{ <role>_vars.inherited.group }}"
+    mode: "{{ <role>_vars.inherited.mode }}"
 ```
 
 ### Role Structure

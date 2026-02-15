@@ -10,5 +10,5 @@ k8s_applications_defaults:
 
   helm: {}
 
-  role:
+  inherited:
     kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"

@@ -2,8 +2,8 @@
 - name: Set Kubeseal Derived Facts (1 of 2)
   ansible.builtin.set_fact:
     k8s_tools_kubeseal_filename: "kubeseal-{{ k8s_tools_vars.kubeseal.version }}-{{ ansible_system | lower }}-{{ ansible_local['arch']['dpkg'] }}.tar.gz"
-    k8s_tools_kubeseal_download_path: "{{ k8s_tools_vars.role.downloads }}/kubeseal/{{ k8s_tools_vars.kubeseal.version }}"
-    k8s_tools_kubeseal_install_path: "{{ k8s_tools_vars.role.install }}/kubeseal-{{ k8s_tools_vars.kubeseal.version }}"
+    k8s_tools_kubeseal_download_path: "{{ k8s_tools_vars.inherited.downloads }}/kubeseal/{{ k8s_tools_vars.kubeseal.version }}"
+    k8s_tools_kubeseal_install_path: "{{ k8s_tools_vars.inherited.install }}/kubeseal-{{ k8s_tools_vars.kubeseal.version }}"
 
 - name: Set Kubeseal Derived Facts (2 of 2)
   ansible.builtin.set_fact:
@@ -13,9 +13,9 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ k8s_tools_vars.role.owner }}"
-    group: "{{ k8s_tools_vars.role.group }}"
-    mode: "{{ k8s_tools_vars.role.mode }}"
+    owner: "{{ k8s_tools_vars.inherited.owner }}"
+    group: "{{ k8s_tools_vars.inherited.group }}"
+    mode: "{{ k8s_tools_vars.inherited.mode }}"
   loop:
     - "{{ k8s_tools_kubeseal_download_path }}"
     - "{{ k8s_tools_kubeseal_install_path }}"

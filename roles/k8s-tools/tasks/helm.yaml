@@ -2,8 +2,8 @@
 - name: Set Helm Derived Facts (1 of 2)
   ansible.builtin.set_fact:
     k8s_tools_helm_filename: "helm-{{ k8s_tools_vars.helm.version }}-{{ ansible_system | lower }}-{{ ansible_local['arch']['container'] }}.tar.gz"
-    k8s_tools_helm_download_path: "{{ k8s_tools_vars.role.downloads }}/helm/{{ k8s_tools_vars.helm.version }}"
-    k8s_tools_helm_install_path: "{{ k8s_tools_vars.role.install }}/helm-{{ k8s_tools_vars.helm.version }}"
+    k8s_tools_helm_download_path: "{{ k8s_tools_vars.inherited.downloads }}/helm/{{ k8s_tools_vars.helm.version }}"
+    k8s_tools_helm_install_path: "{{ k8s_tools_vars.inherited.install }}/helm-{{ k8s_tools_vars.helm.version }}"
 
 - name: Set Helm Derived Facts (2 of 2)
   ansible.builtin.set_fact:
@@ -13,9 +13,9 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ k8s_tools_vars.role.owner }}"
-    group: "{{ k8s_tools_vars.role.group }}"
-    mode: "{{ k8s_tools_vars.role.mode }}"
+    owner: "{{ k8s_tools_vars.inherited.owner }}"
+    group: "{{ k8s_tools_vars.inherited.group }}"
+    mode: "{{ k8s_tools_vars.inherited.mode }}"
   loop:
     - "{{ k8s_tools_helm_download_path }}"
     - "{{ k8s_tools_helm_install_path }}"

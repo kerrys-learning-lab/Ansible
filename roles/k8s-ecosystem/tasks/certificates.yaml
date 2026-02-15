@@ -15,7 +15,7 @@
         name: "{{ k8s_ecosystem_vars.cluster_cert_issuer.name }}"
         namespace: "{{ k8s_ecosystem_vars.cluster_cert_issuer.namespace | default('infrastructure') }}"
       spec: "{{ k8s_ecosystem_vars.cluster_cert_issuer.spec }}"
-    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+    kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
 
 - name: Create K8s Certificate(s)
   kubernetes.core.k8s:
@@ -33,7 +33,7 @@
         issuerRef:
           name: "{{ k8s_ecosystem_vars.cluster_cert_issuer.name }}"
           kind: ClusterIssuer
-    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+    kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
   loop: "{{ k8s_ecosystem_vars.certificates | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

@@ -14,11 +14,11 @@
 
 - name: Role Prerequisites
   ansible.builtin.file:
-    path: "{{  devtools_vars.global.downloads }}"
+    path: "{{  devtools_vars.inherited.downloads }}"
     state: directory
-    owner: "{{  devtools_vars.global.owner }}"
-    group: "{{  devtools_vars.global.group }}"
-    mode: "{{  devtools_vars.global.mode }}"
+    owner: "{{  devtools_vars.inherited.owner }}"
+    group: "{{  devtools_vars.inherited.group }}"
+    mode: "{{  devtools_vars.inherited.mode }}"
 
 - name: Configure AWS CLI
   ansible.builtin.import_tasks: aws-cli.yaml
@@ -43,7 +43,7 @@
 - name: Configure Global Tools via NPM
   community.general.npm:
     name: "{{ item }}"
-    global: true
+    inherited: true
   loop: "{{ devtools_vars.npm }}"
 
 - name: Install Claude Code

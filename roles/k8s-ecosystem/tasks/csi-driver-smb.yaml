@@ -1,19 +1,19 @@
 # code: language=ansible
 - name: Container Storage Interface (CSI) for SMB (aka Samba) - Set Derived Facts
   ansible.builtin.set_fact:
-    k8s_csi_helm_values_path: "{{ k8s_ecosystem_vars.global.working }}/csi-driver-smb--helm-values.yaml"
+    k8s_csi_helm_values_path: "{{ k8s_ecosystem_vars.inherited.working }}/csi-driver-smb--helm-values.yaml"
 
 - name: Container Storage Interface (CSI) for SMB (aka Samba) - Create Kubernetes YAML Files Directory
   ansible.builtin.file:
-    path: "{{ k8s_ecosystem_vars.global.working }}"
+    path: "{{ k8s_ecosystem_vars.inherited.working }}"
     state: directory
-    mode: "{{ k8s_ecosystem_vars.global.mode }}"
+    mode: "{{ k8s_ecosystem_vars.inherited.mode }}"
 
 - name: Container Storage Interface (CSI) for SMB (aka Samba) - Write Helm Values File
   ansible.builtin.copy:
     content: "{{ k8s_ecosystem_vars.smb_driver.helm_values | to_nice_yaml(indent=2) }}"
     dest: "{{ k8s_csi_helm_values_path }}"
-    mode: "{{ k8s_ecosystem_vars.global.mode }}"
+    mode: "{{ k8s_ecosystem_vars.inherited.mode }}"
 
 - name: Container Storage Interface (CSI) for SMB (aka Samba) - Install/Configure Using Helm
   kubernetes.core.helm:
@@ -24,6 +24,6 @@
     chart_ref: "{{ k8s_ecosystem_vars.smb_driver.chart.ref | default('csi-driver-smb') }}"
     values_files: "{{ k8s_csi_helm_values_path }}"
     create_namespace: true
-    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+    kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
     wait: true
   timeout: 120

@@ -4,7 +4,7 @@ host:
     - ntfs-3g
   # argocd:
   #   helm_values:
-  #     global:
+  #     inherited:
   #       domain: "{{ lookup('ansible.builtin.vars', 'lan').fqdn.argocd }}"
   #     server:
   #       ingress:

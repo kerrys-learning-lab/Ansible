@@ -8,5 +8,5 @@
     chart_ref: "{{ k8s_ecosystem_vars.cert_manager.chart.ref | default('cert-manager') }}"
     release_values: "{{ k8s_ecosystem_vars.cert_manager.helm_values }}"
     create_namespace: true
-    kubeconfig: "{{ k8s_ecosystem_vars.global.kubeconfig }}"
+    kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
     wait: true

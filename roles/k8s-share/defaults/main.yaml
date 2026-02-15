@@ -1,10 +1,9 @@
 # code: language=ansible
 k8s_share_defaults:
-  role:
+  inherited:
     owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
     group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
     mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
     downloads: "{{ lookup('ansible.builtin.vars', 'global').downloads | default('/var/lib/ansible/downloads') }}/{{ role_name }}"
     share: "{{ lookup('ansible.builtin.vars', 'global').share | default('/usr/local/share') }}/kubeconfig.d"
-    merged: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"
     kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"
