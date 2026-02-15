@@ -7,3 +7,5 @@ argocd_server_defaults:
     ref: argo-cd
     url: https://argoproj.github.io/argo-helm
     version: 7.8.2
+  certificate:
+    clusterIssuer: acme-letsencrypt-cluster-issuer

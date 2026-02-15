@@ -8,6 +8,25 @@
     argocd_server_k8s_namespace: "{{ argocd_server.k8s.namespace | default(argocd_server_defaults.k8s.namespace) }}"
     argocd_server_helm_config: "{{ argocd_server.helm }}"
 
+- name: Create ArgoCD TLS Certificate
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: argocd-server
+        namespace: "{{ argocd_server_k8s_namespace }}"
+      spec:
+        secretName: argocd-server-tls
+        dnsNames: "{{ argocd_server.certificate.dnsNames }}"
+        issuerRef:
+          name: "{{ argocd_server.certificate.clusterIssuer | default(argocd_server_defaults.certificate.clusterIssuer) }}"
+          kind: ClusterIssuer
+    kubeconfig: /etc/kubeconfig
+  when: argocd_server.certificate is defined
+
 - name: Install/Configure ArgoCD via Helm
   kubernetes.core.helm:
     name: "{{ argocd_server_k8s_name }}"
