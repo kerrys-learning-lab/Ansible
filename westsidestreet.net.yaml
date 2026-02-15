@@ -78,6 +78,8 @@
       when: "'gitlab' in group_names"
       tags:
         - gitlab
+    - role: gitlab-runner
+      when: "'gitlab_runner' in group_names"
   tags:
     - k8s
     - kubernetes

@@ -22,6 +22,10 @@ gitlab:
     gitlab01:
     nvidia-5080:  # TEMPORARY: hosting GitLab while elitedesk is rebuilt
 
+gitlab_runner:
+  hosts:
+    gitlab01:
+
 gpu:
   children:
     nvidia:

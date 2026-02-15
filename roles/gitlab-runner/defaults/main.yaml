@@ -1,0 +1,14 @@
+# Reference: https://docs.gitlab.com/runner/install/kubernetes/#configure-gitlab-runner-with-the-helm-chart
+gitlab_runner_defaults:
+  config: {}
+
+  helm:
+    name: gitlab-runner
+    namespace: gitlab-runner
+    chart:
+      url: https://charts.gitlab.io
+      ref: gitlab-runner
+      version: 0.85.0
+
+  role:
+    kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"

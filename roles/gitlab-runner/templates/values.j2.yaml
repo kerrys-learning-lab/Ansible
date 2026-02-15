@@ -1,0 +1,31 @@
+gitlabUrl: https://{{ gitlab_runner.gitlab_url }}
+rbac:
+    create: true
+runnerToken: "{{ gitlab_runner.token }}"
+runners:
+    config: |
+        [[runners]]
+            [runners.feature_flags]
+                FF_ENABLE_BASH_EXIT_CODE_CHECK = true
+                FF_SCRIPT_SECTIONS = true
+                FF_TIMESTAMPS = true
+            [runners.kubernetes]
+                privileged = true
+                allowed_pull_policies = ["always", "if-not-present"]
+                pull_policy = "always"
+
+            {% if 's3' in gitlab_runner.config %}
+            [runners.cache]
+                Type = "s3"
+                Path = "runner"
+                Shared = true
+
+                [runners.cache.s3]
+                    ServerAddress = "{{ gitlab_runner.config.s3.server_address }}"
+                    BucketName = "{{ gitlab_runner.config.s3.bucket.name }}"
+                    BucketLocation = "{{ gitlab_runner.config.s3.bucket.location }}"
+                    Insecure = true
+                    AuthenticationType = "access-key"
+                    AccessKey = "{{ gitlab_runner.config.s3.access_key }}"
+                    SecretKey = "{{ gitlab_runner.config.s3.secret_key }}"
+            {% endif %}

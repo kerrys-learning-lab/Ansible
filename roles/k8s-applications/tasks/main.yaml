@@ -27,3 +27,19 @@
   loop: "{{ k8s_applications_vars.helm | dict2items }}"
   loop_control:
     label: "{{ item.key }}-{{ item.value.chart.version }}"
+  when: "'url' in item.value.chart"
+
+- name: Install/Configure Applications Using Helm OCI
+  kubernetes.core.helm:
+    name: "{{ item.key }}"
+    namespace: "{{ item.value.namespace }}"
+    chart_version: "{{ item.value.chart.version }}"
+    chart_ref: "{{ item.value.chart.oci }}"
+    release_values: "{{ item.value.helm_values }}"
+    create_namespace: true
+    kubeconfig: "{{ k8s_applications_vars.role.kubeconfig }}"
+    wait: true
+  loop: "{{ k8s_applications_vars.helm | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}-{{ item.value.chart.version }}"
+  when: "'oci' in item.value.chart"

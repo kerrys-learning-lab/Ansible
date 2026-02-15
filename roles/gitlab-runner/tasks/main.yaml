@@ -1,4 +1,42 @@
 # code: language=ansible
-- name: Install GitLab Runner Operator
-  include_tasks: gitlab-runner.yaml
-  when: gitlab_runner is defined
+- name: Merge Dev Tools Variables
+  ansible.builtin.set_fact:
+    gitlab_runner_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_gitlab_runner',
+                initial_value=gitlab_runner_defaults,
+                pattern_type='suffix') }}
+
+- name: Create GitLab Runner Namespace
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      kind: Namespace
+      apiVersion: v1
+      metadata:
+        name: gitlab-runner
+    kubeconfig: "{{ gitlab_runner_vars.role.kubeconfig }}"
+
+- name: Render GitLab Runner Helm Configuration
+  ansible.builtin.set_fact:
+    gitlab_runner_helm_values: "{{ lookup('ansible.builtin.template', 'values.j2.yaml') }}"
+
+- name: "!!!!! Debug"
+  ansible.builtin.debug:
+    var: gitlab_runner_helm_values
+
+- name: "Deliberate fail"
+  ansible.builtin.fail:
+    msg: foo
+
+- name: Install/Configure GitLab Runner via Helm
+  kubernetes.core.helm:
+    name: "{{ gitlab_runner.helm.name }}"
+    namespace: "{{ gitlab_runner.helm.namespace }}"
+    chart_repo_url: "{{ gitlab_runner.helm.chart.url }}"
+    chart_version: "{{ gitlab_runner.helm.chart.version }}"
+    chart_ref: "{{ gitlab_runner.helm.chart.ref }}"
+    release_values: "{{ gitlab_runner.helm.helm_values }}"
+    create_namespace: true
+    kubeconfig: "{{ gitlab_runner.role.kubeconfig }}"

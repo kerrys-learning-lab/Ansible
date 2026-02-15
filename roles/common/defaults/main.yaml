@@ -6,6 +6,7 @@ common_defaults:
   packages:
     - bash-completion
     - cifs-utils
+    - curl
     - gnupg2
     - traceroute
     - tree

@@ -1,28 +1,11 @@
 # code: language=ansible
-gitlab_runner:
-  helm:
-    name: gitlab-runner
-    namespace: gitlab-system
-    url: https://charts.gitlab.io
-    ref: gitlab-runner
-    version: 0.75.1
-    helm_values:
-      gitlabUrl: https://gitlab.westsidestreet.net
-      rbac:
-        create: true
-      runnerToken: "{{ lookup('ansible.builtin.vars', 'gitlab_runner_secrets').token }}"
-      runners:
-        config: |
-          [[runners]]
-            [runners.feature_flags]
-              FF_ENABLE_BASH_EXIT_CODE_CHECK = true
-              FF_SCRIPT_SECTIONS = true
-              FF_TIMESTAMPS = true
-            [runners.kubernetes]
-              image = "registry.westsidestreet.net/kerrys-learning-lab/devsecops/gitlab-runner/gitlab-runner:main"
-              privileged = true
-              allowed_pull_policies = ["always", "if-not-present"]
-              pull_policy = "always"
-
-gitlab_runner_secrets:
-  token: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.runner.token }}"
+gitlab01_gitlab_runner:
+  token: !vault |
+    $ANSIBLE_VAULT;1.1;AES256
+    63656438656330353961356330333130346336613530643138373834656437656466323431616462
+    3139306337636265643263306534393064613163316135620a356537633832306634656431353964
+    30613335323435303963343263343233666437353533376561363832383637646161323431373539
+    3062303666613233660a646334323363383738326637373837333438303065376534393662666131
+    36323930323135653361626364633431336663666437643663623633373063616361663964373962
+    35356531326365326639363030656134383931613765303561343638323933333731303732653338
+    323438623563343562393336313638613331
