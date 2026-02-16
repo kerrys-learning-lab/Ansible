@@ -6,11 +6,17 @@ This repository contains Ansible playbooks and roles for managing a homelab infr
 
 - [Architecture & Design Principles](#architecture--design-principles)
   - [Variable Merge Pattern](#variable-merge-pattern)
+  - [Secrets Pattern](#secrets-pattern)
   - [Global Variables](#global-variables)
+  - [The Lookup Pattern](#the-lookup-pattern)
   - [Role Structure](#role-structure)
   - [Self-Contained Roles](#self-contained-roles)
   - [Inventory Organization](#inventory-organization)
+  - [Conditional Role and Task Execution](#conditional-role-and-task-execution)
   - [Network Topology Variables](#network-topology-variables)
+  - [Helm Chart Conventions](#helm-chart-conventions)
+  - [Kubernetes Resource Patterns](#kubernetes-resource-patterns)
+  - [K8s Engine Abstraction](#k8s-engine-abstraction)
   - [K8s Role Scope: Infrastructure vs Extensions](#k8s-role-scope-infrastructure-vs-extensions)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -71,6 +77,55 @@ The first task in `roles/<role>/tasks/main.yaml` performs the merge:
 ```
 
 For roles split across multiple task files, each sub-task file has a corresponding nested key in the role's variables (e.g., `common_vars.resolve` for `roles/common/tasks/resolve.yaml`).
+
+### Secrets Pattern
+
+Sensitive values (passwords, API keys, tokens) are stored separately from
+role configuration and are **not** part of the Variable Merge Pattern.
+
+#### Central Vault
+
+All secrets originate from a single dictionary, `secrets_vault`, defined in
+`group_vars/all/secrets.yaml`. This file may be encrypted with Ansible Vault
+or stored as plain text (see [GETTING-STARTED.md](GETTING-STARTED.md)).
+
+#### Role-Specific Secrets
+
+Roles that need secrets define a separate `<role>_secrets` variable alongside
+the main `<host>_<role>` variable. These are **not** merged into `<role>_vars`
+-- they exist as standalone variables accessed directly in tasks.
+
+```yaml
+# File: host_vars/gitlab01/gitlab.yaml
+
+# This IS part of the merge pattern (merged into gitlab_vars):
+gitlab01_gitlab:
+  application:
+    crd_values:
+      # ... configuration ...
+
+# This is NOT merged -- it's a standalone variable used directly in tasks:
+gitlab_secrets:
+  backups:
+    minio:
+      key: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.backups.minio.key }}"
+  registry:
+    postgresql:
+      username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.registry.postgresql.username }}"
+      password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').gitlab.registry.postgresql.password }}"
+```
+
+**Why separate?** Keeping secrets out of the merge pipeline prevents them from
+appearing in merged variable dumps and makes the sensitive/non-sensitive
+boundary explicit.
+
+**Usage in tasks:**
+```yaml
+# Configuration comes from merged vars:
+access_key = {{ gitlab_vars.backups.minio.access }}
+# Secrets come from the standalone variable:
+secret_key = {{ gitlab_secrets.backups.minio.key }}
+```
 
 ### Global Variables
 
@@ -136,6 +191,35 @@ Roles access global variables using the **lookup pattern with fallback defaults*
     mode: "{{ <role>_vars.inherited.mode }}"
 ```
 
+### The Lookup Pattern
+
+Variables defined in `group_vars/all/` (like `lan`, `secrets_vault`, and
+`inherited`/`global`) are accessed using `lookup('ansible.builtin.vars', 'varname')`
+rather than direct references:
+
+```yaml
+# Correct -- uses lookup:
+domain: "{{ lookup('ansible.builtin.vars', 'lan').domain }}"
+password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').smb.password }}"
+owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+
+# Incorrect -- direct reference:
+domain: "{{ lan.domain }}"
+```
+
+**Why?** The lookup forces late binding, resolving the value when the variable
+is actually used rather than when the file is loaded. This avoids circular
+dependency issues that arise when `group_vars` and `host_vars` files reference
+each other during Ansible's variable loading phase.
+
+**When to use which:**
+- **Lookup**: For cross-file references to `lan`, `secrets_vault`, `global`,
+  or any variable defined outside the current file's scope (typically in
+  `defaults/main.yaml` and `group_vars`/`host_vars` files).
+- **Direct reference**: For variables within the same merged context, like
+  `<role>_vars.inherited.kubeconfig` inside a task after the merge has
+  already run.
+
 ### Role Structure
 
 - **Organization:** Split complex logic into separate files included by `main.yaml`
@@ -200,6 +284,59 @@ ansible_user: root
 ansible_become: false    # Overrides play-level become: true
 ```
 
+### Conditional Role and Task Execution
+
+The playbook and roles use several patterns to conditionally include roles and
+tasks. Understanding these is important when adding new hosts or roles.
+
+#### Group Membership (Playbook Level)
+
+Roles applied within a multi-role play use `group_names` to check whether the
+current host belongs to a group:
+
+```yaml
+# In westsidestreet.net.yaml -- the k8s play applies to all k8s hosts,
+# but GitLab and Runner roles only run on hosts in those specific groups:
+- role: gitlab
+  when: "'gitlab' in group_names"
+- role: gitlab-runner
+  when: "'gitlab_runner' in group_names"
+```
+
+**To enable a role for a host**, add the host to the appropriate inventory
+group -- no playbook changes needed.
+
+#### Variable Existence (Optional Roles)
+
+Some roles only run when their configuration variable is defined:
+
+```yaml
+- role: argocd-server
+  when: argocd_server is defined
+```
+
+**To enable ArgoCD on a host**, define `argocd_server` in that host's
+`host_vars`. To disable it, remove the variable.
+
+#### Feature Flags (Task Level)
+
+The `k8s_engine.needs` dictionary controls which ecosystem components are
+installed:
+
+```yaml
+# In roles/k8s-ecosystem/tasks/main.yaml:
+- name: Configure k8s CSI Driver for SMB
+  ansible.builtin.include_tasks: csi-driver-smb.yaml
+  when: k8s_engine.needs.smb_driver | default(true)
+
+- name: Configure k8s MetalLB
+  ansible.builtin.include_tasks: metal-lb.yaml
+  when: k8s_engine.needs.metallb | default(true)
+```
+
+These flags are set in the engine's group_vars (e.g.,
+`group_vars/k8s_engine_k3s/main.yaml`).
+
 ### Network Topology Variables
 
 Network topology information is centralized in the `lan` variable with the following structure:
@@ -215,6 +352,140 @@ Network topology information is centralized in the `lan` variable with the follo
 ```yaml
 host: "{{ lookup('ansible.builtin.vars', 'lan').fqdn.nas }}"
 ```
+
+### Helm Chart Conventions
+
+All Helm-based installations follow a consistent variable and task structure.
+
+#### Variable Structure
+
+Helm charts are configured with a standard set of keys in role defaults:
+
+```yaml
+# roles/<role>/defaults/main.yaml
+<role>_defaults:
+  helm:
+    name: release-name           # Helm release name
+    namespace: target-namespace  # Kubernetes namespace
+    chart:
+      url: https://charts.example.io  # Chart repository URL (for HTTP repos)
+      ref: chart-name                  # Chart name within the repo
+      version: 1.2.3                   # Chart version
+    # For OCI registries, use `oci` instead of `url`:
+    # chart:
+    #   oci: oci://registry.example.io/charts/chart-name
+    #   version: 1.2.3
+
+  # Helm values passed to the chart:
+  helm_values: {}
+```
+
+#### Task Pattern
+
+```yaml
+- name: Install/Configure <Component> Using Helm
+  kubernetes.core.helm:
+    name: "{{ <role>_vars.helm.name }}"
+    namespace: "{{ <role>_vars.helm.namespace }}"
+    chart_repo_url: "{{ <role>_vars.helm.chart.url }}"
+    chart_version: "{{ <role>_vars.helm.chart.version }}"
+    chart_ref: "{{ <role>_vars.helm.chart.ref }}"
+    release_values: "{{ <role>_vars.helm_values }}"
+    create_namespace: true
+    kubeconfig: "{{ <role>_vars.inherited.kubeconfig }}"
+    wait: true
+```
+
+#### Helm Values from Templates
+
+When Helm values require conditional logic (e.g., GitLab Runner's optional S3
+cache), a Jinja2 template renders the values first:
+
+```yaml
+- name: Render Helm Configuration
+  ansible.builtin.set_fact:
+    rendered_values: "{{ lookup('ansible.builtin.template', 'values.j2.yaml') }}"
+
+- name: Install via Helm
+  kubernetes.core.helm:
+    release_values: "{{ rendered_values | from_yaml }}"
+    # ... other fields ...
+```
+
+Templates live in `roles/<role>/templates/` and access the merged `<role>_vars`
+directly.
+
+### Kubernetes Resource Patterns
+
+Kubernetes resources are created inline using `kubernetes.core.k8s` with
+`apply: true` for idempotency. Collections of resources (secrets, volumes,
+certificates) use `dict2items` loops over dictionary variables:
+
+```yaml
+- name: Create K8s Certificate(s)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: "{{ item.key }}"
+        namespace: "{{ item.value.namespace }}"
+      spec:
+        secretName: "{{ item.key }}-tls"
+        dnsNames: "{{ item.value.dnsNames }}"
+        issuerRef:
+          name: "{{ k8s_ecosystem_vars.cluster_cert_issuer.name }}"
+          kind: ClusterIssuer
+    kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
+  loop: "{{ k8s_ecosystem_vars.certificates | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+```
+
+This pattern means adding a new certificate (or secret, volume, etc.) only
+requires adding an entry to the appropriate dictionary in `host_vars` -- no
+task changes needed.
+
+### K8s Engine Abstraction
+
+The `k8s-engine` role supports multiple Kubernetes distributions (K3S, RKE2,
+CRC) through a conditional task loading pattern. This is **not** the Variable
+Merge Pattern -- it uses a separate control variable.
+
+#### Engine Selection
+
+Each engine group defines a `k8s_engine` variable that selects the
+distribution and declares feature requirements:
+
+```yaml
+# group_vars/k8s_engine_k3s/main.yaml
+k8s_engine:
+  engine: k3s
+  needs:
+    certmanager: true
+    smb: true
+    metallb: true
+```
+
+#### Conditional Task Loading
+
+The role's `main.yaml` dispatches to engine-specific task files:
+
+```yaml
+- name: Install K3S
+  ansible.builtin.import_tasks: k3s.yaml
+  when: k8s_engine.engine == 'k3s'
+
+- name: Install RKE2
+  ansible.builtin.import_tasks: rke2.yaml
+  when: k8s_engine.engine == 'rke2'
+```
+
+The `k8s_engine.needs` flags are consumed by the `k8s-ecosystem` role to
+conditionally install components (see
+[Conditional Role and Task Execution](#conditional-role-and-task-execution)).
 
 ### K8s Role Scope: Infrastructure vs Extensions
 
