@@ -558,6 +558,59 @@ curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-contai
 sudo apt-get update
 ```
 
+#### NVIDIA Container Toolkit Configuration (nvidia-ctk)
+
+After the toolkit is installed, the `nvidia` role can configure it for GPU
+access in Kubernetes and/or Podman via the `ctk.runtimes` list.
+
+| Runtime | What it does | Use case |
+|---------|-------------|----------|
+| `containerd` | Runs `nvidia-ctk runtime configure --runtime=containerd` and restarts the K8s engine service | GPU workloads in K3s/Kubernetes pods |
+| `cdi` | Enables the `nvidia-cdi-refresh` systemd service to auto-generate CDI specs at `/var/run/cdi/nvidia.yaml` | GPU access in ad-hoc Podman containers |
+
+The two modes are **not mutually exclusive** -- a host can enable both. They
+operate at different layers (containerd config vs. CDI device spec) and don't
+conflict as long as you don't try to use the GPU from both runtimes
+simultaneously.
+
+**Configuration** uses the standard Variable Merge Pattern. Enable runtimes in
+the host's `_nvidia` variable:
+
+```yaml
+# host_vars/<host>/nvidia.yaml
+<host>_nvidia:
+  ctk:
+    runtimes:
+      - containerd
+      - cdi
+```
+
+**Current host configuration:**
+
+| Host | Runtimes | Rationale |
+|------|----------|-----------|
+| nvidia-5080 | `containerd` | Dedicated K3s GPU server |
+| asus | `containerd`, `cdi` | Dev machine -- GPU in K3s and Podman |
+
+#### GPU Support in Kubernetes (k8s-applications)
+
+Hosts with `gpu.enabled: true` in their `_k8s_applications` variables get
+three components deployed to the cluster:
+
+1. **Node Feature Discovery (NFD)** — DaemonSet that detects hardware
+   (PCI devices, CPU features, etc.) and labels nodes accordingly.
+
+2. **NodeFeatureRule for NVIDIA** — A custom NFD rule that sets the label
+   `nvidia.com/gpu.present=true` when PCI vendor `10de` (NVIDIA) is detected.
+   This is necessary because NFD labels PCI devices with their class prefix
+   (e.g., `pci-0300_10de.present`), but the NVIDIA device plugin's default
+   node affinity expects `nvidia.com/gpu.present=true`. The NodeFeatureRule
+   bridges this gap by deriving the expected label from NFD's raw detection.
+
+3. **NVIDIA Device Plugin** — DaemonSet that exposes `nvidia.com/gpu`
+   resources to the kubelet, allowing pods to request GPU access via
+   `resources.limits`.
+
 ### Running Ansible
 
 Variables are encrypted using Ansible Vault. A wrapper script (`ansible.sh`) incorporates the vault password automatically:
@@ -633,6 +686,69 @@ Run from a machine with cluster access (e.g., `elitedesk`):
 curl -s "https://gitlab.com/gitlab-org/charts/gitlab/-/raw/${GITLAB_RELEASE}/scripts/database-upgrade" | \
   bash -s -- -n gitlab-system pre
 ```
+
+### Verifying GPU Access
+
+After running the `nvidia` role with `ctk` configured, verify GPU access
+is working on the target host.
+
+#### Podman (CDI)
+
+```bash
+podman run --rm --device nvidia.com/gpu=all \
+  --security-opt=label=disable \
+  nvidia/cuda:12.6.0-base-ubuntu24.04 nvidia-smi
+```
+
+You should see your GPU listed with driver version and memory info.
+
+#### K3s (containerd)
+
+Apply a test pod:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-test
+spec:
+  runtimeClassName: nvidia
+  restartPolicy: Never
+  containers:
+    - name: gpu-test
+      image: nvidia/cuda:12.6.0-base-ubuntu24.04
+      command: ["nvidia-smi"]
+      resources:
+        limits:
+          nvidia.com/gpu: "1"
+```
+
+```bash
+kubectl apply -f gpu-test.yaml
+kubectl logs gpu-test
+kubectl delete pod gpu-test
+```
+
+> **Note:** Workload pods need both `runtimeClassName: nvidia` and a GPU
+> resource limit. The `runtimeClassName` tells containerd to use the NVIDIA
+> runtime, which injects the driver libraries and tools (e.g., `nvidia-smi`)
+> into the container. The resource limit reserves a GPU device via the
+> NVIDIA device plugin. Without the runtime class, the GPU device is
+> allocated but the NVIDIA userspace tools and libraries are not available.
+>
+> The `nvidia.com/gpu` resource limit also requires the
+> [NVIDIA device plugin](https://github.com/NVIDIA/k8s-device-plugin) DaemonSet
+> to be deployed in the cluster. Without it, the kubelet won't advertise GPU
+> resources and the pod will stay `Pending` with an `Insufficient nvidia.com/gpu`
+> event.
+
+### k8s-share Role: Delegation Caveat
+
+In the `k8s-share` role, all tasks **except** `slurp` must be delegated to the
+Ansible control node (`localhost`). The `slurp` task reads files from the remote
+host (e.g., fetching a kubeconfig), but subsequent operations (writing files,
+running kubectl) should execute locally. Forgetting to delegate causes tasks to
+run on the remote host where the expected local paths and tools may not exist.
 
 ### Proxmox Storage Setup
 

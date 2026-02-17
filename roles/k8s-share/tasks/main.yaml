@@ -59,3 +59,4 @@
     src: "{{ k8s_share_vars.inherited.share }}/kubeconfig.all.yaml"
     path: "{{ k8s_engine_vars.inherited.kubeconfig }}"
     state: link
+  delegate_to: localhost

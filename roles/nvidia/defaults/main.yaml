@@ -45,6 +45,21 @@ nvidia_defaults:
         url: "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
     packages:
       - nvidia-container-toolkit
+    service: containerd
+
+
+  # --------------------------------------------------------------------------
+  # NVIDIA Container Toolkit Configuration (nvidia-ctk)
+  #
+  # Supported runtimes:
+  #   containerd - Configures containerd for GPU access (K3s/Kubernetes)
+  #                Runs: nvidia-ctk runtime configure --runtime=containerd
+  #   cdi        - Enables CDI spec generation for Podman GPU access
+  #                Enables: nvidia-cdi-refresh.service
+  #
+  # Reference: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+  ctk:
+    runtimes: []
 
 
   # --------------------------------------------------------------------------

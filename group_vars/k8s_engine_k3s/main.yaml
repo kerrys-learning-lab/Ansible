@@ -6,3 +6,4 @@ k8s_engine:
     smb_driver: true
     metallb: true
   kubeconfig: /etc/rancher/k3s/k3s.yaml
+  service: k3s

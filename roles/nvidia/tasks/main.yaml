@@ -31,3 +31,17 @@
   tags:
     - container-toolkit
   when: ansible_os_family == 'RedHat'
+
+- name: Configure NVIDIA CTK for containerd
+  ansible.builtin.include_tasks: nvidia-ctk-containerd.yaml
+  tags:
+    - nvidia-ctk
+    - containerd
+  when: "'containerd' in nvidia_vars.ctk.runtimes"
+
+- name: Configure NVIDIA CTK for CDI
+  ansible.builtin.include_tasks: nvidia-ctk-cdi.yaml
+  tags:
+    - nvidia-ctk
+    - cdi
+  when: "'cdi' in nvidia_vars.ctk.runtimes"

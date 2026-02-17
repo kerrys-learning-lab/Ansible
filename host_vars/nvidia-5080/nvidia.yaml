@@ -1,0 +1,5 @@
+# code: language=ansible
+nvidia5080_nvidia:
+  ctk:
+    runtimes:
+      - containerd

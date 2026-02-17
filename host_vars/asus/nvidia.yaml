@@ -1,0 +1,6 @@
+# code: language=ansible
+asus_nvidia:
+  ctk:
+    runtimes:
+      - containerd
+      - cdi

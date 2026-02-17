@@ -1,0 +1,5 @@
+# code: language=ansible
+- name: NVIDIA CTK - Configure containerd runtime
+  ansible.builtin.command: nvidia-ctk runtime configure --runtime=containerd
+  changed_when: true
+  notify: Restart Kubernetes Runtime

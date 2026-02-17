@@ -5,13 +5,20 @@
       {{ lookup('community.general.merge_variables',
                 '_k8s_applications',
                 initial_value=k8s_applications_defaults,
-                pattern_type='suffix') }}
+                pattern_type='suffix',
+                override='ignore') }}
 
 - name: Install Elasticsearch Operator
   ansible.builtin.import_tasks: elastic-operator.yaml
   when: k8s_applications_vars.elastic_operator.enabled | default(false)
   tags:
     - elasticsearch
+
+- name: Install GPU Support
+  ansible.builtin.import_tasks: gpu.yaml
+  when: k8s_applications_vars.gpu.enabled | default(false)
+  tags:
+    - gpu
 
 - name: Install/Configure Applications Using Helm
   kubernetes.core.helm:
