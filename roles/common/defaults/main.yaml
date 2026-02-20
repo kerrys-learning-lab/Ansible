@@ -51,6 +51,10 @@ common_defaults:
     disks: {}
     volume_groups: {}
 
+  # --------------------------------------------------------------------------
+  # /etc/profile.d environment files
+  profile_d: {}
+
   inherited:
     owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
     group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"

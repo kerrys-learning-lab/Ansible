@@ -9,13 +9,6 @@
   tags:
     - always
 
-- name: Set K8S Ecosystem Environment
-  ansible.builtin.copy:
-    dest: "{{ k8s_ecosystem_vars.inherited.env }}"
-    content: |
-      export KUBECONFIG={{ k8s_ecosystem_vars.inherited.kubeconfig }}
-    mode: "{{ k8s_ecosystem_vars.inherited.mode }}"
-
 - name: K8S Ecosystem Role Prerequisites
   ansible.builtin.file:
     path: "{{  k8s_ecosystem_vars.inherited.downloads }}"

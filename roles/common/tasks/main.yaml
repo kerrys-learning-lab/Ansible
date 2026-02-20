@@ -49,6 +49,13 @@
     - nfs
     - smb
 
+- name: Configure /etc/profile.d Environment Files
+  ansible.builtin.import_tasks: profile-d.yaml
+  when: common_vars.profile_d | length > 0
+  tags:
+    - profile-d
+    - env
+
 - name: Create Custom Ansible Facts
   ansible.builtin.import_tasks: facts.yaml
 
