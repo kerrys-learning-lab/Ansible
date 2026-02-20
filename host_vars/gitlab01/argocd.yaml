@@ -1,7 +1,10 @@
 # code: language=ansible
-argocd_server:
-  helm:
-    inherited:
+gitlab01_argocd:
+  cluster:
+    labels:
+      env/infrastructure: "true"
+  helm_values:
+    global:
       domain: argocd.{{ lookup('ansible.builtin.vars', 'lan').domain }}
     server:
       ingress:
@@ -27,26 +30,30 @@ argocd_server:
       repositories:
         argo-cd:
           name: argo-cd
-          url: https://gitlab.westsidestreet.net/api/v4/projects/29/packages/helm/stable
+          url: https://gitlab.westsidestreet.net/api/v4/projects/32/packages/helm/stable
           type: helm
         boids-app:
           name: boids-app
           url: git@gitlab.westsidestreet.net:kerrys-learning-lab/boids/boids-app.git
         elasticsearch:
           name: elasticsearch
-          url: https://gitlab.westsidestreet.net/api/v4/projects/34/packages/helm/stable
+          url: https://gitlab.westsidestreet.net/api/v4/projects/33/packages/helm/stable
           type: helm
         helm-library:
           name: helm-library
-          url: https://gitlab.westsidestreet.net/api/v4/projects/18/packages/helm/stable
+          url: https://gitlab.westsidestreet.net/api/v4/projects/34/packages/helm/stable
+          type: helm
+        home-lab:
+          name: home-lab
+          url: https://gitlab.westsidestreet.net/api/v4/projects/29/packages/helm/stable
           type: helm
         jupyter-server:
           name: jupyter-server
-          url: https://gitlab.westsidestreet.net/api/v4/projects/7/packages/helm/stable
+          url: https://gitlab.westsidestreet.net/api/v4/projects/35/packages/helm/stable
           type: helm
         mysql:
           name: mysql
-          url: https://gitlab.westsidestreet.net/api/v4/projects/30/packages/helm/stable
+          url: https://gitlab.westsidestreet.net/api/v4/projects/37/packages/helm/stable
           type: helm
         nats:
           name: nats
@@ -55,13 +62,18 @@ argocd_server:
         spyll:
           name: spyll
           type: helm
-          url: https://gitlab.westsidestreet.net/api/v4/projects/32/packages/helm/stable
+          url: https://gitlab.westsidestreet.net/api/v4/projects/10/packages/helm/stable
   projects:
     boids:
       description: |
         Boids is an artificial life program, developed by Craig Reynolds in
         1986, which simulates the flocking behaviour of birds, and related
         group motion.
+      destination:
+        name: "*"
+    home-lab:
+      description: |
+        Applications and utilities that are part of the home-lab infrastructure
       destination:
         name: "*"
   certificate:
@@ -75,3 +87,12 @@ argocd_server:
         path: argocd-applications
       destination:
         name: dev-vm
+  applicationsets_matrix:
+    dev:
+      source:
+        url: git@gitlab.westsidestreet.net:kerrys-learning-lab/development-environment/argocd-applications.git
+        ref: main
+    infrastructure:
+      source:
+        url: git@gitlab.westsidestreet.net:kerrys-learning-lab/development-environment/argocd-applications.git
+        ref: main

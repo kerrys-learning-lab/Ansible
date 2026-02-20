@@ -1,0 +1,25 @@
+# code: language=ansible
+argocd_defaults:
+  name: argo-cd
+  namespace: argo
+  chart:
+    ref: argo-cd
+    url: https://argoproj.github.io/argo-helm
+    version: 9.4.3
+
+  certificate:
+    clusterIssuer: acme-letsencrypt-cluster-issuer
+
+  cluster:
+    labels: {}
+    serviceAccount:
+      name: argocd-manager
+      namespace: kube-system
+
+  inherited:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').downloads | default('/var/lib/ansible/downloads') }}/{{ role_name }}"
+    share: "{{ lookup('ansible.builtin.vars', 'global').share | default('/usr/local/share') }}"
+    kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"

@@ -2,7 +2,7 @@
 gitlab01_gitlab:
   application:
     crd_values:
-      inherited:
+      global:
         common:
           certmanager.k8s.io/issuer: acme-letsencrypt-cluster-issuer
         hosts:
@@ -61,6 +61,14 @@ gitlab01_gitlab:
       postgresql:
         install: true
         primary:
+          # NOTE: Increasing the max number of connections in PG due to
+          #       constantly reaching max:
+          extendedConfiguration: |
+            max_connections = 500
+            shared_buffers = 256MB                      # increase with max_connections
+            idle_in_transaction_session_timeout = 60000 # kills stuck transactions
+            statement_timeout = 30000                   # 30s; kills runaway queries
+            tcp_keepalives_idle = 60
           persistence:
             existingClaim: postgresql
       registry:
@@ -80,7 +88,17 @@ gitlab01_gitlab:
           migrations:
             enabled: true
       sidekiq:
-        maxReplicas: 4
+        # NOTE: Trying to reduce the number of open connections to PG due to
+        #       constantly reaching max:
+        maxReplicas: 3
+        concurrency: 10
+      webservice:
+        puma:
+          # NOTE: Trying to reduce the number of open connections to PG due to
+          #       constantly reaching max:
+          workers: 2
+          minThreads: 1
+          maxThreads: 4
   k8s:
     claims:
       local:

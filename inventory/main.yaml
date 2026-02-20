@@ -10,8 +10,15 @@ ansible:
     asus:
 
 argocd:
-  hosts:
-    gitlab01:
+  children:
+    argocd_server:
+      hosts:
+        gitlab01:
+    argocd_cluster:
+      hosts:
+        gitlab01:
+        asus:
+        nvidia-5080:
 
 development:
   hosts:

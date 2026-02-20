@@ -1,0 +1,5 @@
+# code: language=ansible
+asus_argocd:
+  cluster:
+    labels:
+      env/dev: "true"

@@ -1,0 +1,5 @@
+# code: language=ansible
+nvidia_5080_argocd:
+  cluster:
+    labels:
+      env/ml: "true"

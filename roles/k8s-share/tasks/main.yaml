@@ -5,7 +5,8 @@
       {{ lookup('community.general.merge_variables',
                 '_k8s_share',
                 initial_value=k8s_share_defaults,
-                pattern_type='suffix') }}
+                pattern_type='suffix',
+                override='ignore') }}
 
 - name: Create K8s Local Share Directories
   ansible.builtin.file:
@@ -57,6 +58,6 @@
 - name: Link System kubeconfig (Overrides K3S kubeconfig with shared)
   ansible.builtin.file:
     src: "{{ k8s_share_vars.inherited.share }}/kubeconfig.all.yaml"
-    path: "{{ k8s_engine_vars.inherited.kubeconfig }}"
+    path: "{{ k8s_share_vars.inherited.kubeconfig }}"
     state: link
   delegate_to: localhost

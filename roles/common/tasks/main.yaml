@@ -7,6 +7,8 @@
                 pattern_type='suffix',
                 initial_value=common_defaults,
                 override='ignore') }}
+  tags:
+    - always
 
 - name: Install/Configure OS Packages
   ansible.builtin.import_tasks: packages.yaml

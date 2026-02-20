@@ -6,3 +6,30 @@ asus_common:
   packages:
     - shotwell # Image editor
     - zsh
+  users_and_groups:
+    users:
+      # Strictly speaking, it's not necessary to have an account for ArgoCD.
+      # But, it's a convenient place to control its SSH keys and use for
+      # trouble-shooting access to (e.g.) GitLab
+      argo:
+        create: true
+        shell: /bin/bash
+        ssh_key:
+          public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILMedk4rvJpujyrRHDSMQfQNE+IHVkL5tDynFLMrbbGC argo@asus.westsidestreet.net
+          private: "{{ lookup('ansible.builtin.vars', 'secrets_vault').argocd.ed25519 }}"
+      claude:
+        create: true
+        shell: /bin/bash
+        groups:
+          - sudo
+        ssh_key:
+          # generate: true
+          # type: ed25519
+          # comment: claude@asus.westsidestreet.net
+          public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHbb0/MTee+LwDMiyaPDF0a7/SnSOs3cRqj/PPw68ydX claude@asus.westsidestreet.net
+          private: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.ed25519 }}"
+        env:
+          GITLAB_USERNAME: claude
+          GITLAB_TOKEN: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.glpat }}"
+          GITLAB_URL: https://{{ lookup('ansible.builtin.vars', 'lan').fqdn.gitlab }}
+          PATH: $HOME/.local/bin:$PATH

@@ -1,0 +1,86 @@
+# code: language=ansible
+#
+# Creates ArgoCD manager resources on remote clusters so that the ArgoCD
+# server can manage them declaratively via cluster Secrets.
+#
+- name: Create ArgoCD Manager ServiceAccount
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: "{{ argocd_vars.cluster.serviceAccount.name }}"
+        namespace: "{{ argocd_vars.cluster.serviceAccount.namespace }}"
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+
+- name: Create ArgoCD Manager ClusterRole
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRole
+      metadata:
+        name: argocd-manager-role
+      rules:
+        - apiGroups: ["*"]
+          resources: ["*"]
+          verbs: ["*"]
+        - nonResourceURLs: ["*"]
+          verbs: ["*"]
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+
+- name: Create ArgoCD Manager ClusterRoleBinding
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: argocd-manager-role-binding
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: argocd-manager-role
+      subjects:
+        - kind: ServiceAccount
+          name: "{{ argocd_vars.cluster.serviceAccount.name }}"
+          namespace: "{{ argocd_vars.cluster.serviceAccount.namespace }}"
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+
+- name: Create ArgoCD Manager Token Secret
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: argocd-manager-token
+        namespace: "{{ argocd_vars.cluster.serviceAccount.namespace }}"
+        annotations:
+          kubernetes.io/service-account.name: "{{ argocd_vars.cluster.serviceAccount.name }}"
+      type: kubernetes.io/service-account-token
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+
+- name: Wait for Token Secret to be populated
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: argocd-manager-token
+    namespace: "{{ argocd_vars.cluster.serviceAccount.namespace }}"
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  register: argocd_token_secret
+  until: argocd_token_secret.resources[0].data.token is defined
+  retries: 10
+  delay: 3
+
+- name: Set ArgoCD Agent facts for use by the server
+  ansible.builtin.set_fact:
+    argocd_agent_token: "{{ argocd_token_secret.resources[0].data.token | b64decode }}"
+    argocd_agent_ca: "{{ argocd_token_secret.resources[0].data['ca.crt'] }}"
+    argocd_agent_server: "https://{{ ansible_host }}:6443"
+    argocd_agent_labels: "{{ argocd_vars.cluster.labels }}"

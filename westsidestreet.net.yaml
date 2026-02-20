@@ -67,8 +67,8 @@
     - role: k8s-share
       tags:
         - share
-    - role: argocd-server
-      when: argocd_server is defined
+    - role: argocd
+      when: "'argocd' in group_names"
       tags:
         - argocd
     - role: gitlab
@@ -80,6 +80,10 @@
       tags:
         - gitlab
         - gitlab-runner
+    - role: vllm
+      when: "'nvidia' in group_names"
+      tags:
+        - vllm
   tags:
     - k8s
     - kubernetes

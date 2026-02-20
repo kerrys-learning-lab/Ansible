@@ -190,3 +190,26 @@ pages.westsidestreet.net       CNAME → pages02.westsidestreet.net
 
 **Zero client-side changes required.** All git remotes, runners, ArgoCD configs,
 and container image references continue to use the stable alias.
+
+### 5. Troubleshooting
+
+1. Log in to PG
+
+```bash
+PGPASSWORD=${POSTGRES_POSTGRES_PASSWORD} psql -U postgres -d template1
+```
+
+2. Check the number and type of open PG connections:
+
+```sql
+SELECT state, count(*), application_name
+FROM pg_stat_activity
+GROUP BY state, application_name
+ORDER BY count DESC;
+```
+
+3. Check max connections setting
+
+```sql
+SHOW max_connections;
+```

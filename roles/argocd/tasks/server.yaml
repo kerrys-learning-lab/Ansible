@@ -1,0 +1,166 @@
+# code: language=ansible
+- name: Create ArgoCD TLS Certificate
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: argocd-server
+        namespace: "{{ argocd_vars.namespace }}"
+      spec:
+        secretName: argocd-server-tls
+        dnsNames: "{{ argocd_vars.certificate.dnsNames }}"
+        issuerRef:
+          name: "{{ argocd_vars.certificate.clusterIssuer }}"
+          kind: ClusterIssuer
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  when: argocd_vars.certificate is defined
+
+- name: Install/Configure ArgoCD via Helm
+  kubernetes.core.helm:
+    name: "{{ argocd_vars.name }}"
+    namespace: "{{ argocd_vars.namespace }}"
+    chart_repo_url: "{{ argocd_vars.chart.url }}"
+    chart_version: "{{ argocd_vars.chart.version }}"
+    chart_ref: "{{ argocd_vars.chart.ref }}"
+    release_values: "{{ argocd_vars.helm_values }}"
+    create_namespace: true
+    wait: true
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+
+- name: Retrieve ArgoCD Admin Secret
+  kubernetes.core.k8s:
+    version: v1
+    kind: Secret
+    name: argocd-initial-admin-secret
+    namespace: "{{ argocd_vars.namespace }}"
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  register: argocd_admin_secret
+
+- name: Create ArgoCD Projects
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: AppProject
+      metadata:
+        name: "{{ item.key }}"
+        namespace: argo
+        finalizers:
+          - resources-finalizer.argocd.argoproj.io
+      spec:
+        description: "{{ item.value.description | default('TBP') }}"
+        sourceRepos:
+          - '*'
+        destinations:
+          - namespace: "{{ item.value.destination.namespace | default(item.key) }}"
+            name: "{{ item.value.destination.name | default('in-cluster') }}"
+        clusterResourceWhitelist:
+          - group: '*'
+            kind: Namespace
+          - group: '*'
+            kind: ClusterRole
+          - group: '*'
+            kind: ClusterRoleBinding
+          - group: '*'
+            kind: Role
+          - group: '*'
+            kind: RoleBinding
+          - group: '*'
+            kind: CustomResourceDefinition
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  loop: "{{ argocd_vars.projects | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create ArgoCD ApplicationSets for Helm Charts
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'applicationset.j2.yaml') | from_yaml }}"
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  vars:
+    appset_type: helm-chart
+    appset_key: "{{ item.key }}"
+    appset_name: "{{ item.key }}-applicationset-helm-chart"
+    appset: "{{ item.value }}"
+  loop: "{{ argocd_vars.applicationsets | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create ArgoCD ApplicationSets for Git Repos
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'applicationset.j2.yaml') | from_yaml }}"
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  vars:
+    appset_type: git-repo
+    appset_key: "{{ item.key }}"
+    appset_name: "{{ item.key }}-applicationset-git-repo"
+    appset: "{{ item.value }}"
+  loop: "{{ argocd_vars.applicationsets | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create ArgoCD ApplicationSets for Matrix (Cluster + Helm Chart)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'applicationset.j2.yaml') | from_yaml }}"
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  vars:
+    appset_type: matrix-chart
+    appset_key: "{{ item.key }}"
+    appset_name: "{{ item.key }}-applicationset-matrix-chart"
+    appset: "{{ item.value }}"
+  loop: "{{ argocd_vars.applicationsets_matrix | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Create ArgoCD ApplicationSets for Matrix (Cluster + Git Repo)
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'applicationset.j2.yaml') | from_yaml }}"
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  vars:
+    appset_type: matrix-repo
+    appset_key: "{{ item.key }}"
+    appset_name: "{{ item.key }}-applicationset-matrix-repo"
+    appset: "{{ item.value }}"
+  loop: "{{ argocd_vars.applicationsets_matrix | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+
+- name: Register ArgoCD Cluster Secrets
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "cluster-{{ item }}"
+        namespace: "{{ argocd_vars.namespace }}"
+        labels: "{{ {'argocd.argoproj.io/secret-type': 'cluster'} | combine(hostvars[item].argocd_agent_labels) }}"
+      type: Opaque
+      stringData:
+        name: "{{ item }}"
+        server: "{{ hostvars[item].argocd_agent_server }}"
+        config: |
+          {
+            "bearerToken": "{{ hostvars[item].argocd_agent_token }}",
+            "tlsClientConfig": {
+              "caData": "{{ hostvars[item].argocd_agent_ca }}",
+              "insecure": false
+            }
+          }
+    kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  loop: "{{ groups['argocd_cluster'] | default([]) | select('in', ansible_play_hosts) }}"
+  loop_control:
+    label: "{{ item }}"
