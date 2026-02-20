@@ -1,5 +1,5 @@
 # code: language=ansible
-- name: "Set environment variable {{ item.key }} for {{ user_name }}"
+- name: "Set environment variables {{ user_name }}"
   ansible.builtin.lineinfile:
     path: "~{{ user_name }}/.bashrc"
     line: "export {{ item.key }}={{ item.value }}"

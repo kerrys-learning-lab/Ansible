@@ -5,6 +5,9 @@ k8s_tools_defaults:
     version: v3.20.0
     url_prefix: https://get.helm.sh
     bin: /usr/local/bin/helm
+    plugins:
+      - https://github.com/databus23/helm-diff
+      - https://github.com/helm-unittest/helm-unittest.git
 
   k9s:
     version: v0.50.18

@@ -7,7 +7,7 @@ infrastructure_k8s_ecosystem:
     name: acme-letsencrypt-cluster-issuer
     spec:
       acme:
-        email: "{{ lookup('ansible.builtin.vars', 'secrets_vault').email }}"
+        email: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.email }}"
         server: https://acme-v02.api.letsencrypt.org/directory
         privateKeySecretRef:
           name: acme-letsencrypt-cluster-issuer

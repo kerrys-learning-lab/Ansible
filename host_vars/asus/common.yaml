@@ -9,22 +9,28 @@ asus_common:
   users_and_groups:
     users:
       kerry:
+        name: Kerry Johnson
+        email: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.email }}"
         chezmoi:
-          name: Kerry
-          email: kerry@westsidestreet.net
+          age:
+            recipient: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.age.recipient }}"
+            secret: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.age.secret }}"
+          data:
+            foo: bar
       # Strictly speaking, it's not necessary to have an account for ArgoCD.
       # But, it's a convenient place to control its SSH keys and use for
       # trouble-shooting access to (e.g.) GitLab
       argo:
+        name: Argo
+        email: argo@westsidestreet.net
         create: true
         shell: /bin/bash
         ssh_key:
           public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILMedk4rvJpujyrRHDSMQfQNE+IHVkL5tDynFLMrbbGC argo@asus.westsidestreet.net
           private: "{{ lookup('ansible.builtin.vars', 'secrets_vault').argocd.ed25519 }}"
-        chezmoi:
-          name: Argo
-          email: argo@westsidestreet.net
       claude:
+        name: Claude
+        email: claude@westsidestreet.net
         create: true
         shell: /bin/bash
         groups:
@@ -40,6 +46,3 @@ asus_common:
           GITLAB_TOKEN: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.glpat }}"
           GITLAB_URL: https://{{ lookup('ansible.builtin.vars', 'lan').fqdn.gitlab }}
           PATH: $HOME/.local/bin:$PATH
-        chezmoi:
-          name: Claude
-          email: claude@westsidestreet.net

@@ -38,3 +38,9 @@
     src: "{{ k8s_tools_helm_install_path }}/{{ ansible_system | lower }}-{{ ansible_local['arch']['container'] }}/helm"
     dest: "{{ k8s_tools_vars.helm.bin }}"
     state: link
+
+- name: Install Helm Plugins
+  kubernetes.core.helm_plugin:
+    plugin_path: "{{ item }}"
+    state: present
+  loop: "{{ k8s_tools_vars.helm.plugins | default([]) }}"

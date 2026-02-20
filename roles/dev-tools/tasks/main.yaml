@@ -56,7 +56,3 @@
   tags:
     - podman
 
-- name: Configure Chezmoi
-  ansible.builtin.import_tasks: chezmoi.yaml
-  tags:
-    - chezmoi

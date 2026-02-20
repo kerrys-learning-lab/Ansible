@@ -5,94 +5,9 @@
     state: present
   loop: "{{ common_vars.users_and_groups.groups | default([]) }}"
 
-- name: Users and Groups - Create Users
-  ansible.builtin.user:
-    name: "{{ item.key }}"
-    shell: "{{ item.value.shell | default('/bin/bash') }}"
-    create_home: true
-    state: present
+- name: Configure Users
+  ansible.builtin.include_tasks: user/main.yaml
   loop: "{{ common_vars.users_and_groups.users | dict2items }}"
   loop_control:
-    label: "{{ item.key }}"
-  when: item.value.create | default(false)
-
-- name: Users and Groups - Append Groups to Users
-  ansible.builtin.user:
-    name: "{{ item.key }}"
-    groups: "{{ item.value.groups }}"
-    append: true
-  loop: "{{ common_vars.users_and_groups.users | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  when: "'groups' in item.value and item.value.groups | length > 0"
-
-- name: Users and Groups - Generate SSH Keys
-  ansible.builtin.user:
-    name: "{{ item.key }}"
-    generate_ssh_key: true
-    ssh_key_type: "{{ item.value.ssh_key.type | default('ed25519') }}"
-    ssh_key_comment: "{{ item.value.ssh_key.comment | default(item.key + '@' + ansible_hostname) }}"
-    ssh_key_file: ".ssh/id_{{ item.value.ssh_key.type | default('ed25519') }}"
-  loop: "{{ common_vars.users_and_groups.users | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  when: >-
-    item.value.ssh_key is defined
-    and item.value.ssh_key.generate | default(false)
-    and item.value.ssh_key.private is not defined
-  register: ssh_key_result
-
-- name: Users and Groups - Display SSH Public Keys
-  ansible.builtin.debug:
-    msg: "Public key for {{ item.item.key }}: {{ item.ssh_public_key }}"
-  loop: "{{ ssh_key_result.results | default([]) }}"
-  loop_control:
-    label: "{{ item.item.key }}"
-  when: not (item.skipped | default(false)) and item.ssh_public_key is defined
-
-- name: Users and Groups - Ensure SSH Directory
-  ansible.builtin.file:
-    path: "~{{ item.key }}/.ssh"
-    state: directory
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-    mode: '0700'
-  loop: "{{ common_vars.users_and_groups.users | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  when: item.value.ssh_key is defined and item.value.ssh_key.private is defined
-
-- name: Users and Groups - Write SSH Private Keys
-  ansible.builtin.copy:
-    content: "{{ item.value.ssh_key.private }}"
-    dest: "~{{ item.key }}/.ssh/id_{{ item.value.ssh_key.type | default('ed25519') }}"
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-    mode: '0600'
-  loop: "{{ common_vars.users_and_groups.users | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  when: item.value.ssh_key is defined and item.value.ssh_key.private is defined
-  no_log: true
-
-- name: Users and Groups - Write SSH Public Keys
-  ansible.builtin.copy:
-    content: "{{ item.value.ssh_key.public }}"
-    dest: "~{{ item.key }}/.ssh/id_{{ item.value.ssh_key.type | default('ed25519') }}.pub"
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-    mode: '0644'
-  loop: "{{ common_vars.users_and_groups.users | dict2items }}"
-  loop_control:
-    label: "{{ item.key }}"
-  when: item.value.ssh_key is defined and item.value.ssh_key.public is defined
-
-- name: Users and Groups - Set Environment Variables in .bashrc
-  ansible.builtin.include_tasks: user-env-vars.yaml
-  loop: "{{ common_vars.users_and_groups.users | dict2items | selectattr('value.env', 'defined') | list }}"
-  loop_control:
-    loop_var: user_entry
-    label: "{{ user_entry.key }}"
-  vars:
-    user_name: "{{ user_entry.key }}"
-    user_env: "{{ user_entry.value.env }}"
+    label: "{{ user.key }}"
+    loop_var: user
