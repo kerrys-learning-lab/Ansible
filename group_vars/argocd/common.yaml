@@ -1,0 +1,8 @@
+# code: language=ansible
+argocd_common:
+
+  # --------------------------------------------------------------------------
+  # /etc/profile.d environment files
+  profile_d:
+    argocd:
+      ARGOCD_SERVER: "{{ lookup('ansible.builtin.vars', 'lan').fqdn.argocd }}"

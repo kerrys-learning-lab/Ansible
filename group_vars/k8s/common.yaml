@@ -1,0 +1,8 @@
+# code: language=ansible
+k8s_common:
+
+  # --------------------------------------------------------------------------
+  # /etc/profile.d environment files
+  profile_d:
+    kubeconfig:
+      KUBECONFIG: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"
