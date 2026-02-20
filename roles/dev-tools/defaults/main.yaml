@@ -2,6 +2,7 @@
 devtools_defaults:
   packages:
     # Convenience
+    - age
     - bat
     - jq
     - speedtest-cli

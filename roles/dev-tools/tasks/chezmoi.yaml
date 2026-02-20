@@ -1,0 +1,23 @@
+# code: language=ansible
+- name: Chezmoi - Ensure config directory
+  ansible.builtin.file:
+    path: /home/{{ item.key }}/.config/chezmoi
+    state: directory
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+    mode: '0700'
+  loop: "{{ common_vars.users_and_groups.users | dict2items | selectattr('value.chezmoi', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Chezmoi - Create default chezmoi.toml (if absent)
+  ansible.builtin.template:
+    src: chezmoi.toml.j2
+    dest: /home/{{ item.key }}/.config/chezmoi/chezmoi.toml
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+    mode: '0600'
+    force: false
+  loop: "{{ common_vars.users_and_groups.users | dict2items | selectattr('value.chezmoi', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.key }}"
