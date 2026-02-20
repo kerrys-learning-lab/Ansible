@@ -10,6 +10,7 @@ This repository contains Ansible playbooks and roles for managing a homelab infr
   - [Global Variables](#global-variables)
   - [The Lookup Pattern](#the-lookup-pattern)
   - [Role Structure](#role-structure)
+  - [Complex Loop Decomposition](#complex-loop-decomposition)
   - [Self-Contained Roles](#self-contained-roles)
   - [Inventory Organization](#inventory-organization)
   - [Conditional Role and Task Execution](#conditional-role-and-task-execution)
@@ -227,6 +228,65 @@ each other during Ansible's variable loading phase.
   - Every task inherits the role's name as a tag (applied in playbook)
   - Sub-tasks can have granular tags (e.g., `install`, `config`)
 - **Idempotency:** Tasks must check state before changing it, especially for `command`/`shell` modules
+
+### Complex Loop Decomposition
+
+When a task loop is complex — involving multiple steps per item, conditional
+logic, or inline templates — extract the per-item work into a dedicated task
+file and use `include_tasks` in the outer loop.  This keeps both files focused
+and readable.
+
+**Anti-pattern: everything in one file**
+
+```yaml
+# tasks/users-and-groups.yaml (hard to follow when each item needs many steps)
+- name: Set env vars for each user
+  ansible.builtin.lineinfile:
+    path: "/home/{{ item.0.key }}/.bashrc"
+    line: "export {{ item.1.key }}={{ item.1.value }}"
+  loop: "{{ common_vars.users_and_groups.users | dict2items
+            | selectattr('value.env', 'defined')
+            | subelements('value.env') }}"
+  # ... more tasks duplicated per user ...
+```
+
+**Preferred pattern: outer loop + inner task file**
+
+```yaml
+# tasks/users-and-groups.yaml -- drives the loop
+- name: Configure environment variables for each user
+  ansible.builtin.include_tasks: user-env-vars.yaml
+  loop: "{{ common_vars.users_and_groups.users | dict2items
+            | selectattr('value.env', 'defined') | list }}"
+  loop_control:
+    loop_var: user_item
+    label: "{{ user_item.key }}"
+```
+
+```yaml
+# tasks/user-env-vars.yaml -- focuses on a single user
+- name: Ensure ~/.bashrc exports are present
+  ansible.builtin.lineinfile:
+    path: "/home/{{ user_item.key }}/.bashrc"
+    line: "export {{ env_var.key }}={{ env_var.value }}"
+  loop: "{{ user_item.value.env | dict2items }}"
+  loop_control:
+    loop_var: env_var
+    label: "{{ env_var.key }}"
+```
+
+**Key details:**
+
+- Use `loop_var` in the outer `loop_control` to give the item a meaningful
+  name (e.g., `user_item`) so the inner file can reference it without
+  shadowing the `item` variable.
+- Use `import_tasks` for static includes (evaluated at parse time, tags
+  propagate); use `include_tasks` when the filename or loop is dynamic
+  (evaluated at run time).  Outer loops **must** use `include_tasks`.
+
+**Real-world example:** `roles/common/tasks/users-and-groups.yaml` drives the
+user loop and calls `include_tasks: user-env-vars.yaml` for the environment
+variable work.
 
 ### Self-Contained Roles
 
