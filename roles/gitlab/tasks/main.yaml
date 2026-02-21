@@ -27,8 +27,8 @@
   ansible.builtin.file:
     path: "{{ gitlab_vars.inherited.local_volumes }}/{{ item.value.path | dirname }}"
     state: directory
-    owner: "{{ item.value.owner | default(gitlab_vars.inherited.owner) }}"
-    group: "{{ item.value.group | default(gitlab_vars.inherited.group) }}"
+    owner: "{{ gitlab_vars.inherited.owner }}"
+    group: "{{ gitlab_vars.inherited.group }}"
     mode: "{{ gitlab_vars.inherited.mode }}"
   loop: "{{ gitlab_vars.storage.local_volumes | dict2items }}"
   loop_control:
