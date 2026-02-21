@@ -33,3 +33,7 @@ gitlab01_common:
             size: 100%FREE
             filesystem: ext4
             mount: /var/lib/k8s-local-volumes
+  users_and_groups:
+    users:
+      kerry: "{{ lookup('ansible.builtin.vars', 'global').kerry }}"
+      gitlab-runner: "{{ lookup('ansible.builtin.vars', 'global').gitlab_runner }}"

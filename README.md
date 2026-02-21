@@ -338,12 +338,6 @@ proxmox:
     elitedesk:
 ```
 
-Group-level connection overrides in `group_vars/proxmox/main.yaml`:
-```yaml
-ansible_user: root
-ansible_become: false    # Overrides play-level become: true
-```
-
 ### Conditional Role and Task Execution
 
 The playbook and roles use several patterns to conditionally include roles and
@@ -580,10 +574,6 @@ The `k8s` role focuses on **core Kubernetes infrastructure** - enabling standard
 User must have password-less SSH to the target machine and must be able to
 execute 'sudo' without requiring a password.
 
-**Exception: Proxmox hosts** connect as `root` directly (no sudo). See
-`group_vars/proxmox/main.yaml` for connection settings (`ansible_user: root`,
-`ansible_become: false`).
-
 #### Ansible Galaxy Collections
 
 How to update all collections:
@@ -698,9 +688,9 @@ Add an entry to `cnpg.local_volumes` in the host's `_k8s_applications` variable:
   cnpg:
     enabled: true
     local_volumes:
-      cnpg--my-app-db:          # PV name — must be unique cluster-wide
+      cnpg--<my-namespace>--<my-app>: # PV name — must be unique cluster-wide
         capacity: 20Gi
-        path: cnpg/my-app-db   # relative to /var/lib/k8s-local-volumes/
+        path: cnpg/<my-namespace>/<my-app>    # relative to /var/lib/k8s-local-volumes/
         owner: 26               # postgres UID in CNPG images
         group: 26
         mode: u=rwx,go=

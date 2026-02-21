@@ -50,3 +50,6 @@ k8s_applications_defaults:
     mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
     local_volumes: /var/lib/k8s-local-volumes
     kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"
+    postgres:
+      owner: "{{ lookup('ansible.builtin.vars', 'global').postgres.owner | default(26) }}"
+      group: "{{ lookup('ansible.builtin.vars', 'global').postgres.group | default(26) }}"

@@ -8,15 +8,9 @@ asus_common:
     - zsh
   users_and_groups:
     users:
-      kerry:
-        name: Kerry Johnson
-        email: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.email }}"
-        chezmoi:
-          age:
-            recipient: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.age.recipient }}"
-            secret: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.age.secret }}"
-          data:
-            foo: bar
+      kerry: "{{ lookup('ansible.builtin.vars', 'global').kerry }}"
+      gitlab-runner: "{{ lookup('ansible.builtin.vars', 'global').gitlab_runner }}"
+
       # Strictly speaking, it's not necessary to have an account for ArgoCD.
       # But, it's a convenient place to control its SSH keys and use for
       # trouble-shooting access to (e.g.) GitLab
@@ -26,23 +20,17 @@ asus_common:
         create: true
         shell: /bin/bash
         ssh_key:
-          public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILMedk4rvJpujyrRHDSMQfQNE+IHVkL5tDynFLMrbbGC argo@asus.westsidestreet.net
+          public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILMedk4rvJpujyrRHDSMQfQNE+IHVkL5tDynFLMrbbGC argo@westsidestreet.net
           private: "{{ lookup('ansible.builtin.vars', 'secrets_vault').argocd.ed25519 }}"
+        chezmoi: {}
       claude:
         name: Claude
         email: claude@westsidestreet.net
         create: true
         shell: /bin/bash
-        groups:
-          - sudo
         ssh_key:
-          # generate: true
-          # type: ed25519
-          # comment: claude@asus.westsidestreet.net
-          public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHbb0/MTee+LwDMiyaPDF0a7/SnSOs3cRqj/PPw68ydX claude@asus.westsidestreet.net
+          public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHbb0/MTee+LwDMiyaPDF0a7/SnSOs3cRqj/PPw68ydX claude@westsidestreet.net
           private: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.ed25519 }}"
-        env:
-          GITLAB_USERNAME: claude
-          GITLAB_TOKEN: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.glpat }}"
-          GITLAB_URL: https://{{ lookup('ansible.builtin.vars', 'lan').fqdn.gitlab }}
-          PATH: $HOME/.local/bin:$PATH
+        chezmoi:
+          data:
+            gitlab_pat: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.glpat }}"

@@ -3,3 +3,8 @@ nvidia5080_common:
   fqdn: nvidia-5080.westsidestreet.net
   resolve:
     link: 2
+
+  users_and_groups:
+    users:
+      kerry: "{{ lookup('ansible.builtin.vars', 'global').kerry }}"
+      gitlab-runner: "{{ lookup('ansible.builtin.vars', 'global').gitlab_runner }}"

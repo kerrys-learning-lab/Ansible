@@ -29,5 +29,3 @@ all_common:
     domain: "{{ lookup('ansible.builtin.vars', 'lan').domain }}"
     nameservers:
       - "{{ lookup('ansible.builtin.vars', 'lan').ip.nameserver }}"
-      - 8.8.8.8
-      - 8.8.4.4

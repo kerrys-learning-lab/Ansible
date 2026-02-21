@@ -8,10 +8,11 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-added-large-files
-      - id: check-merge-conflicts
+      - id: check-merge-conflict
 
-  - repo: https://github.com/ansible/ansible-lint
-    rev: v25.1.3
+  - repo: git@gitlab.westsidestreet.net:kerrys-learning-lab/development-environment/pre-commit-hooks.git
+    rev: v0.1.0
     hooks:
       - id: ansible-lint
-        args: [--strict]  # matches CI behavior (ansible-lint --strict)
+        args:
+          - westsidestreet.net.yaml
