@@ -29,7 +29,23 @@ k8s_applications_defaults:
       helm_values:
         runtimeClassName: nvidia
 
+  cnpg:
+    enabled: false
+    helm:
+      name: cnpg
+      namespace: cnpg-system
+      chart:
+        url: https://cloudnative-pg.github.io/charts
+        ref: cloudnative-pg
+        version: "0.22.0"
+    helm_values: {}
+    local_volumes: {}
+
   helm: {}
 
   inherited:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
+    local_volumes: /var/lib/k8s-local-volumes
     kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"
