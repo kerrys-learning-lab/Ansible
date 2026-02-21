@@ -3,9 +3,7 @@ gitlab01_k8s_applications:
   cnpg:
     enabled: true
     local_volumes:
-      cnpg--grafana-db:
+      cnpg--monitoring--grafana:
         capacity: 10Gi
-        path: cnpg/grafana-db
-        owner: 26    # postgres user UID in CNPG images
-        group: 26
+        path: cnpg/monitoring/grafana-db
         mode: u=rwx,go=

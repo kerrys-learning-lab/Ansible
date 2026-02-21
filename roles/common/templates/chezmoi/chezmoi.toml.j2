@@ -1,5 +1,5 @@
 # Managed by Ansible — local changes ARE NOT PRESERVED
-{% if user.value.chezmoi.age %}
+{% if 'age' in user.value.chezmoi %}
 encryption = "age"
 [age]
     identity  = "~/.config/chezmoi/age-key.txt"

@@ -14,5 +14,5 @@
   ansible.builtin.command: ubuntu-drivers install
   when: nvidia_smi_check.rc != 0
   notify: Reboot for NVIDIA driver
-  register: ubuntu_drivers_install
-  changed_when: "'Running kernel seems to be up-to-date' not in ubuntu_drivers_install.stdout"
+  register: nvidia_ubuntu_drivers_install
+  changed_when: "'Running kernel seems to be up-to-date' not in nvidia_ubuntu_drivers_install.stdout"

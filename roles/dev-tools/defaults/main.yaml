@@ -4,6 +4,7 @@ devtools_defaults:
     # Convenience
     - age
     - bat
+    - gita
     - jq
     - speedtest-cli
     - tree

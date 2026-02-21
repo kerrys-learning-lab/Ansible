@@ -34,10 +34,7 @@
     owner: "{{ user.key }}"
     group: "{{ user.key }}"
     mode: '0700'
-  when: >-
-    user.value.ssh_key is defined
-    and (user.value.ssh_key.private is defined
-         or user.value.ssh_key.authorized_keys is defined)
+  when: user.value.ssh_key is defined
 
 - name: Users and Groups - Write SSH Private Keys - {{ user.key }}
   ansible.builtin.copy:
@@ -57,33 +54,17 @@
     group: "{{ user.key }}"
     mode: '0644'
   when: user.value.ssh_key is defined and user.value.ssh_key.public is defined
+  no_log: true
 
 - name: Users and Groups - Manage Authorized Keys - {{ user.key }}
   ansible.posix.authorized_key:
     user: "{{ user.key }}"
     key: "{{ item }}"
     state: present
-  loop: "{{ user.value.ssh_key.authorized_keys | default([]) }}"
-  when: >-
-    user.value.ssh_key is defined
-    and user.value.ssh_key.authorized_keys is defined
-
-- name: Users and Groups - Configure Sudoers - {{ user.key }}
-  ansible.builtin.template:
-    src: sudoers.j2
-    dest: /etc/sudoers.d/{{ user.key }}
-    owner: root
-    group: root
-    mode: '0440'
-    validate: /usr/sbin/visudo -cf %s
-  when: user.value.sudoers is defined
-
-- name: Users and Groups - Set Environment Variables - {{ user.key }}
-  ansible.builtin.include_tasks: ../user-env-vars.yaml
-  when: user.value.env is defined
-  vars:
-    user_name: "{{ user.key }}"
-    user_env: "{{ user.value.env }}"
+  loop: >-
+    {{ ([user.value.ssh_key.public]) + (user.value.ssh_key.authorized_keys | default([])) }}
+  when: user.value.ssh_key is defined
+  no_log: true
 
 - name: Configure Chezmoi - {{ user.key }}
   ansible.builtin.include_tasks: chezmoi.yaml

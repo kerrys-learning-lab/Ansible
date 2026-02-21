@@ -11,35 +11,37 @@
 
 - name: Set Resolve Derived Facts
   ansible.builtin.set_fact:
-    resolve_nameservers: "{{ common_vars.resolve.nameservers | join(' ') }}"
-    resolve_any_nameserver_needs_update: false
+    common_common_common_resolve_any_nameserver_needs_update: "{{ common_vars.resolve.nameservers | join(' ') }}"
+    common_resolve_any_nameserver_needs_update: false
 
 - name: Resolve - Retrieve Existing Nameservers
   ansible.builtin.command: "{{ common_vars.resolve.resolvectl }} dns {{ common_vars.resolve.link }}"
-  register: resolve_dns_existing_output
+  register: common_resolve_dns_existing_output
   changed_when: false
   when: "'link' in common_vars.resolve"
 
 - name: Resolve - Check Nameservers
   ansible.builtin.set_fact:
-    resolve_any_nameserver_needs_update: "{{ resolve_any_nameserver_needs_update or item not in resolve_dns_existing_output.stdout }}"
+    common_resolve_any_nameserver_needs_update: "{{ common_resolve_any_nameserver_needs_update or item not in common_resolve_dns_existing_output.stdout }}"
   loop: "{{ common_vars.resolve.nameservers }}"
   when: "'link' in common_vars.resolve"
 
 - name: Resolve - Update Nameservers
-  ansible.builtin.command: "{{ common_vars.resolve.resolvectl }} dns {{ common_vars.resolve.link }} {{ resolve_nameservers }}"
-  register: resolve_dns_existing_output
-  when: "'link' in common_vars.resolve and resolve_any_nameserver_needs_update"
-  changed_when: "'link' in common_vars.resolve and resolve_any_nameserver_needs_update"
+  ansible.builtin.command: |
+    {{ common_vars.resolve.resolvectl }} dns  {{ common_vars.resolve.link }}
+                                              {{ common_common_common_resolve_any_nameserver_needs_update }}
+  register: common_resolve_dns_existing_output
+  when: "'link' in common_vars.resolve and common_resolve_any_nameserver_needs_update"
+  changed_when: "'link' in common_vars.resolve and common_resolve_any_nameserver_needs_update"
 
 - name: Resolve - Retrieve Existing Search Domain
   ansible.builtin.command: "{{ common_vars.resolve.resolvectl }} domain {{ common_vars.resolve.link }}"
-  register: resolve_domain_existing_output
+  register: common_resolve_domain_existing_output
   changed_when: false
   when: "'link' in common_vars.resolve"
 
 - name: Resolve - Update Search Domain
   ansible.builtin.command: "{{ common_vars.resolve.resolvectl }} domain {{ common_vars.resolve.link }} {{ common_vars.resolve.domain }}"
-  register: resolve_domain_existing_output
-  when: "'link' in common_vars.resolve and common_vars.resolve.domain not in resolve_domain_existing_output.stdout"
-  changed_when: "'link' in common_vars.resolve and common_vars.resolve.domain not in resolve_domain_existing_output.stdout"
+  register: common_resolve_domain_existing_output
+  when: "'link' in common_vars.resolve and common_vars.resolve.domain not in common_resolve_domain_existing_output.stdout"
+  changed_when: "'link' in common_vars.resolve and common_vars.resolve.domain not in common_resolve_domain_existing_output.stdout"

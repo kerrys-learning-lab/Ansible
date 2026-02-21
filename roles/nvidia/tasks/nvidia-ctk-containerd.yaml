@@ -1,13 +1,15 @@
 # code: language=ansible
-- name: NVIDIA CTK - Check if containerd runtime is configured
-  ansible.builtin.command:
-    cmd: grep -q 'runtimes.nvidia' /etc/containerd/config.toml
-  register: nvidia_ctk_check
+- name: NVIDIA CTK - Read containerd config
+  ansible.builtin.slurp:
+    src: /etc/containerd/conf.d/99-nvidia.toml
+  register: nvidia_ctk_containerd_config
   failed_when: false
-  changed_when: false
 
 - name: NVIDIA CTK - Configure containerd runtime
   ansible.builtin.command: nvidia-ctk runtime configure --runtime=containerd
   changed_when: true
-  when: nvidia_ctk_check.rc != 0
+  when: >-
+    nvidia_ctk_containerd_config.content is not defined
+    or 'runtimes.nvidia' not in
+    (nvidia_ctk_containerd_config.content | b64decode)
   notify: Restart Kubernetes Runtime

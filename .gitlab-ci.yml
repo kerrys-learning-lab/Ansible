@@ -1,0 +1,53 @@
+include:
+  - project: $GITLABCI_DEFAULT_PIPELINE_PROJECT
+    ref: $GITLABCI_DEFAULT_PIPELINE_REF
+    file:
+      - pipelines/.configure-access.yaml
+      - pipelines/.stages.yaml
+      - pipelines/.defaults.yaml
+
+variables:
+  ANSIBLE_INVENTORY_PATH:  ./inventory
+  ANSIBLE_PLAYBOOK_PATH: ./westsidestreet.net.yaml
+  ANSIBLE_REMOTE_USER: gitlab-runner
+  SSH_TEST_COMMAND: uname -a
+  SSH_TEST_OPTIONS: |
+    -o BatchMode=yes
+
+
+# ----------------------------------------------------------------------------
+ansible-pre:
+  stage: .pre
+  before_script:
+    - !reference ['.configure-ssh-access', 'script']
+  script:
+    # List the inventory (hosts), skipping the first line, which is a header
+    - |
+      ANSIBLE_HOSTS=$(ansible all --list-hosts -i inventory | tail -n +2)
+    - |
+      for host in ${ANSIBLE_HOSTS}; do
+        if [[ -n "${GITLABCI_DOMAIN_NAME}" ]]; then
+          host=${host}.${GITLABCI_DOMAIN_NAME}
+        fi
+
+        ssh  ${SSH_TEST_OPTIONS}  ${ANSIBLE_REMOTE_USER}@${host}  ${SSH_TEST_COMMAND}
+      done
+
+
+# ----------------------------------------------------------------------------
+ansible-lint:
+  stage: test
+  script:
+    - ansible-lint  --strict  ${ANSIBLE_PLAYBOOK_PATH}
+
+
+# ----------------------------------------------------------------------------
+ansible-run:
+  stage: publish
+  before_script:
+    - !reference ['.configure-ssh-access', 'script']
+  script:
+    - |
+      ansible-playbook  --vault-password-file ${ANSIBLE_VAULT_PASSWORD_FILE}  \
+                        --inventory           ${ANSIBLE_INVENTORY_PATH}  \
+                        ${ANSIBLE_PLAYBOOK_PATH}

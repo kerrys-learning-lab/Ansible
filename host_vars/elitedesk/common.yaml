@@ -29,3 +29,8 @@ elitedesk_common:
         pvs:
           - /dev/sdb1
         thinpool: data
+
+  users_and_groups:
+    users:
+      kerry: "{{ lookup('ansible.builtin.vars', 'global').kerry }}"
+      gitlab-runner: "{{ lookup('ansible.builtin.vars', 'global').gitlab_runner }}"

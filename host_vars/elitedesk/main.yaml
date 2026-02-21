@@ -1,0 +1,4 @@
+# code: language=ansible
+
+ansible_fqdn: elitedesk.westsidestreet.net
+ansible_host: elitedesk.westsidestreet.net

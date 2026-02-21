@@ -4,23 +4,23 @@
 # Skip entirely if no disk management config is defined
 - name: Disk Management - Set config shorthand
   ansible.builtin.set_fact:
-    _disk_mgmt: "{{ common_vars.disk_management | default({}) }}"
+    common_disk_mgmt_vars: "{{ common_vars.disk_management | default({}) }}"
 
 - name: Disk Management - Determine if there is work to do
   ansible.builtin.set_fact:
-    _disk_mgmt_enabled: "{{ (_disk_mgmt.disks | default({}) | length > 0) or
-                            (_disk_mgmt.volume_groups | default({}) | length > 0) }}"
+    common_disk_mgmt_vars_enabled: "{{ (common_disk_mgmt_vars.disks | default({}) | length > 0) or
+                            (common_disk_mgmt_vars.volume_groups | default({}) | length > 0) }}"
 
 
 # --------------------------------------------------------------------------
 # Apply declarative disk configuration
 - name: Disk Management - Configure disks, LVM, filesystems, and mounts
   disk_management:
-    disks: "{{ _disk_mgmt.disks | default({}) }}"
-    volume_groups: "{{ _disk_mgmt.volume_groups | default({}) }}"
-  when: _disk_mgmt_enabled
-  register: _disk_mgmt_result
+    disks: "{{ common_disk_mgmt_vars.disks | default({}) }}"
+    volume_groups: "{{ common_disk_mgmt_vars.volume_groups | default({}) }}"
+  when: common_disk_mgmt_vars_enabled
+  register: common_disk_mgmt_vars_result
 
 - name: Disk Management - Reboot if partition table changed
   ansible.builtin.reboot:
-  when: _disk_mgmt_result.reboot_required | default(false)
+  when: common_disk_mgmt_vars_result.reboot_required | default(false)
