@@ -31,6 +31,7 @@ k8s_applications_defaults:
 
   cnpg:
     enabled: false
+    storage_class: cnpg-local
     helm:
       name: cnpg
       namespace: cnpg-system

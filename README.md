@@ -671,6 +671,71 @@ three components deployed to the cluster:
    resources to the kubelet, allowing pods to request GPU access via
    `resources.limits`.
 
+#### CNPG (CloudNativePG) in Kubernetes (k8s-applications)
+
+Hosts with `cnpg.enabled: true` in their `_k8s_applications` variables get
+three things deployed:
+
+1. **`cnpg-local` StorageClass** — A dedicated `kubernetes.io/no-provisioner`
+   class with `WaitForFirstConsumer` binding, separate from the generic `local`
+   class so CNPG storage is clearly identified and independently configurable.
+
+2. **CNPG Operator** — Deployed via Helm from `cloudnative-pg.github.io/charts`.
+   Watches for `Cluster` CRs and manages the full PostgreSQL lifecycle
+   (provisioning, failover, backups, upgrades).
+
+3. **PersistentVolumes** — One PV per entry in `cnpg.local_volumes`, created
+   under `/var/lib/k8s-local-volumes/cnpg/` and labelled `owner: <key>` for
+   deterministic binding by CNPG `Cluster` CRs.
+
+##### Adding a new CNPG database volume
+
+Add an entry to `cnpg.local_volumes` in the host's `_k8s_applications` variable:
+
+```yaml
+# host_vars/<host>/k8s-applications.yaml
+<host>_k8s_applications:
+  cnpg:
+    enabled: true
+    local_volumes:
+      cnpg--my-app-db:          # PV name — must be unique cluster-wide
+        capacity: 20Gi
+        path: cnpg/my-app-db   # relative to /var/lib/k8s-local-volumes/
+        owner: 26               # postgres UID in CNPG images
+        group: 26
+        mode: u=rwx,go=
+```
+
+Then reference it from the ArgoCD `Cluster` CR via `matchLabels`:
+
+```yaml
+spec:
+  instances: 1
+  storage:
+    size: 20Gi
+    pvcTemplate:
+      spec:
+        storageClassName: cnpg-local   # matches cnpg.storage_class default
+        selector:
+          matchLabels:
+            owner: cnpg--my-app-db
+```
+
+The CNPG operator creates a PVC per instance; Kubernetes binds it to the
+matching PV via the label selector (same mechanism as Gitaly). For multi-instance
+clusters, provision one PV per replica (e.g. `cnpg--my-app-db-1`,
+`cnpg--my-app-db-2`) and use a dynamic provisioner instead of `matchLabels`.
+
+The StorageClass name defaults to `cnpg-local` and can be overridden via
+`cnpg.storage_class` in the host's `_k8s_applications` variable.
+
+> **Note:** The postgres user UID in CNPG images is `26`. Verify with:
+> ```bash
+> kubectl run -it --rm cnpg-check \
+>   --image=ghcr.io/cloudnative-pg/postgresql:16 \
+>   --restart=Never -- id postgres
+> ```
+
 ### Running Ansible
 
 Variables are encrypted using Ansible Vault. A wrapper script (`ansible.sh`) incorporates the vault password automatically:
