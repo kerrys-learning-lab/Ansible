@@ -9,16 +9,12 @@
                 override='ignore') }}
 
 - name: Create K8s Local Share Directories
-  ansible.builtin.file:
-    state: directory
-    path: "{{ item }}"
-    owner: "{{ k8s_share_vars.inherited.owner }}"
-    group: "{{ k8s_share_vars.inherited.group }}"
-    mode: "{{ k8s_share_vars.inherited.mode }}"
-  loop:
-    - "{{ k8s_share_vars.inherited.downloads }}"
-    - "{{ k8s_share_vars.inherited.share }}"
-  delegate_to: localhost
+  ansible.builtin.include_tasks: create-share-dirs.yaml
+  loop: "{{ groups['ansible'] }}"
+  loop_control:
+    loop_var: _ansible_host
+    label: "{{ _ansible_host }}"
+  run_once: true
 
 - name: Fetch All Kubeconfigs
   ansible.builtin.slurp:
@@ -32,7 +28,11 @@
     owner: "{{ k8s_share_vars.inherited.owner }}"
     group: "{{ k8s_share_vars.inherited.group }}"
     mode: "{{ k8s_share_vars.inherited.mode }}"
-  delegate_to: localhost
+  loop: "{{ groups['ansible'] }}"
+  loop_control:
+    loop_var: _ansible_host
+    label: "{{ _ansible_host }}"
+  delegate_to: "{{ _ansible_host }}"
 
 - name: Transform and Share Kubeconfig
   kubeconfig_transform:
@@ -43,7 +43,11 @@
     owner: "{{ k8s_share_vars.inherited.owner }}"
     group: "{{ k8s_share_vars.inherited.group }}"
     mode: "{{ k8s_share_vars.inherited.mode }}"
-  delegate_to: localhost
+  loop: "{{ groups['ansible'] }}"
+  loop_control:
+    loop_var: _ansible_host
+    label: "{{ _ansible_host }}"
+  delegate_to: "{{ _ansible_host }}"
 
 - name: Merge All Kubeconfigs
   kubeconfig_merge:
@@ -52,7 +56,11 @@
     owner: "{{ k8s_share_vars.inherited.owner }}"
     group: "{{ k8s_share_vars.inherited.group }}"
     mode: "{{ k8s_share_vars.inherited.mode }}"
-  delegate_to: localhost
+  loop: "{{ groups['ansible'] }}"
+  loop_control:
+    loop_var: _ansible_host
+    label: "{{ _ansible_host }}"
+  delegate_to: "{{ _ansible_host }}"
   run_once: true
 
 - name: Link System kubeconfig (Overrides K3S kubeconfig with shared)
@@ -60,4 +68,9 @@
     src: "{{ k8s_share_vars.inherited.share }}/kubeconfig.all.yaml"
     path: "{{ k8s_share_vars.inherited.kubeconfig }}"
     state: link
-  delegate_to: localhost
+  loop: "{{ groups['ansible'] }}"
+  loop_control:
+    loop_var: _ansible_host
+    label: "{{ _ansible_host }}"
+  delegate_to: "{{ _ansible_host }}"
+  run_once: true
