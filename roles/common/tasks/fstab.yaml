@@ -1,9 +1,13 @@
 # code: language=ansible
 - name: Filesystem Table - Create Network Mount Locations (SMB)
-  ansible.builtin.file:
+  ansible.builtin.file: # noqa: risky-file-permissions
     state: directory
     path: /mnt/{{ item.value.path }}
-    mode: a=rX
+    # mode is intentionally omitted: these are CIFS mount points whose
+    # permissions are governed by mount options, not by Unix chmod.
+    # Setting mode here causes a spurious `changed` on every run because
+    # Ansible sees the CIFS-reported permissions rather than the underlying
+    # directory's permissions.
   loop: "{{ common_vars.fstab.smb.mounts | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
