@@ -9,6 +9,9 @@ devtools_defaults:
     - tree
     - unzip
 
+    # Development workflow
+    - pre-commit
+
     # For certain CLI integrations (like continue, below)
     - npm
 
