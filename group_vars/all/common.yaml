@@ -15,7 +15,7 @@ all_common:
   fstab:
     smb:
       host: "{{ lookup('ansible.builtin.vars', 'lan').ip.smb }}"
-      opts: username={{ lookup('ansible.builtin.vars', 'secrets_vault').smb.username }},password={{ lookup('ansible.builtin.vars', 'secrets_vault').smb.password }}
+      opts: username={{ lookup('ansible.builtin.vars', 'secrets_vault').smb.username }},password={{ lookup('ansible.builtin.vars', 'secrets_vault').smb.password }} # noqa: yaml[line-length]
       mounts:
         homes:
           path: nas-homes
