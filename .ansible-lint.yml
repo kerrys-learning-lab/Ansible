@@ -1,3 +1,7 @@
 ---
 skip_list:
   - name[template]
+  - role-name  # Hyphenated role names are intentional; renaming would break all references
+
+exclude_paths:
+  - group_vars/all/secrets.yaml  # Contains SSH public keys in block literals that cannot be split

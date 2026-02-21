@@ -12,7 +12,6 @@
     {{ nvidia_vars.container_toolkit.debian.keyring }}.asc
   args:
     creates: "{{ nvidia_vars.container_toolkit.debian.keyring }}"
-  when: nvidia_gpg_key_download.changed
 
 - name: NVIDIA Container Toolkit (Debian) - Add Repository
   ansible.builtin.apt_repository:

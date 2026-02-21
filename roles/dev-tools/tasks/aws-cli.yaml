@@ -41,6 +41,7 @@
   ansible.builtin.shell: # noqa: command-instead-of-shell
     cmd: |
       {{ aws_cli_download_path }}/aws/install --install-dir {{ aws_cli_install_path }}
+  changed_when: true
   when: |
     not devtools_aws_test_installation.stat.exists
     or  devtools_vars.aws.cli.version not in devtools_aws_test_installation.stat.lnk_target

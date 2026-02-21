@@ -1,6 +1,6 @@
 # code: language=ansible
 - name: Configure CertBot VirtualEnv
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: python3 -m venv {{ certbot.venv }}
     creates: "{{ certbot.venv }}"
   notify:
@@ -13,7 +13,7 @@
 
 - name: Link CertBot Executable
   ansible.builtin.file:
-    src: "{{ certbot.venv}}/bin/certbot"
+    src: "{{ certbot.venv }}/bin/certbot"
     dest: /usr/bin/certbot
     state: link
 

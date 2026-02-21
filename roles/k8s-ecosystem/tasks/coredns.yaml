@@ -16,15 +16,4 @@
               forward . {{ lookup('ansible.builtin.vars', 'lan').ip.nameserver }}
           }
     kubeconfig: "{{ k8s_ecosystem_vars.inherited.kubeconfig }}"
-  register: k8s_ecosystem_coredns_custom
-
-- name: Perform a Rolling Restart of CoreDNS pods
-  ansible.builtin.command:
-    cmd:
-      kubectl --kubeconfig  {{ k8s_ecosystem_vars.inherited.kubeconfig }}
-              --namespace   kube-system
-              rollout
-              restart
-              deployment/coredns
-  changed_when: k8s_ecosystem_coredns_custom.changed
-  when: k8s_ecosystem_coredns_custom.changed
+  notify: Perform a Rolling Restart of CoreDNS pods
