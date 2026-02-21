@@ -1,0 +1,59 @@
+# code: language=ansible
+- name: CNPG - Install Operator Using Helm
+  kubernetes.core.helm:
+    name: "{{ k8s_applications_vars.cnpg.helm.name }}"
+    namespace: "{{ k8s_applications_vars.cnpg.helm.namespace }}"
+    chart_repo_url: "{{ k8s_applications_vars.cnpg.helm.chart.url }}"
+    chart_version: "{{ k8s_applications_vars.cnpg.helm.chart.version }}"
+    chart_ref: "{{ k8s_applications_vars.cnpg.helm.chart.ref }}"
+    release_values: "{{ k8s_applications_vars.cnpg.helm_values }}"
+    create_namespace: true
+    kubeconfig: "{{ k8s_applications_vars.inherited.kubeconfig }}"
+    wait: true
+
+- name: CNPG - Create Local Volume Directory Parents
+  ansible.builtin.file:
+    path: "{{ k8s_applications_vars.inherited.local_volumes }}/{{ item.value.path | dirname }}"
+    state: directory
+    owner: "{{ item.value.owner | default(k8s_applications_vars.inherited.owner) }}"
+    group: "{{ item.value.group | default(k8s_applications_vars.inherited.group) }}"
+    mode: "{{ k8s_applications_vars.inherited.mode }}"
+  loop: "{{ k8s_applications_vars.cnpg.local_volumes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: CNPG - Create Local Volume Directories
+  ansible.builtin.file:
+    path: "{{ k8s_applications_vars.inherited.local_volumes }}/{{ item.value.path }}"
+    state: directory
+    owner: "{{ item.value.owner | default(k8s_applications_vars.inherited.owner) }}"
+    group: "{{ item.value.group | default(k8s_applications_vars.inherited.group) }}"
+    mode: "{{ item.value.mode | default(k8s_applications_vars.inherited.mode) }}"
+  loop: "{{ k8s_applications_vars.cnpg.local_volumes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: CNPG - Create Local Persistent Volumes
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: "{{ item.key }}"
+        labels:
+          owner: "{{ item.key }}"
+      spec:
+        capacity:
+          storage: "{{ item.value.capacity | default('10Gi') }}"
+        accessModes:
+          - ReadWriteOnce
+        persistentVolumeReclaimPolicy: Retain
+        storageClassName: local
+        hostPath:
+          path: "{{ k8s_applications_vars.inherited.local_volumes }}/{{ item.value.path }}"
+    kubeconfig: "{{ k8s_applications_vars.inherited.kubeconfig }}"
+  loop: "{{ k8s_applications_vars.cnpg.local_volumes | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

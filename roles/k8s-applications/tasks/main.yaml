@@ -20,6 +20,12 @@
   tags:
     - gpu
 
+- name: Install CNPG Operator
+  ansible.builtin.import_tasks: cnpg.yaml
+  when: k8s_applications_vars.cnpg.enabled | default(false)
+  tags:
+    - cnpg
+
 - name: Install/Configure Applications Using Helm
   kubernetes.core.helm:
     name: "{{ item.key }}"

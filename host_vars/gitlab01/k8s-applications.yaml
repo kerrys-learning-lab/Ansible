@@ -1,0 +1,11 @@
+# code: language=ansible
+gitlab01_k8s_applications:
+  cnpg:
+    enabled: true
+    local_volumes:
+      cnpg--grafana-db:
+        capacity: 10Gi
+        path: cnpg/grafana-db
+        owner: 26    # postgres user UID in CNPG images
+        group: 26
+        mode: u=rwx,go=
