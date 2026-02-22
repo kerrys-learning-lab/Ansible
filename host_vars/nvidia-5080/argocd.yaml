@@ -2,4 +2,4 @@
 nvidia_5080_argocd:
   cluster:
     labels:
-      env/ml: "true"
+      env/machine-learning: "true"

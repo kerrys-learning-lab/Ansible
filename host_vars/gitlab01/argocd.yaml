@@ -63,6 +63,10 @@ gitlab01_argocd:
           name: spyll
           type: helm
           url: https://gitlab.westsidestreet.net/api/v4/projects/10/packages/helm/stable
+        vllm:
+          name: vllm
+          url: https://github.com/vllm-project/vllm.git
+          type: git
   projects:
     boids:
       description: |
@@ -98,6 +102,10 @@ gitlab01_argocd:
         url: git@gitlab.westsidestreet.net:kerrys-learning-lab/development-environment/argocd-applications.git
         ref: main
     infrastructure:
+      source:
+        url: git@gitlab.westsidestreet.net:kerrys-learning-lab/development-environment/argocd-applications.git
+        ref: main
+    machine-learning:
       source:
         url: git@gitlab.westsidestreet.net:kerrys-learning-lab/development-environment/argocd-applications.git
         ref: main
