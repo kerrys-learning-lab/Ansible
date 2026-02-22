@@ -3,7 +3,7 @@ gitlab01_k8s_applications:
   cnpg:
     enabled: true
     local_volumes:
-      cnpg--monitoring--grafana:
+      cnpg--monitoring--grafana-db:
         capacity: 10Gi
-        path: cnpg/monitoring/grafana
+        path: cnpg/monitoring/grafana-db
         mode: u=rwx,go=
