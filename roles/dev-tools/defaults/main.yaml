@@ -24,6 +24,7 @@ devtools_defaults:
     - gnome-shell-extension-system-monitor
   npm:
     - "@continuedev/cli"
+    - renovate
 
   aws:
     cli:
