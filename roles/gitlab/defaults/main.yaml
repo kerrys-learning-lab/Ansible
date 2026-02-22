@@ -24,11 +24,13 @@ gitlab_defaults:
     namespace: gitlab-system
     url: https://charts.gitlab.io
     ref: gitlab-operator
+    # renovate: datasource=helm registryUrl=https://charts.gitlab.io depName=gitlab-operator
     version: 2.8.3
     helm_values: {}
 
   application:
     name: gitlab
+    # renovate: datasource=helm registryUrl=https://charts.gitlab.io depName=gitlab
     version: 9.8.3
     crd_values: {}
 

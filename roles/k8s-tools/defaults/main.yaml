@@ -2,6 +2,7 @@
 k8s_tools_defaults:
 
   helm:
+    # renovate: datasource=github-releases depName=helm/helm
     version: v3.20.0
     url_prefix: https://get.helm.sh
     bin: /usr/local/bin/helm
@@ -10,16 +11,19 @@ k8s_tools_defaults:
       - https://github.com/helm-unittest/helm-unittest.git
 
   k9s:
+    # renovate: datasource=github-releases depName=derailed/k9s
     version: v0.50.18
     url_prefix: https://github.com/derailed/k9s/releases/download
     bin: /usr/local/bin/k9s
 
   argocd:
+    # renovate: datasource=github-releases depName=argoproj/argo-cd
     version: v2.14.11
     url_prefix: https://github.com/argoproj/argo-cd/releases/download
     bin: /usr/local/bin/argocd
 
   kubeseal:
+    # renovate: datasource=github-releases depName=bitnami-labs/sealed-secrets
     version: 0.32.2
     url_prefix: https://github.com/bitnami-labs/sealed-secrets/releases/download
     bin: /usr/local/bin/kubeseal

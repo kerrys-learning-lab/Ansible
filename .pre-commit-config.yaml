@@ -16,3 +16,12 @@ repos:
       - id: ansible-lint
         args:
           - westsidestreet.net.yaml
+
+  - repo: local
+    hooks:
+      - id: check-renovate-annotations
+        name: Check Renovate annotations on version fields
+        entry: scripts/check-renovate-annotations.sh
+        language: script
+        files: ^(roles/.*/defaults/main\.yaml|host_vars/.*\.yaml|group_vars/.*\.yaml)$
+        pass_filenames: true

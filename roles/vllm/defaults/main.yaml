@@ -1,6 +1,7 @@
 vllm_defaults:
   enabled: false
 
+  # renovate: datasource=github-releases depName=vllm-project/vllm
   version: 0.16.0
   helm:
     name: vllm

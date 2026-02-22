@@ -1,0 +1,45 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "roles/.*/defaults/main\\.yaml$",
+        "host_vars/.*\\.yaml$",
+        "group_vars/.*\\.yaml$"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)(?:\\s+registryUrl=(?<registryUrl>\\S+))?\\s+depName=(?<depName>\\S+)\\n\\s+\\w+:\\s*[\"']?(?<currentValue>v?[\\d.]+)[\"']?"
+      ]
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "GitLab: separate group, manual review only",
+      "matchPackageNames": ["gitlab", "gitlab-operator", "gitlab-runner"],
+      "groupName": "gitlab",
+      "automerge": false
+    },
+    {
+      "description": "Non-GitLab Helm charts: auto-merge patch updates",
+      "matchDatasources": ["helm"],
+      "excludePackageNames": ["gitlab", "gitlab-operator", "gitlab-runner"],
+      "groupName": "helm-charts",
+      "automerge": true,
+      "matchUpdateTypes": ["patch"]
+    },
+    {
+      "description": "GitHub releases: auto-merge patch updates",
+      "matchDatasources": ["github-releases"],
+      "groupName": "github-releases",
+      "automerge": true,
+      "matchUpdateTypes": ["patch"]
+    },
+    {
+      "description": "All minor/major updates require manual review",
+      "matchUpdateTypes": ["minor", "major"],
+      "automerge": false
+    }
+  ]
+}

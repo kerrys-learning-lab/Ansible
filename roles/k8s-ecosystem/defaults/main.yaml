@@ -4,6 +4,7 @@ k8s_ecosystem_defaults:
   cert_manager:
     chart:
       url: https://charts.jetstack.io
+      # renovate: datasource=helm registryUrl=https://charts.jetstack.io depName=cert-manager
       version: v1.19.2
     helm_values:
       crds:
@@ -22,6 +23,7 @@ k8s_ecosystem_defaults:
     chart:
       url: https://bitnami-labs.github.io/sealed-secrets
       ref: sealed-secrets
+      # renovate: datasource=helm registryUrl=https://bitnami-labs.github.io/sealed-secrets depName=sealed-secrets
       version: 2.17.9
     helm_values:
       # OpenShift's Security Context Constraints (SCCs) require pods to run
@@ -47,6 +49,7 @@ k8s_ecosystem_defaults:
     chart:
       url: https://metallb.github.io/metallb
       ref: metallb
+      # renovate: datasource=helm registryUrl=https://metallb.github.io/metallb depName=metallb
       version: v0.14.9
       helm_values:
         labels:
@@ -60,6 +63,7 @@ k8s_ecosystem_defaults:
     chart:
       url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts
       ref: csi-driver-smb
+      # renovate: datasource=helm registryUrl=https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts depName=csi-driver-smb
       version: v1.17.0
     helm_values: {}
 

@@ -8,6 +8,7 @@ gitlab_runner_defaults:
     chart:
       url: https://charts.gitlab.io
       ref: gitlab-runner
+      # renovate: datasource=helm registryUrl=https://charts.gitlab.io depName=gitlab-runner
       version: 0.85.0
 
   inherited:

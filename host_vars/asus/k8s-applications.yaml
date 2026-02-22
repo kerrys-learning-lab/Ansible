@@ -9,6 +9,7 @@ asus_k8s_applications:
       namespace: dev
       chart:
         url: https://nats-io.github.io/k8s/helm/charts
+        # renovate: datasource=helm registryUrl=https://nats-io.github.io/k8s/helm/charts depName=nats
         version: 2.12.4
         ref: nats
       helm_values:

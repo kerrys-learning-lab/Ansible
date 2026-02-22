@@ -3,6 +3,7 @@ asus_devtools:
   cpp:
     sources:
       mujoco:
+        # renovate: datasource=github-releases depName=google-deepmind/mujoco
         version: 3.4.0
         url: https://github.com/google-deepmind/mujoco/releases/download/3.4.0/mujoco-3.4.0-linux-x86_64.tar.gz
         extract: true
