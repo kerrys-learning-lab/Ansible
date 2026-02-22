@@ -71,6 +71,10 @@
             kind: RoleBinding
           - group: '*'
             kind: CustomResourceDefinition
+          - group: '*'
+            kind: ValidatingWebhookConfiguration
+          - group: '*'
+            kind: MutatingWebhookConfiguration
     kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
   loop: "{{ argocd_vars.projects | default({}) | dict2items }}"
   loop_control:

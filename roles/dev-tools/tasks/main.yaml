@@ -6,6 +6,8 @@
                 '_devtools',
                 initial_value=devtools_defaults,
                 pattern_type='suffix') }}
+  tags:
+    - always
 
 - name: OS Packages
   ansible.builtin.package:
