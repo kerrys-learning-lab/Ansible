@@ -87,7 +87,7 @@ devtools_defaults:
           bazelisk: bazelisk-linux-amd64
       buildifier:
         # renovate: datasource=github-releases depName=bazelbuild/buildtools
-        version: v8.2.1
+        version: v8.5.1
         url: https://github.com/bazelbuild/buildtools/releases/download/v8.2.1/buildifier-linux-amd64
         rcopy: true
         modes:
