@@ -1,4 +1,4 @@
 # code: language=ansible
 nvidia5080_k8s_applications:
   gpu:
-    enabled: true
+    enabled: false

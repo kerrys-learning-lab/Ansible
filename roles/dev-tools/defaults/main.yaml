@@ -6,6 +6,7 @@ devtools_defaults:
     - bat
     - gita
     - jq
+    - python3-huggingface-hub
     - speedtest-cli
     - tree
     - unzip
