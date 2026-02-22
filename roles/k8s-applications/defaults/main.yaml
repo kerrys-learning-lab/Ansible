@@ -1,6 +1,7 @@
 # code: language=ansible
 k8s_applications_defaults:
   elastic_operator:
+    # renovate: datasource=github-releases depName=elastic/cloud-on-k8s
     version: 3.3.0
     url:
       prefix: https://download.elastic.co/downloads/eck
@@ -16,6 +17,7 @@ k8s_applications_defaults:
         name: node-feature-discovery
         chart:
           oci: oci://registry.k8s.io/nfd/charts/node-feature-discovery
+          # renovate: datasource=docker depName=registry.k8s.io/nfd/charts/node-feature-discovery
           version: "0.18.3"
       helm_values: {}
     nvidia_device_plugin:
@@ -25,6 +27,7 @@ k8s_applications_defaults:
         chart:
           url: https://nvidia.github.io/k8s-device-plugin
           ref: nvidia-device-plugin
+          # renovate: datasource=helm registryUrl=https://nvidia.github.io/k8s-device-plugin depName=nvidia-device-plugin
           version: "0.17.1"
       helm_values:
         runtimeClassName: nvidia
@@ -38,6 +41,7 @@ k8s_applications_defaults:
       chart:
         url: https://cloudnative-pg.github.io/charts
         ref: cloudnative-pg
+        # renovate: datasource=helm registryUrl=https://cloudnative-pg.github.io/charts depName=cloudnative-pg
         version: "0.22.0"
     helm_values: {}
     local_volumes: {}

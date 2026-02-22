@@ -19,6 +19,12 @@ This repository contains Ansible playbooks and roles for managing a homelab infr
   - [Kubernetes Resource Patterns](#kubernetes-resource-patterns)
   - [K8s Engine Abstraction](#k8s-engine-abstraction)
   - [K8s Role Scope: Infrastructure vs Extensions](#k8s-role-scope-infrastructure-vs-extensions)
+- [Dependency Management (Renovate)](#dependency-management-renovate)
+  - [Inline Annotations](#inline-annotations)
+  - [What Renovate Tracks](#what-renovate-tracks)
+  - [MR Strategy & Automerge](#mr-strategy--automerge)
+  - [Pre-commit Validation](#pre-commit-validation)
+  - [Adding a New Dependency](#adding-a-new-dependency)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Running Ansible](#running-ansible)
@@ -562,6 +568,66 @@ The `k8s` role focuses on **core Kubernetes infrastructure** - enabling standard
 - Optional extensions: Not all clusters need all tools
 - Follows existing pattern: Applications are separate roles
 - Clean conditionals: Roles handle their own skip logic internally
+
+### Dependency Management (Renovate)
+
+External dependency versions are tracked by [Renovate](https://docs.renovatebot.com/) using **regex custom managers with inline comments**. This approach was chosen over alternatives (centralized versions file, BOM generation) because it works with the existing project structure, is self-documenting, and is a well-established Renovate pattern.
+
+#### Inline Annotations
+
+Every `version:` field with a pinned semver value must have a `# renovate:` comment directly above it, specifying the datasource and package name:
+
+```yaml
+# Helm chart example:
+cert_manager:
+  chart:
+    url: https://charts.jetstack.io
+    # renovate: datasource=helm registryUrl=https://charts.jetstack.io depName=cert-manager
+    version: v1.19.2
+
+# GitHub release example:
+k9s:
+  # renovate: datasource=github-releases depName=derailed/k9s
+  version: v0.50.18
+```
+
+Renovate matches the comment + version line via regex, looks up the latest version from the specified datasource, and opens an MR to bump the version.
+
+#### What Renovate Tracks
+
+| Category | Datasource | Examples |
+|----------|-----------|----------|
+| Helm charts (HTTP repos) | `helm` | cert-manager, argocd, metallb, gitlab-operator |
+| Helm charts (OCI registries) | `docker` | node-feature-discovery |
+| Binary tools | `github-releases` | helm, k9s, kubeseal, bazelisk |
+| Operators & tarballs | `github-releases` | elasticsearch-operator, mujoco |
+
+**Not tracked:** OS packages (apt/dnf) with no pinned versions, K3s/RKE2 installer scripts (auto-update), Claude CLI (no pinned version).
+
+Annotations are placed in `roles/*/defaults/main.yaml`, `host_vars/**/*.yaml`, and `group_vars/**/*.yaml`. Overrides at the group/host level are rare and intentional, so tracking at the defaults level provides sufficient coverage.
+
+#### MR Strategy & Automerge
+
+| Scope | Grouping | Automerge |
+|-------|----------|-----------|
+| GitLab (operator, runner, app) | Separate group | Never (manual review) |
+| Non-GitLab Helm charts | Grouped together | Patch updates only |
+| GitHub releases | Grouped together | Patch updates only |
+| Minor/major updates (all) | Per above groups | Never (manual review) |
+
+Configuration is in `renovate.json` at the project root.
+
+#### Pre-commit Validation
+
+A pre-commit hook (`scripts/check-renovate-annotations.sh`) validates that every `version:` field with a semver value has a `# renovate:` comment above it. This catches new dependencies added without annotations.
+
+#### Adding a New Dependency
+
+When adding a new versioned dependency:
+
+1. Add the `version:` field as usual in the role defaults or host/group vars
+2. Add a `# renovate:` comment directly above it with the appropriate datasource and package name
+3. The pre-commit hook will fail if the annotation is missing
 
 ---
 

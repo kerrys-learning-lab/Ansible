@@ -29,6 +29,7 @@ devtools_defaults:
     cli:
       url_prefix: https://awscli.amazonaws.com/awscli-exe-{{ ansible_system | lower }}-{{ ansible_architecture | lower }}
       # version: 2.25.1
+      # renovate: datasource=github-releases depName=aws/aws-cli
       version: 2.33.21
     bin: /usr/local/bin/aws
 
@@ -66,6 +67,7 @@ devtools_defaults:
 
     tools:
       bazel-compile-commands:
+        # renovate: datasource=github-releases depName=kiron1/bazel-compile-commands
         version: 0.20.1
         url: https://github.com/kiron1/bazel-compile-commands/releases/download/v0.20.1/bazel-compile-commands_0.20.1-linux_amd64.zip
         dest: /
@@ -74,6 +76,7 @@ devtools_defaults:
           bazel-clangd-wrapper: usr/bin/bazel-clangd-wrapper
           bazel-compile-commands: usr/bin/bazel-compile-commands
       bazelisk:
+        # renovate: datasource=github-releases depName=bazelbuild/bazelisk
         version: v1.28.1
         url: https://github.com/bazelbuild/bazelisk/releases/download/v1.28.1/bazelisk-linux-amd64
         rcopy: true
@@ -82,6 +85,7 @@ devtools_defaults:
         links:
           bazelisk: bazelisk-linux-amd64
       buildifier:
+        # renovate: datasource=github-releases depName=bazelbuild/buildtools
         version: v8.2.1
         url: https://github.com/bazelbuild/buildtools/releases/download/v8.2.1/buildifier-linux-amd64
         rcopy: true
