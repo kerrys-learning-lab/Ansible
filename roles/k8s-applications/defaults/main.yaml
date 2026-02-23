@@ -42,7 +42,7 @@ k8s_applications_defaults:
         url: https://cloudnative-pg.github.io/charts
         ref: cloudnative-pg
         # renovate: datasource=helm registryUrl=https://cloudnative-pg.github.io/charts depName=cloudnative-pg
-        version: "0.22.0"
+        version: "0.27.1"
     helm_values: {}
     local_volumes: {}
 
