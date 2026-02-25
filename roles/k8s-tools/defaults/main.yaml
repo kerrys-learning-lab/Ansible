@@ -24,7 +24,7 @@ k8s_tools_defaults:
 
   kubeseal:
     # renovate: datasource=github-releases depName=bitnami-labs/sealed-secrets
-    version: 0.32.2
+    version: 0.36.0
     url_prefix: https://github.com/bitnami-labs/sealed-secrets/releases/download
     bin: /usr/local/bin/kubeseal
 
