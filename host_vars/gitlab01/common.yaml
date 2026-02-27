@@ -35,5 +35,6 @@ gitlab01_common:
             mount: /var/lib/k8s-local-volumes
   users_and_groups:
     users:
+      claude: "{{ lookup('ansible.builtin.vars', 'global').claude }}"
       kerry: "{{ lookup('ansible.builtin.vars', 'global').kerry }}"
       gitlab-runner: "{{ lookup('ansible.builtin.vars', 'global').gitlab_runner }}"

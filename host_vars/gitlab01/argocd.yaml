@@ -19,6 +19,10 @@ gitlab01_argocd:
       ssh:
         knownHosts: "{{ lookup('ansible.builtin.vars', 'secrets_vault').ssh.knownHosts }}"
       credentialTemplates:
+        github-git:
+          url: git@github.com
+          sshPrivateKey: |
+            {{ lookup('ansible.builtin.vars', 'secrets_vault').argocd.ed25519 }}
         kerrys-learning-lab-git:
           url: git@gitlab.westsidestreet.net:kerrys-learning-lab
           sshPrivateKey: |
@@ -65,19 +69,24 @@ gitlab01_argocd:
           url: https://gitlab.westsidestreet.net/api/v4/projects/10/packages/helm/stable
         vllm:
           name: vllm
-          url: https://github.com/vllm-project/vllm.git
+          url: git@gitlab.westsidestreet.net:kerrys-learning-lab/helm-charts/vllm.git
           type: git
   projects:
-    boids:
-      description: |
-        Boids is an artificial life program, developed by Craig Reynolds in
-        1986, which simulates the flocking behaviour of birds, and related
-        group motion.
-      destination:
-        name: "*"
+    # boids:
+    #   description: |
+    #     Boids is an artificial life program, developed by Craig Reynolds in
+    #     1986, which simulates the flocking behaviour of birds, and related
+    #     group motion.
+    #   destination:
+    #     name: "*"
     home-lab:
       description: |
         Applications and utilities that are part of the home-lab
+      destination:
+        name: "*"
+    llm:
+      description: |
+        Applications and utilities to serve a local Large Language Model (LLM)
       destination:
         name: "*"
     monitoring:

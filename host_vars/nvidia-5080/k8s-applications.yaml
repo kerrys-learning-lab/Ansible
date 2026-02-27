@@ -1,4 +1,12 @@
 # code: language=ansible
 nvidia5080_k8s_applications:
   gpu:
-    enabled: false
+    enabled: true
+
+  cnpg:
+    enabled: true
+    local_volumes:
+      cnpg--llm--open-webui-db:
+        capacity: 10Gi
+        path: cnpg/llm/open-webui-db
+        mode: u=rwx,go=

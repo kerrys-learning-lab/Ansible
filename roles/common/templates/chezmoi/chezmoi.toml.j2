@@ -14,3 +14,6 @@ encryption = "age"
     {{ data_key }} = "{{ data_value }}"
 {% endfor %}
 {% endif %}
+
+[template]
+  options = [ "missingkey=zero" ]

@@ -45,6 +45,11 @@ k8s_engine_defaults:
       url: https://get.k3s.io
       creates: /usr/local/bin/k3s
 
+    manifests:
+      dest: /var/lib/rancher/k3s/server/manifests
+      manifests:
+        - traefik-config
+
     # --------------------------------------------------------------------------
     # Kubeconfig and kubectl paths
     # --------------------------------------------------------------------------

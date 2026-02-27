@@ -11,6 +11,18 @@ global:
   warning: "⚠️ WARNING"
   error: "❌ ERROR"
 
+  claude:
+    name: Claude
+    email: claude@westsidestreet.net
+    create: true
+    shell: /bin/bash
+    ssh_key:
+      public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHbb0/MTee+LwDMiyaPDF0a7/SnSOs3cRqj/PPw68ydX claude@westsidestreet.net
+      private: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.ed25519 }}"
+    chezmoi:
+      data:
+        gitlab_token: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.glpat }}"
+
   kerry:
     name: Kerry Johnson
     email: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.email }}"
@@ -21,7 +33,7 @@ global:
         recipient: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.age.recipient }}"
         secret: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.age.secret }}"
       data:
-        gitlab_pat: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.glpat }}"
+        gitlab_token: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.glpat }}"
         renovate_gh_token: "{{ lookup('ansible.builtin.vars', 'secrets_vault').renovate.github }}"
     ssh_key:
       public: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCrgP4AEmwByBSxxYty43bf9ilK/VGEhRvERoSIgkLVZ1fcD1VZDDbAVINK8GGEJU00QYR006UrKKjG5z72LEcvSzAVlnU4gLawiI5PCFWrfNBdY5MlV3sS9Kc/afJLkFM2GJd7yiBVhYtd5XsYFFIFyvPb6gv6gS8JNl3qAne8QmyP+NZjXU7WS5oZxx88fUbgXMWi5pYL0MXfXIpxLQWR2Idd9eRI3r95ps5hxVjC0jwrME6akgmdwWA/hp1p61+icYkarIi3041AddL6PRjBNoiSI9K044eBA3oq6GX1ImmvibrKTMOmjYPsXwUHgVwlnaSl9cZFj576ymdBHM9dMLr3EsFnPbl7rLH8kbr5wNNhMc/a8Ttk0c5505dY+HAPNb7h0E5FJg9T9K5b+CT0o8WLgI6TLpiALUC5GQcgQvuu6s+i/XFezZuGttrh/GAxELACZO2lhvdJUVmFz+8offGR3+taWFLBM38Qvu46d6nNYOaCs3dvWzLhSTfNe+8= kerry@westsidestreet.net

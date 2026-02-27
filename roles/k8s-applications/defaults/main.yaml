@@ -31,7 +31,11 @@ k8s_applications_defaults:
           version: "0.17.1"
       helm_values:
         runtimeClassName: nvidia
-
+        gfd:
+          enabled: true
+        nfd:
+          # NFD is already deployed, above
+          enabled: false
   cnpg:
     enabled: false
     storage_class: cnpg-local

@@ -8,6 +8,7 @@ asus_common:
     - zsh
   users_and_groups:
     users:
+      claude: "{{ lookup('ansible.builtin.vars', 'global').claude }}"
       kerry: "{{ lookup('ansible.builtin.vars', 'global').kerry }}"
       gitlab-runner: "{{ lookup('ansible.builtin.vars', 'global').gitlab_runner }}"
 
@@ -23,14 +24,3 @@ asus_common:
           public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILMedk4rvJpujyrRHDSMQfQNE+IHVkL5tDynFLMrbbGC argo@westsidestreet.net
           private: "{{ lookup('ansible.builtin.vars', 'secrets_vault').argocd.ed25519 }}"
         chezmoi: {}
-      claude:
-        name: Claude
-        email: claude@westsidestreet.net
-        create: true
-        shell: /bin/bash
-        ssh_key:
-          public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHbb0/MTee+LwDMiyaPDF0a7/SnSOs3cRqj/PPw68ydX claude@westsidestreet.net
-          private: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.ed25519 }}"
-        chezmoi:
-          data:
-            gitlab_pat: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.glpat }}"

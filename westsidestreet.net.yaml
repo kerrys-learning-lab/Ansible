@@ -80,10 +80,6 @@
       tags:
         - gitlab
         - gitlab-runner
-    - role: vllm
-      when: "'nvidia' in group_names"
-      tags:
-        - vllm
   tags:
     - k8s
     - kubernetes

@@ -5,7 +5,7 @@ all_common:
   # /etc/profile.d environment files
   profile_d:
     gitlab:
-      GITLAB_HTTPS_URL: "https://{{ lookup('ansible.builtin.vars', 'lan').fqdn.gitlab }}"
+      GITLAB_URL: "https://{{ lookup('ansible.builtin.vars', 'lan').fqdn.gitlab }}"
       CI_API_V4_URL: "https://{{ lookup('ansible.builtin.vars', 'lan').fqdn.gitlab }}/api/v4"
       CI_REGISTRY: "{{ lookup('ansible.builtin.vars', 'lan').fqdn.registry }}"
 
