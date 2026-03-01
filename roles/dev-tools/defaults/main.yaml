@@ -69,7 +69,7 @@ devtools_defaults:
     tools:
       bazel-compile-commands:
         # renovate: datasource=github-releases depName=kiron1/bazel-compile-commands
-        version: 0.20.1
+        version: 0.21.0
         url: https://github.com/kiron1/bazel-compile-commands/releases/download/v0.20.1/bazel-compile-commands_0.20.1-linux_amd64.zip
         dest: /
         extract: true
