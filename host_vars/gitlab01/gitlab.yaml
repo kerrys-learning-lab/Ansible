@@ -37,6 +37,12 @@ gitlab01_gitlab:
             matchLabels:
               owner: gitlab-18.x--gitaly
             size: 100Gi
+        sidekiq:
+          # NOTE: Trying to reduce the number of open connections to PG due to
+          #       constantly reaching max:
+          minReplicas: 1
+          maxReplicas: 1
+          concurrency: 10
         toolbox:
           backups:
             objectStorage:
@@ -87,11 +93,6 @@ gitlab01_gitlab:
             key: password
           migrations:
             enabled: true
-      sidekiq:
-        # NOTE: Trying to reduce the number of open connections to PG due to
-        #       constantly reaching max:
-        maxReplicas: 3
-        concurrency: 10
       webservice:
         puma:
           # NOTE: Trying to reduce the number of open connections to PG due to
