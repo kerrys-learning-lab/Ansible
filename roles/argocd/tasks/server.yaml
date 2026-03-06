@@ -144,7 +144,7 @@
 - name: Register ArgoCD Cluster Secrets
   kubernetes.core.k8s:
     state: present
-    apply: true
+    force: true
     definition:
       apiVersion: v1
       kind: Secret
@@ -156,14 +156,10 @@
       stringData:
         name: "{{ item }}"
         server: "{{ hostvars[item].argocd_agent_server }}"
-        config: |
-          {
-            "bearerToken": "{{ hostvars[item].argocd_agent_token }}",
-            "tlsClientConfig": {
-              "caData": "{{ hostvars[item].argocd_agent_ca }}",
-              "insecure": false
-            }
-          }
+        config: >-
+          {{ {"bearerToken": hostvars[item].argocd_agent_token,
+              "tlsClientConfig": {"caData": hostvars[item].argocd_agent_ca,
+                                  "insecure": false}} | to_json }}
     kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
   loop: "{{ groups['argocd_cluster'] | default([]) | select('in', ansible_play_hosts) }}"
   loop_control:

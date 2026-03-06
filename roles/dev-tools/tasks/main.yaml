@@ -47,6 +47,11 @@
   tags:
     - podman
 
+- name: Configure VS Code
+  ansible.builtin.import_tasks: vscode.yaml
+  tags:
+    - vscode
+
 - name: Configure Global Tools via NPM
   community.general.npm:
     name: "{{ item }}"
