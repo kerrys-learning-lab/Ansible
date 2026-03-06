@@ -48,13 +48,16 @@ ansible-run:
     - !reference ['.configure-ssh-access', 'script']
   script:
     - mkdir artifacts
-    - ansible-playbook  -vvv
-                        --vault-password-file ${ANSIBLE_VAULT_PASSWORD_FILE}
-                        --inventory           ${ANSIBLE_INVENTORY_PATH}
-                        ${ANSIBLE_PLAYBOOK_PATH}
-        | tee artifacts/ansible.log
+    - |
+        ansible-playbook  -vvv  \
+                          --vault-password-file ${ANSIBLE_VAULT_PASSWORD_FILE}  \
+                          --inventory           ${ANSIBLE_INVENTORY_PATH} \
+                          ${ANSIBLE_PLAYBOOK_PATH}  \
+        | tee artifacts/ansible.log  \
         | grep TASK
   artifacts:
     paths:
       - artifacts
     when: always
+  retry: 2
+  resource_group: ansible-run
