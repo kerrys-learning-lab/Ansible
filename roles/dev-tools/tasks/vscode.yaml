@@ -1,0 +1,23 @@
+# code: language=ansible
+- name: VS Code - Download GPG Key
+  ansible.builtin.get_url:
+    url: "{{ devtools_vars.vscode.gpg_key_url }}"
+    dest: "{{ devtools_vars.vscode.keyring }}.asc"
+    mode: a=r
+
+- name: VS Code - Dearmor GPG Key
+  ansible.builtin.command:
+    cmd: >-
+      gpg --dearmor -o {{ devtools_vars.vscode.keyring }}
+      {{ devtools_vars.vscode.keyring }}.asc
+    creates: "{{ devtools_vars.vscode.keyring }}"
+
+- name: VS Code - Add Apt Repository
+  ansible.builtin.apt_repository:
+    repo: "{{ devtools_vars.vscode.repo }}"
+    filename: vscode
+    state: present
+
+- name: VS Code - Install
+  ansible.builtin.package:
+    name: "{{ devtools_vars.vscode.packages }}"

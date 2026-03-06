@@ -47,7 +47,14 @@ ansible-run:
   before_script:
     - !reference ['.configure-ssh-access', 'script']
   script:
-    - |
-      ansible-playbook  --vault-password-file ${ANSIBLE_VAULT_PASSWORD_FILE}  \
-                        --inventory           ${ANSIBLE_INVENTORY_PATH}  \
+    - mkdir artifacts
+    - ansible-playbook  -vvv
+                        --vault-password-file ${ANSIBLE_VAULT_PASSWORD_FILE}
+                        --inventory           ${ANSIBLE_INVENTORY_PATH}
                         ${ANSIBLE_PLAYBOOK_PATH}
+        | tee artifacts/ansible.log
+        | grep TASK
+  artifacts:
+    paths:
+      - artifacts
+    when: always
