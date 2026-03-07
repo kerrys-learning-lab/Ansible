@@ -1,0 +1,32 @@
+# code: language=ansible
+- name: Merge Proxmox Configuration
+  ansible.builtin.set_fact:
+    proxmox_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_proxmox',
+                pattern_type='suffix',
+                initial_value=proxmox_defaults,
+                override='ignore') }}
+  tags:
+    - always
+
+- name: Configure Proxmox Repositories
+  ansible.builtin.import_tasks: repos.yaml
+  tags:
+    - proxmox-repos
+
+- name: Pre-update LVM Snapshot
+  ansible.builtin.import_tasks: snapshot.yaml
+  tags:
+    - proxmox-snapshot
+
+- name: Apply System Updates
+  ansible.builtin.import_tasks: update.yaml
+  tags:
+    - proxmox-update
+
+- name: Clean Up Old Snapshots
+  ansible.builtin.import_tasks: snapshot-cleanup.yaml
+  tags:
+    - proxmox-snapshot
+    - proxmox-cleanup

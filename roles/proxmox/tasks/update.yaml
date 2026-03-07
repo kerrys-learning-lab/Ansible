@@ -1,0 +1,13 @@
+# code: language=ansible
+#
+# Apply system updates using Proxmox's recommended approach:
+#   apt-get update && apt-get dist-upgrade
+#
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Apply dist-upgrade
+  ansible.builtin.apt:
+    upgrade: dist
+  register: _proxmox_update_result

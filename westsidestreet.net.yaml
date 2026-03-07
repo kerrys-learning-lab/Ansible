@@ -28,6 +28,21 @@
     - common
   any_errors_fatal: true
 
+- name: Proxmox VE Host Configuration
+  become: true
+  hosts:
+    - proxmox
+  pre_tasks:
+    - name: Setup Ansible facts
+      ansible.builtin.setup:
+      tags:
+        - always
+  roles:
+    - role: proxmox
+  tags:
+    - proxmox
+  any_errors_fatal: true
+
 - name: GPU Drivers and Services
   become: true
   hosts:

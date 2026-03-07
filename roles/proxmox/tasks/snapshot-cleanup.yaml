@@ -1,0 +1,33 @@
+# code: language=ansible
+#
+# Remove old pre-update snapshots, keeping only the most recent N
+# (configured by proxmox_vars.snapshot.retain_count).
+#
+- name: List existing pre-update snapshots
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail &&
+      lvs --noheadings --nosuffix
+      --select 'lv_attr=~[^s] && lv_name=~^{{ proxmox_vars.snapshot.name_prefix }}'
+      --sort lv_name
+      -o lv_name
+      {{ proxmox_vars.snapshot.volume_group }}
+      | awk '{print $1}'
+    executable: /bin/bash
+  register: _proxmox_existing_snapshots
+  changed_when: false
+
+- name: Identify snapshots to remove
+  ansible.builtin.set_fact:
+    _proxmox_snapshots_to_remove: >-
+      {{ _proxmox_existing_snapshots.stdout_lines[:-proxmox_vars.snapshot.retain_count | int]
+         if (_proxmox_existing_snapshots.stdout_lines | length) > (proxmox_vars.snapshot.retain_count | int)
+         else [] }}
+
+- name: Remove old pre-update snapshots
+  ansible.builtin.command:
+    cmd: "lvremove -f {{ proxmox_vars.snapshot.volume_group }}/{{ item }}"
+  loop: "{{ _proxmox_snapshots_to_remove }}"
+  register: _proxmox_remove_result
+  changed_when: _proxmox_remove_result.rc == 0
+  when: _proxmox_snapshots_to_remove | length > 0

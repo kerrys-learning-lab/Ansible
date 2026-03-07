@@ -1,0 +1,44 @@
+# code: language=ansible
+#
+# Proxmox VE role defaults.
+# Values can be overridden per-group/host via the Variable Merge Pattern
+# (variables whose name ends with `_proxmox`).
+#
+proxmox_defaults:
+
+  # --------------------------------------------------------------------------
+  # Repository Configuration
+  #
+  # Proxmox ships with an enterprise repo that requires a paid subscription.
+  # This role disables it and enables the free no-subscription repo instead.
+  repo:
+    # The enterprise list file to disable (comment out)
+    enterprise_list: /etc/apt/sources.list.d/pve-enterprise.list
+    # The no-subscription repo to enable
+    no_subscription:
+      name: pve-no-subscription
+      repo: "deb http://download.proxmox.com/debian/pve {{ ansible_distribution_release }} pve-no-subscription"
+      filename: pve-no-subscription
+
+  # --------------------------------------------------------------------------
+  # LVM Snapshot Configuration
+  #
+  # Before applying system updates, an LVM snapshot of the root volume is
+  # created for rollback safety.
+  snapshot:
+    # Source logical volume (the root filesystem)
+    source_lv: /dev/pve/root
+    # Volume group containing the source LV
+    volume_group: pve
+    # Snapshot size — must be large enough to hold changes during the update
+    size: 5G
+    # Prefix for snapshot names (a timestamp is appended)
+    name_prefix: pre-update
+    # Number of most-recent snapshots to retain after a successful update
+    retain_count: 3
+
+  # --------------------------------------------------------------------------
+  inherited:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
