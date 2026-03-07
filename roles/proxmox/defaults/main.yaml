@@ -12,8 +12,10 @@ proxmox_defaults:
   # Proxmox ships with an enterprise repo that requires a paid subscription.
   # This role disables it and enables the free no-subscription repo instead.
   repo:
-    # The enterprise list file to disable (comment out)
-    enterprise_list: /etc/apt/sources.list.d/pve-enterprise.list
+    # Enterprise list files to disable (comment out deb lines)
+    enterprise_lists:
+      - /etc/apt/sources.list.d/pve-enterprise.list
+      - /etc/apt/sources.list.d/ceph.list
     # The no-subscription repo to enable
     no_subscription:
       name: pve-no-subscription
