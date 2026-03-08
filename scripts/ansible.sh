@@ -6,7 +6,7 @@ export ANSIBLE_CALLBACK_RESULT_FORMAT=yaml
 
 ANSIBLE_CMD=ansible-playbook
 DEFAULT_ANSIBLE_DIR=~/dev/kerrys-learning-lab/development-environment/ansible
-ANSIBLE_VAULT_PASSWORD_FILE=~/.ansible-vault-password
+ANSIBLE_VAULT_PASSWORD_FILE=${ANSIBLE_VAULT_PASSWORD_FILE:-~/.ansible-vault-password}
 INVENTORY=inventory
 PLAYBOOK=westsidestreet.net.yaml
 
@@ -25,8 +25,8 @@ fi
 mkdir -p ./artifacts
 
 time    ${ANSIBLE_CMD}  -vvv  \
-                        --inventory ${INVENTORY}  \
-                        --vault-password-file ${ANSIBLE_VAULT_PASSWORD_FILE}  \
+                        --inventory             ${INVENTORY}  \
+                        --vault-password-file   ${ANSIBLE_VAULT_PASSWORD_FILE}  \
                         $*  \
                         ${PLAYBOOK}  \
         | tee artifacts/ansible.log  \
