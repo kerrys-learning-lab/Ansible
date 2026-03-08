@@ -1,0 +1,26 @@
+# code: language=ansible
+monitoring_k8s_ecosystem:
+
+  metallb:
+    pool:
+      - 192.168.0.205-192.168.0.209
+
+  k3s:
+    tls-san:
+      - monitoring
+      - monitoring.westsidestreet.net
+      - 192.168.0.125
+
+  secrets:
+    aws:
+      type: kubernetes.io/basic-auth
+      namespace: infrastructure
+      stringData:
+        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').aws.account.username }}"
+        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').aws.account.password }}"
+    nas--smb:
+      type: kubernetes.io/basic-auth
+      namespace: infrastructure
+      stringData:
+        username: "{{ lookup('ansible.builtin.vars', 'secrets_vault').smb.username }}"
+        password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').smb.password }}"
