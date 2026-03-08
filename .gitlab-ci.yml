@@ -42,21 +42,34 @@ ansible-lint:
 
 
 # ----------------------------------------------------------------------------
-ansible-run:
+.ansible-run:
   stage: publish
-  before_script:
-    - !reference ['.configure-ssh-access', 'script']
   script:
     - mkdir artifacts
-    - |
-        if [[ "${CI_COMMIT_BRANCH}" != "${CI_DEFAULT_BRANCH}" ]]; then
-          DRY_RUN=--check
-        fi
-
-        ./scripts/ansible.sh  ${DRY_RUN}
+    - ./scripts/ansible.sh  ${DRY_RUN}
   artifacts:
     paths:
       - artifacts
     when: always
   retry: 2
   resource_group: ansible-run
+
+
+# ----------------------------------------------------------------------------
+ansible-dry-run:
+  extends: .ansible-run
+  before_script:
+    - !reference ['.configure-ssh-access', 'script']
+    - export DRY_RUN=--check
+    - echo "DRY RUN"
+  rules:
+    - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
+
+
+# ----------------------------------------------------------------------------
+ansible-run:
+  extends: .ansible-run
+  before_script:
+    - !reference ['.configure-ssh-access', 'script']
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
