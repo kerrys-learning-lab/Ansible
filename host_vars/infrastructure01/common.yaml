@@ -1,0 +1,41 @@
+# code: language=ansible
+infrastructure01_common:
+  fqdn: infrastructure01.westsidestreet.net
+
+  disk_management:
+    disks:
+      /dev/sdb:
+        label: gpt
+        force: true
+        partitions:
+          - number: 1
+            size: 100%
+            flags: [lvm]
+
+    volume_groups:
+      ubuntu-vg:
+        pvs:
+          - /dev/sda3
+        logical_volumes:
+          ubuntu-lv:
+            size: 100%FREE
+            filesystem: ext4
+
+      monitoring:
+        pvs:
+          - /dev/sdb1
+        logical_volumes:
+          kubelet:
+            size: 50G
+            filesystem: ext4
+            mount: /var/lib/kubelet
+          data:
+            size: 100%FREE
+            filesystem: ext4
+            mount: /var/lib/k8s-local-volumes
+
+  users_and_groups:
+    users:
+      claude: "{{ lookup('ansible.builtin.vars', 'global').claude }}"
+      kerry: "{{ lookup('ansible.builtin.vars', 'global').kerry }}"
+      gitlab-runner: "{{ lookup('ansible.builtin.vars', 'global').gitlab_runner }}"

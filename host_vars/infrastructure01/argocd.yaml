@@ -1,0 +1,6 @@
+# code: language=ansible
+infrastructure01_argocd:
+  cluster:
+    labels:
+      env/monitoring: "true"
+      env/infrastructure: "true"

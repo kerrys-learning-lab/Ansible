@@ -1,17 +1,15 @@
 # code: language=ansible
-gitlab01_k8s_ecosystem:
+infrastructure01_k8s_ecosystem:
 
   metallb:
     pool:
-      # NOTE: Reserved these in the Netgear router by setting the upper
-      #       limit of the router's IP range to a.b.c.199
-      - 192.168.0.235-192.168.0.239
+      - 192.168.0.205-192.168.0.209
 
   k3s:
     tls-san:
-      - gitlab01
-      - gitlab01.westsidestreet.net
-      - 192.168.0.38
+      - infrastructure01
+      - infrastructure01.westsidestreet.net
+      - 192.168.0.125
 
   secrets:
     aws:

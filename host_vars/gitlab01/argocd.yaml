@@ -1,8 +1,7 @@
 # code: language=ansible
 gitlab01_argocd:
   cluster:
-    labels:
-      env/infrastructure: "true"
+    labels: {}
   helm_values:
     global:
       domain: argocd.{{ lookup('ansible.builtin.vars', 'lan').domain }}

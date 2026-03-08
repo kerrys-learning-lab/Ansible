@@ -1,0 +1,26 @@
+# code: language=ansible
+#
+# Disable Proxmox enterprise repos and enable the no-subscription repo.
+#
+- name: Check if Proxmox enterprise repo files exist
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ proxmox_vars.repo.enterprise_lists }}"
+  register: _proxmox_enterprise_repos
+
+- name: Disable Proxmox enterprise repositories
+  ansible.builtin.replace:
+    path: "{{ item.item }}"
+    regexp: '^(deb\s)'
+    replace: '# \1'
+  loop: "{{ _proxmox_enterprise_repos.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.stat.exists
+
+- name: Enable Proxmox no-subscription repository
+  ansible.builtin.apt_repository:
+    repo: "{{ proxmox_vars.repo.no_subscription.repo }}"
+    filename: "{{ proxmox_vars.repo.no_subscription.filename }}"
+    state: present
+    update_cache: true
