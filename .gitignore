@@ -3,3 +3,5 @@ _secrets**
 __pycache__
 .ansible
 .claude/worktrees
+artifacts
+.gitlab-ci-local
