@@ -3,7 +3,7 @@ all:
     asus:
     elitedesk:
     gitlab01:
-    monitoring:
+    infrastructure01:
     nvidia-5080:
 
 ansible:
@@ -19,7 +19,7 @@ argocd:
       hosts:
         gitlab01:
         asus:
-        monitoring:
+        infrastructure01:
         nvidia-5080:
 
 development:
@@ -54,7 +54,7 @@ k8s:
       hosts:
         asus:
         gitlab01:
-        monitoring:
+        infrastructure01:
         nvidia-5080:
 
 raspberry_pi:
@@ -67,5 +67,5 @@ ubuntu:
   hosts:
     asus:
     gitlab01:
-    monitoring:
+    infrastructure01:
     nvidia-5080:

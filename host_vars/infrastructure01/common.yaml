@@ -1,6 +1,6 @@
 # code: language=ansible
-monitoring_common:
-  fqdn: monitoring.westsidestreet.net
+infrastructure01_common:
+  fqdn: infrastructure01.westsidestreet.net
 
   disk_management:
     disks:

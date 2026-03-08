@@ -1,5 +1,5 @@
 # code: language=ansible
-monitoring_k8s_applications:
+infrastructure01_k8s_applications:
   cnpg:
     enabled: true
     local_volumes:

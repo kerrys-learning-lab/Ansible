@@ -5,7 +5,7 @@ gitlab01_k8s_ecosystem:
     pool:
       # NOTE: Reserved these in the Netgear router by setting the upper
       #       limit of the router's IP range to a.b.c.199
-      - 192.168.0.235-192.168.0.244
+      - 192.168.0.235-192.168.0.239
 
   k3s:
     tls-san:

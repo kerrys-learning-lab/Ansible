@@ -1,5 +1,5 @@
 # code: language=ansible
-monitoring_argocd:
+infrastructure01_argocd:
   cluster:
     labels:
       env/monitoring: "true"

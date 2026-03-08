@@ -1,5 +1,5 @@
 # code: language=ansible
-monitoring_k8s_ecosystem:
+infrastructure01_k8s_ecosystem:
 
   metallb:
     pool:
@@ -7,8 +7,8 @@ monitoring_k8s_ecosystem:
 
   k3s:
     tls-san:
-      - monitoring
-      - monitoring.westsidestreet.net
+      - infrastructure01
+      - infrastructure01.westsidestreet.net
       - 192.168.0.125
 
   secrets:
