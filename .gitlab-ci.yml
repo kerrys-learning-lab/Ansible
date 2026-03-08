@@ -53,7 +53,7 @@ ansible-run:
           DRY_RUN=--check
         fi
 
-        ./scripts/ansiblel.sh  ${DRY_RUN}
+        ./scripts/ansible.sh  ${DRY_RUN}
   artifacts:
     paths:
       - artifacts
