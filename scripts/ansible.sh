@@ -5,7 +5,7 @@ export ANSIBLE_DISPLAY_SKIPPED_HOSTS=false
 export ANSIBLE_CALLBACK_RESULT_FORMAT=yaml
 
 ANSIBLE_CMD=ansible-playbook
-DEFAULT_ANSIBLE_DIR=~/dev/kerrys-learning-lab/development-environment/ansible
+DEFAULT_ANSIBLE_DIR=~/dev/kerrys-learning-lab/devsecops/ansible
 ANSIBLE_VAULT_PASSWORD_FILE=${ANSIBLE_VAULT_PASSWORD_FILE:-~/.ansible-vault-password}
 INVENTORY=inventory
 PLAYBOOK=westsidestreet.net.yaml

@@ -95,6 +95,12 @@ devtools_defaults:
         links:
           bazel-buildifier: buildifier-linux-amd64
 
+  java:
+    packages:
+      - openjdk-25-jdk
+      - openjdk-25-jdk-headless
+      - gradle
+
   debs:
     - https://github.com/bazelbuild/bazel/releases/download/8.5.0/bazel_8.5.0-linux-x86_64.deb
     - https://github.com/Eugeny/tabby/releases/download/v1.0.230/tabby-1.0.230-linux-x64.deb

@@ -37,6 +37,11 @@
   tags:
     - c++
 
+- name: Configure Java Development Tools
+  ansible.builtin.import_tasks: java/main.yaml
+  tags:
+    - java
+
 - name: Configure GitLabCI Local
   ansible.builtin.import_tasks: gitlabci-local.yaml
   tags:

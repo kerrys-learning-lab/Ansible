@@ -1,0 +1,4 @@
+# code: language=ansible
+- name: Java - OS Packages
+  ansible.builtin.package:
+    name: "{{ devtools_vars.java.packages }}"
