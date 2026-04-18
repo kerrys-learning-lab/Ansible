@@ -3,7 +3,7 @@ k8s_tools_defaults:
 
   helm:
     # renovate: datasource=github-releases depName=helm/helm
-    version: v3.20.1
+    version: v3.20.2
     url_prefix: https://get.helm.sh
     bin: /usr/local/bin/helm
     plugins:
@@ -24,7 +24,7 @@ k8s_tools_defaults:
 
   kubeseal:
     # renovate: datasource=github-releases depName=bitnami-labs/sealed-secrets
-    version: 0.36.1
+    version: 0.36.6
     url_prefix: https://github.com/bitnami-labs/sealed-secrets/releases/download
     bin: /usr/local/bin/kubeseal
 
