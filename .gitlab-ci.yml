@@ -46,7 +46,10 @@ ansible-lint:
   stage: publish
   script:
     - mkdir artifacts
-    - ./scripts/ansible.sh  ${DRY_RUN}
+    - ./scripts/ansible.sh  --verbose
+                            --filter
+                            --log-file ./artifacts/ansible.log
+                            ${DRY_RUN}
   artifacts:
     paths:
       - artifacts
