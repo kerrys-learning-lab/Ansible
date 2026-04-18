@@ -12,11 +12,24 @@
       {{ devtools_vars.vscode.keyring }}.asc
     creates: "{{ devtools_vars.vscode.keyring }}"
 
-- name: VS Code - Add Apt Repository
-  ansible.builtin.apt_repository:
-    repo: "{{ devtools_vars.vscode.repo }}"
-    filename: vscode
-    state: present
+- name: VS Code - Add Apt Repository (DEB822 format)
+  ansible.builtin.deb822_repository:
+    name: vscode
+    uris: https://packages.microsoft.com/repos/code
+    suites: stable
+    components: main
+    architectures: amd64
+    signed_by: "{{ devtools_vars.vscode.keyring }}"
+
+- name: VS Code - Remove legacy apt source
+  ansible.builtin.file:
+    path: "{{ devtools_vars.vscode.source_file_legacy }}"
+    state: absent
+
+- name: VS Code - Remove legacy keyring
+  ansible.builtin.file:
+    path: "{{ devtools_vars.vscode.keyring_legacy }}"
+    state: absent
 
 - name: VS Code - Install
   ansible.builtin.package:
