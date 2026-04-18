@@ -2,7 +2,7 @@
 k8s_applications_defaults:
   elastic_operator:
     # renovate: datasource=github-releases depName=elastic/cloud-on-k8s
-    version: 3.3.1
+    version: 3.3.2
     url:
       prefix: https://download.elastic.co/downloads/eck
       resources:
