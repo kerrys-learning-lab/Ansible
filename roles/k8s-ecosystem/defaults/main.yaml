@@ -5,7 +5,7 @@ k8s_ecosystem_defaults:
     chart:
       url: https://charts.jetstack.io
       # renovate: datasource=helm registryUrl=https://charts.jetstack.io depName=cert-manager
-      version: v1.20.0
+      version: v1.20.2
     helm_values:
       crds:
         enabled: true
@@ -24,7 +24,7 @@ k8s_ecosystem_defaults:
       url: https://bitnami-labs.github.io/sealed-secrets
       ref: sealed-secrets
       # renovate: datasource=helm registryUrl=https://bitnami-labs.github.io/sealed-secrets depName=sealed-secrets
-      version: 2.18.4
+      version: 2.18.5
     helm_values:
       # OpenShift's Security Context Constraints (SCCs) require pods to run
       # with a dynamically assigned user ID (UID) and group ID (GID) range
