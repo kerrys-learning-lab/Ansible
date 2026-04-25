@@ -7,6 +7,11 @@
                 pattern_type='suffix',
                 initial_value=common_defaults,
                 override='ignore') }}
+    common_host_uptime_human_readable: |
+      {{ '%dd %02d:%02d:%02d' | format(ansible_facts.uptime_seconds // 86400,
+                                      (ansible_facts.uptime_seconds % 86400) // 3600,
+                                      (ansible_facts.uptime_seconds % 3600) // 60,
+                                       ansible_facts.uptime_seconds % 60) }}
   tags:
     - always
 
@@ -76,3 +81,10 @@
   loop: "{{ host.paths | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+
+- name: Reboot if uptime is greater than 7 days
+  ansible.builtin.reboot:
+    msg: "Rebooting due to high uptime ({{ common_host_uptime_human_readable }})"
+    reboot_timeout: 600
+  throttle: 1
+  when: ansible_facts.uptime_seconds > (7 * 24 * 60 * 60)
