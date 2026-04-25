@@ -1,0 +1,4 @@
+# code: language=ansible
+
+ansible_fqdn: proxmox01.westsidestreet.net
+ansible_host: proxmox01.westsidestreet.net

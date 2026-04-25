@@ -1,0 +1,9 @@
+# code: language=ansible
+proxmox01_common:
+  fqdn: proxmox01.westsidestreet.net
+
+  users_and_groups:
+    users:
+      claude: "{{ lookup('ansible.builtin.vars', 'global').claude }}"
+      kerry: "{{ lookup('ansible.builtin.vars', 'global').kerry }}"
+      gitlab-runner: "{{ lookup('ansible.builtin.vars', 'global').gitlab_runner }}"

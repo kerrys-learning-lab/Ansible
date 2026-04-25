@@ -5,6 +5,7 @@ all:
     gitlab01:
     infrastructure01:
     nvidia-5080:
+    proxmox01:
 
 ansible:
   hosts:
@@ -45,6 +46,7 @@ gpu:
 proxmox:
   hosts:
     elitedesk:
+    proxmox01:
 
 k8s:
   children:

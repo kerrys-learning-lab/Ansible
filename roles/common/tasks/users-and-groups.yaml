@@ -10,4 +10,4 @@
   loop: "{{ common_vars.users_and_groups.users | dict2items }}"
   loop_control:
     label: "{{ user.key }}"
-    loop_var: user
+    loop_var: common_user

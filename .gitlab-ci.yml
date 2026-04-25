@@ -7,7 +7,6 @@ include:
       - pipelines/.defaults.yaml
 
 variables:
-  ANSIBLE_INVENTORY_PATH:  ./inventory
   ANSIBLE_PLAYBOOK_PATH: ./westsidestreet.net.yaml
   ANSIBLE_REMOTE_USER: gitlab-runner
   SSH_TEST_COMMAND: uname -a
@@ -23,7 +22,7 @@ ansible-pre:
   script:
     # List the inventory (hosts), skipping the first line, which is a header
     - |
-      ANSIBLE_HOSTS=$(ansible all --list-hosts -i inventory | tail -n +2)
+      ANSIBLE_HOSTS=$(ansible all --list-hosts | tail -n +2)
     - |
       for host in ${ANSIBLE_HOSTS}; do
         if [[ -n "${GITLABCI_DOMAIN_NAME}" ]]; then
@@ -46,10 +45,7 @@ ansible-lint:
   stage: publish
   script:
     - mkdir artifacts
-    - ./scripts/ansible.sh  --verbose
-                            --filter
-                            --log-file ./artifacts/ansible.log
-                            ${DRY_RUN}
+    - ansible-playbook  ${DRY_RUN}  ${ANSIBLE_PLAYBOOK_PATH}
   artifacts:
     paths:
       - artifacts
