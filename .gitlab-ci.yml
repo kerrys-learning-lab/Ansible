@@ -11,6 +11,10 @@ variables:
   # warning when executing within CI/CD:
   # [WARNING]: Ansible is being run in a world writable directory
   ANSIBLE_CONFIG: ./ansible.cfg
+
+  # Can't trust that my Asus laptop is on/available when CI/CD runs
+  ANSIBLE_HOST_FILTER: "all:!asus"
+
   ANSIBLE_PLAYBOOK_PATH: ./westsidestreet.net.yaml
   ANSIBLE_REMOTE_USER: gitlab-runner
   SSH_TEST_COMMAND: uname -a
@@ -26,7 +30,7 @@ ansible-pre:
   script:
     # List the inventory (hosts), skipping the first line, which is a header
     - |
-      ANSIBLE_HOSTS=$(ansible all --list-hosts | tail -n +2)
+      ANSIBLE_HOSTS=$(ansible all --list-hosts --limit "${ANSIBLE_HOST_FILTER}" | tail -n +2)
     - |
       for host in ${ANSIBLE_HOSTS}; do
         if [[ -n "${GITLABCI_DOMAIN_NAME}" ]]; then
@@ -49,7 +53,7 @@ ansible-lint:
   stage: publish
   script:
     - mkdir artifacts
-    - ansible-playbook  ${DRY_RUN}  ${ANSIBLE_PLAYBOOK_PATH}
+    - ansible-playbook  --limit "${ANSIBLE_HOST_FILTER}"   ${DRY_RUN}  ${ANSIBLE_PLAYBOOK_PATH}
   artifacts:
     paths:
       - artifacts
