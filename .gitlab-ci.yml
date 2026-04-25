@@ -7,6 +7,10 @@ include:
       - pipelines/.defaults.yaml
 
 variables:
+  # Must explicitly specify ANSIBLE_CONFIG in order to avoid the following
+  # warning when executing within CI/CD:
+  # [WARNING]: Ansible is being run in a world writable directory
+  ANSIBLE_CONFIG: ./ansible.cfg
   ANSIBLE_PLAYBOOK_PATH: ./westsidestreet.net.yaml
   ANSIBLE_REMOTE_USER: gitlab-runner
   SSH_TEST_COMMAND: uname -a
