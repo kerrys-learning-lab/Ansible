@@ -3,7 +3,7 @@ k8s_engine_defaults:
   crc:
     remote:
       # renovate: datasource=github-releases depName=crc-org/crc
-      version: 2.58.0
+      version: 2.60.1
       url_prefix: https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/crc
       filename: crc-linux-amd64.tar.xz
     bin: /usr/local/bin/crc
