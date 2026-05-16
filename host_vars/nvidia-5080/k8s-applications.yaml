@@ -6,7 +6,7 @@ nvidia5080_k8s_applications:
   cnpg:
     enabled: true
     local_volumes:
-      cnpg--llm--open-webui-db:
+      cnpg--home-lab-local-inference--open-webui-db:
         capacity: 10Gi
-        path: cnpg/llm/open-webui-db
+        path: cnpg/home-lab/local-inference/open-webui-db
         mode: u=rwx,go=

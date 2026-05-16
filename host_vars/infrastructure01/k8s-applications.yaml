@@ -3,7 +3,8 @@ infrastructure01_k8s_applications:
   cnpg:
     enabled: true
     local_volumes:
-      cnpg--monitoring--grafana-db:
+      # Must match cnpg--<namespace>--<app-name>
+      cnpg--devsecops-monitoring--grafana-db:
         capacity: 10Gi
-        path: cnpg/monitoring/grafana-db
+        path: cnpg/devsecops/monitoring/grafana-db
         mode: u=rwx,go=

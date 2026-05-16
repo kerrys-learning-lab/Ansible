@@ -12,6 +12,7 @@ devtools_defaults:
     - unzip
 
     # Development workflow
+    - gitleaks
     - pre-commit
 
     # For certain CLI integrations (like continue, below)
