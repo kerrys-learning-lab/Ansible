@@ -1,0 +1,16 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore false positives"
+commits = [
+    # Verified, 2026-05-11
+    '''2ac2b682846d06c4ad5d173cb5ffc323319a3737''',
+    '''53d4f7acd499c5dbca3bf12c23acb21acee49e05''',
+    '''a0d3b9ae4b03fe3995ef091cc6a7da827b8479ee''',
+    '''152d05197120d78ecbb01f735a6a470ba224c835''',
+]
+regexes = [
+    '''^.*EXAMPLE.*$''',
+    '''^glpat-xxxxxxxxxxxxxxxxxxxx$''',
+]

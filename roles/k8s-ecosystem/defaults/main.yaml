@@ -9,9 +9,9 @@ k8s_ecosystem_defaults:
     helm_values:
       crds:
         enabled: true
-      # # dns01RecursiveNameservers: 192.168.0.3:53
-      # dns01RecursiveNameservers: 8.8.8.8:53,1.1.1.1:53
-      # dns01RecursiveNameserversOnly: true
+      # Force cert-manager to use external DNS servers
+      dns01RecursiveNameservers: 8.8.8.8:53,1.1.1.1:53
+      dns01RecursiveNameserversOnly: true
 
 
   certificates: {}

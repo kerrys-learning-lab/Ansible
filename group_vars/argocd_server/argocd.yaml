@@ -1,0 +1,77 @@
+# code: language=ansible
+argocd_server_argocd:
+  helm_values:
+    global:
+      domain: argocd.{{ lookup('ansible.builtin.vars', 'lan').domain }}
+    server:
+      ingress:
+        enabled: true
+        tls: true
+        ingressClassName: gitlab-nginx
+        annotations:
+          cert-manager.io/cluster-issuer: acme-letsencrypt-cluster-issuer
+      service:
+        type: LoadBalancer
+    configs:
+      params:
+        annotations:
+          # See https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-Git-File-Globbing/
+          applicationsetcontroller.enable.new.git.file.globbing: "true"
+      ssh:
+        knownHosts: "{{ lookup('ansible.builtin.vars', 'secrets_vault').ssh.knownHosts }}"
+      credentialTemplates:
+        github-git:
+          url: git@github.com
+          sshPrivateKey: |
+            {{ lookup('ansible.builtin.vars', 'secrets_vault').argocd.ed25519 }}
+        kerrys-learning-lab-git:
+          url: git@gitlab.westsidestreet.net:kerrys-learning-lab
+          sshPrivateKey: |
+            {{ lookup('ansible.builtin.vars', 'secrets_vault').argocd.ed25519 }}
+        kerrys-learning-lab-helm:
+          url: https://{{ lookup('ansible.builtin.vars', 'lan').fqdn.gitlab }}/api/v4
+          username: argocd
+          password: "{{ lookup('ansible.builtin.vars', 'secrets_vault').argocd.glpat }}"
+      repositories:
+        argo-cd:
+          name: argo-cd
+          url: https://gitlab.westsidestreet.net/api/v4/projects/32/packages/helm/stable
+          type: helm
+        boids-app:
+          name: boids-app
+          url: git@gitlab.westsidestreet.net:kerrys-learning-lab/boids/boids-app.git
+        elasticsearch:
+          name: elasticsearch
+          url: https://gitlab.westsidestreet.net/api/v4/projects/33/packages/helm/stable
+          type: helm
+        helm-library:
+          name: helm-library
+          url: https://gitlab.westsidestreet.net/api/v4/projects/34/packages/helm/stable
+          type: helm
+        home-lab:
+          name: home-lab
+          url: https://gitlab.westsidestreet.net/api/v4/projects/29/packages/helm/stable
+          type: helm
+        jupyter-server:
+          name: jupyter-server
+          url: https://gitlab.westsidestreet.net/api/v4/projects/35/packages/helm/stable
+          type: helm
+        mysql:
+          name: mysql
+          url: https://gitlab.westsidestreet.net/api/v4/projects/37/packages/helm/stable
+          type: helm
+        nats:
+          name: nats
+          url: https://nats-io.github.io/k8s/helm/charts/
+          type: helm
+        spyll:
+          name: spyll
+          type: helm
+          url: https://gitlab.westsidestreet.net/api/v4/projects/10/packages/helm/stable
+        vllm:
+          name: vllm
+          url: git@gitlab.westsidestreet.net:kerrys-learning-lab/helm-charts/vllm.git
+          type: git
+  certificate:
+    dnsNames:
+      - argocd.westsidestreet.net

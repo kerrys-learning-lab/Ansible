@@ -14,6 +14,9 @@
         name: "{{ argocd_vars.cluster.serviceAccount.name }}"
         namespace: "{{ argocd_vars.cluster.serviceAccount.namespace }}"
     kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  tags:
+    - argocd
+
 
 - name: Create ArgoCD Manager ClusterRole
   kubernetes.core.k8s:
@@ -31,6 +34,9 @@
         - nonResourceURLs: ["*"]
           verbs: ["*"]
     kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  tags:
+    - argocd
+
 
 - name: Create ArgoCD Manager ClusterRoleBinding
   kubernetes.core.k8s:
@@ -50,6 +56,9 @@
           name: "{{ argocd_vars.cluster.serviceAccount.name }}"
           namespace: "{{ argocd_vars.cluster.serviceAccount.namespace }}"
     kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  tags:
+    - argocd
+
 
 - name: Create ArgoCD Manager Token Secret
   kubernetes.core.k8s:
@@ -65,6 +74,9 @@
           kubernetes.io/service-account.name: "{{ argocd_vars.cluster.serviceAccount.name }}"
       type: kubernetes.io/service-account-token
     kubeconfig: "{{ argocd_vars.inherited.kubeconfig }}"
+  tags:
+    - argocd
+
 
 - name: Wait for Token Secret to be populated
   kubernetes.core.k8s_info:
@@ -77,6 +89,9 @@
   until: argocd_token_secret.resources[0].data.token is defined
   retries: 10
   delay: 3
+  tags:
+    - argocd
+
 
 - name: Set ArgoCD Agent facts for use by the server
   ansible.builtin.set_fact:
@@ -84,3 +99,5 @@
     argocd_agent_ca: "{{ argocd_token_secret.resources[0].data['ca.crt'] }}"
     argocd_agent_server: "https://{{ ansible_host }}:6443"
     argocd_agent_labels: "{{ argocd_vars.cluster.labels }}"
+  tags:
+    - argocd

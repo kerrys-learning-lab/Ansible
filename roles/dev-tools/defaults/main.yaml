@@ -12,6 +12,7 @@ devtools_defaults:
     - unzip
 
     # Development workflow
+    - gitleaks
     - pre-commit
 
     # For certain CLI integrations (like continue, below)
@@ -78,7 +79,7 @@ devtools_defaults:
           bazel-compile-commands: usr/bin/bazel-compile-commands
       bazelisk:
         # renovate: datasource=github-releases depName=bazelbuild/bazelisk
-        version: v1.28.1
+        version: v1.29.0
         url: https://github.com/bazelbuild/bazelisk/releases/download/v1.28.1/bazelisk-linux-amd64
         rcopy: true
         modes:
