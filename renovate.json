@@ -16,11 +16,6 @@
   ],
   "packageRules": [
     {
-      "description": "Helm CLI: pin to v3.x until kubernetes.core collection supports Helm v4",
-      "matchPackageNames": ["helm/helm"],
-      "allowedVersions": "<4.0.0"
-    },
-    {
       "description": "GitLab: separate group, manual review only",
       "matchPackageNames": ["gitlab", "gitlab-operator", "gitlab-runner"],
       "groupName": "gitlab",
