@@ -33,5 +33,6 @@ elitedesk_common:
   users_and_groups:
     users:
       claude: "{{ lookup('ansible.builtin.vars', 'global').claude }}"
+      hermes: "{{ lookup('ansible.builtin.vars', 'global').hermes }}"
       kerry: "{{ lookup('ansible.builtin.vars', 'global').kerry }}"
       gitlab-runner: "{{ lookup('ansible.builtin.vars', 'global').gitlab_runner }}"

@@ -23,6 +23,19 @@ global:
       data:
         gitlab_token: "{{ lookup('ansible.builtin.vars', 'secrets_vault').claude.glpat }}"
 
+  hermes:
+    name: Hermes Conrad
+    email: hermes@westsidestreet.net
+    create: true
+    shell: /bin/bash
+    ssh_key:
+      public: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHpZ1/QUMPun6wjaSxLp8aJ2RGivic5gTfp3H89ZGycC hermes@asus.westsidestreet.net
+      private: "{{ lookup('ansible.builtin.vars', 'secrets_vault').hermes.ed25519 }}"
+    chezmoi:
+      data:
+        gitlab_token: "{{ lookup('ansible.builtin.vars', 'secrets_vault').hermes.glpat }}"
+        hass_token: "{{ lookup('ansible.builtin.vars', 'secrets_vault').hermes.hass }}"
+
   kerry:
     name: Kerry Johnson
     email: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.email }}"
