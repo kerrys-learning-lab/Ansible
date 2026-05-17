@@ -43,4 +43,5 @@
   kubernetes.core.helm_plugin:
     plugin_path: "{{ item }}"
     state: present
+    verify: false
   loop: "{{ k8s_tools_vars.helm.plugins | default([]) }}"

@@ -3,7 +3,7 @@ k8s_tools_defaults:
 
   helm:
     # renovate: datasource=github-releases depName=helm/helm
-    version: v3.20.2
+    version: v4.2.0
     url_prefix: https://get.helm.sh
     bin: /usr/local/bin/helm
     plugins:
