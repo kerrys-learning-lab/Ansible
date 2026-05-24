@@ -52,6 +52,8 @@ global:
         runpod_api_key: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.runpod }}"
         hf_inference_token: "{{ lookup('ansible.builtin.vars', 'secrets_vault').hugging_face.inference }}"
         test_account_1_gitlab_token: "{{ lookup('ansible.builtin.vars', 'secrets_vault').test_account_1.glpat }}"
+        aws_access_key_id: "{{ lookup('ansible.builtin.vars', 'secrets_vault').aws.account.username }}"
+        aws_secret_access_key: "{{ lookup('ansible.builtin.vars', 'secrets_vault').aws.account.password }}"
     ssh_key:
       public: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCrgP4AEmwByBSxxYty43bf9ilK/VGEhRvERoSIgkLVZ1fcD1VZDDbAVINK8GGEJU00QYR006UrKKjG5z72LEcvSzAVlnU4gLawiI5PCFWrfNBdY5MlV3sS9Kc/afJLkFM2GJd7yiBVhYtd5XsYFFIFyvPb6gv6gS8JNl3qAne8QmyP+NZjXU7WS5oZxx88fUbgXMWi5pYL0MXfXIpxLQWR2Idd9eRI3r95ps5hxVjC0jwrME6akgmdwWA/hp1p61+icYkarIi3041AddL6PRjBNoiSI9K044eBA3oq6GX1ImmvibrKTMOmjYPsXwUHgVwlnaSl9cZFj576ymdBHM9dMLr3EsFnPbl7rLH8kbr5wNNhMc/a8Ttk0c5505dY+HAPNb7h0E5FJg9T9K5b+CT0o8WLgI6TLpiALUC5GQcgQvuu6s+i/XFezZuGttrh/GAxELACZO2lhvdJUVmFz+8offGR3+taWFLBM38Qvu46d6nNYOaCs3dvWzLhSTfNe+8= kerry@westsidestreet.net
       private: "{{ lookup('ansible.builtin.vars', 'secrets_vault').kerry.rsa }}"
