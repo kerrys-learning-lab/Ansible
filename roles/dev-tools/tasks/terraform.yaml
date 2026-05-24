@@ -1,0 +1,27 @@
+# code: language=ansible
+# - name: Terraform - Download GPG Key
+#   ansible.builtin.get_url:
+#     url: "{{ devtools_vars.terraform.gpg.url }}"
+#     dest: /etc/apt/keyrings/hashicorp.asc
+#     # "{{ devtools_vars.inherited.downloads }}/hashicorp.gpg"
+#     mode: "{{ devtools_vars.inherited.mode }}"
+
+# - name: Terraform - Dearmor GPG key
+#   ansible.builtin.shell: |
+#     set -o pipefail
+#     cat {{ devtools_vars.inherited.downloads }}/hashicorp.gpg  | \
+#       gpg --dearmor -o {{ devtools_vars.terraform.gpg.dest }}
+#   args:
+#     creates: "{{ devtools_vars.terraform.gpg.dest }}"
+
+# - name: Terraform - Add Hashicorp Apt Repository
+#   ansible.builtin.apt_repository:
+#     repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/hashicorp.asc] {{ devtools_vars.terraform.apt.repo_url }} stable main
+#     # repo: deb [arch=amd64 signed-by={{ devtools_vars.terraform.gpg.dest }}] {{ devtools_vars.terraform.apt.repo_url }} stable main
+#     state: present
+#     filename: hashicorp
+#     update_cache: true
+
+- name: Terraform - OS Packages
+  ansible.builtin.package:
+    name: "{{ devtools_vars.terraform.apt.packages }}"
