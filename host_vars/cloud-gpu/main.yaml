@@ -1,8 +1,7 @@
 # code: language=ansible
 ansible_fqdn: cloud-gpu.westsidestreet.net
-ansible_host: CHANGEME  # Updated after terraform apply with the instance's public IP
+ansible_host: 54.186.253.30
 ansible_user: ubuntu
-ansible_ssh_private_key_file: ~/.ssh/kerry-aws.pem
 
 # Override k8s_engine group_vars — cloud GPU doesn't need metallb or SMB
 k8s_engine:
