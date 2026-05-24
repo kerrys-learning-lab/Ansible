@@ -26,6 +26,13 @@
   tags:
     - cnpg
 
+- name: Deploy vLLM Inference Server
+  ansible.builtin.import_tasks: vllm.yaml
+  when: k8s_applications_vars.vllm.enabled | default(false)
+  tags:
+    - vllm
+    - inference
+
 - name: Install/Configure Applications Using Helm
   kubernetes.core.helm:
     name: "{{ item.key }}"

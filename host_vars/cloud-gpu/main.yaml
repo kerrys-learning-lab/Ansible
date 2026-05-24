@@ -1,0 +1,15 @@
+# code: language=ansible
+ansible_fqdn: cloud-gpu.westsidestreet.net
+ansible_host: CHANGEME  # Updated after terraform apply with the instance's public IP
+ansible_user: ubuntu
+ansible_ssh_private_key_file: ~/.ssh/kerry-aws.pem
+
+# Override k8s_engine group_vars — cloud GPU doesn't need metallb or SMB
+k8s_engine:
+  engine: k3s
+  needs:
+    cert_manager: true
+    smb_driver: false
+    metallb: false
+  kubeconfig: /etc/rancher/k3s/k3s.yaml
+  service: k3s

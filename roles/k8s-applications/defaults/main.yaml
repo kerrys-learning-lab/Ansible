@@ -50,6 +50,19 @@ k8s_applications_defaults:
     helm_values: {}
     local_volumes: {}
 
+  vllm:
+    enabled: false
+    namespace: inference
+    model: Qwen/Qwen2.5-Coder-7B-Instruct
+    image: vllm/vllm-openai
+    # renovate: datasource=docker depName=vllm/vllm-openai
+    version: latest
+    gpu_count: 1
+    replicas: 1
+    host: ""
+    tls:
+      cluster_issuer: ""
+
   helm: {}
 
   inherited:

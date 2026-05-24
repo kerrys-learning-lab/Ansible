@@ -1,6 +1,7 @@
 all:
   hosts:
     asus:
+    cloud-gpu:
     elitedesk:
     gitlab01:
     infrastructure01:
@@ -41,6 +42,7 @@ gpu:
     nvidia:
       hosts:
         asus:
+        cloud-gpu:
         nvidia-5080:
 
 proxmox:
@@ -55,6 +57,7 @@ k8s:
     k8s_engine_k3s:
       hosts:
         asus:
+        cloud-gpu:
         gitlab01:
         infrastructure01:
         nvidia-5080:
@@ -68,6 +71,7 @@ raspberry_pi:
 ubuntu:
   hosts:
     asus:
+    cloud-gpu:
     gitlab01:
     infrastructure01:
     nvidia-5080:

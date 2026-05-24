@@ -1,0 +1,14 @@
+# code: language=ansible
+cloudgpu_k8s_applications:
+  gpu:
+    enabled: true
+
+  vllm:
+    enabled: true
+    namespace: inference
+    model: Qwen/Qwen2.5-Coder-7B-Instruct
+    gpu_count: 1
+    replicas: 1
+    host: cloud-gpu.westsidestreet.net
+    tls:
+      cluster_issuer: letsencrypt-prod

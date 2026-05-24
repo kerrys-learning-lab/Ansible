@@ -1,0 +1,9 @@
+# code: language=ansible
+cloudgpu_common:
+  fqdn: cloud-gpu.westsidestreet.net
+  resolve:
+    link: 2
+
+  users_and_groups:
+    users:
+      kerry: "{{ lookup('ansible.builtin.vars', 'global').kerry }}"

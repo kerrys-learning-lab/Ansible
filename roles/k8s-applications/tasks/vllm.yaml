@@ -1,0 +1,115 @@
+# code: language=ansible
+- name: vLLM - Create Namespace
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ k8s_applications_vars.vllm.namespace }}"
+    kubeconfig: "{{ k8s_applications_vars.inherited.kubeconfig }}"
+
+- name: vLLM - Create Deployment
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: vllm
+        namespace: "{{ k8s_applications_vars.vllm.namespace }}"
+        labels:
+          app: vllm
+      spec:
+        replicas: "{{ k8s_applications_vars.vllm.replicas }}"
+        selector:
+          matchLabels:
+            app: vllm
+        template:
+          metadata:
+            labels:
+              app: vllm
+          spec:
+            containers:
+              - name: vllm
+                image: "{{ k8s_applications_vars.vllm.image }}:{{ k8s_applications_vars.vllm.version }}"
+                args:
+                  - --model
+                  - "{{ k8s_applications_vars.vllm.model }}"
+                  - --host
+                  - "0.0.0.0"
+                  - --port
+                  - "8000"
+                ports:
+                  - containerPort: 8000
+                    name: http
+                    protocol: TCP
+                resources:
+                  limits:
+                    nvidia.com/gpu: "{{ k8s_applications_vars.vllm.gpu_count }}"
+                  requests:
+                    nvidia.com/gpu: "{{ k8s_applications_vars.vllm.gpu_count }}"
+                readinessProbe:
+                  httpGet:
+                    path: /health
+                    port: http
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+            runtimeClassName: nvidia
+    kubeconfig: "{{ k8s_applications_vars.inherited.kubeconfig }}"
+
+- name: vLLM - Create Service
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: vllm
+        namespace: "{{ k8s_applications_vars.vllm.namespace }}"
+        labels:
+          app: vllm
+      spec:
+        type: ClusterIP
+        ports:
+          - port: 8000
+            targetPort: http
+            protocol: TCP
+            name: http
+        selector:
+          app: vllm
+    kubeconfig: "{{ k8s_applications_vars.inherited.kubeconfig }}"
+
+- name: vLLM - Create Ingress
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: vllm
+        namespace: "{{ k8s_applications_vars.vllm.namespace }}"
+        annotations:
+          cert-manager.io/cluster-issuer: "{{ k8s_applications_vars.vllm.tls.cluster_issuer }}"
+      spec:
+        ingressClassName: traefik
+        tls:
+          - hosts:
+              - "{{ k8s_applications_vars.vllm.host }}"
+            secretName: vllm-tls
+        rules:
+          - host: "{{ k8s_applications_vars.vllm.host }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: vllm
+                      port:
+                        number: 8000
+    kubeconfig: "{{ k8s_applications_vars.inherited.kubeconfig }}"
