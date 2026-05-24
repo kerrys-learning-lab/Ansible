@@ -4,6 +4,10 @@ cloudgpu_k8s_ecosystem:
   metallb:
     pool: []
 
+  storage:
+    classes: {}
+    local_volumes: {}
+
   cluster_cert_issuer:
     name: letsencrypt-prod
     spec:

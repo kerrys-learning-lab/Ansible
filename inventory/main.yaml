@@ -62,6 +62,15 @@ k8s:
         infrastructure01:
         nvidia-5080:
 
+lan:
+  hosts:
+    asus:
+    elitedesk:
+    gitlab01:
+    infrastructure01:
+    nvidia-5080:
+    proxmox01:
+
 raspberry_pi:
   hosts: {}
     # raspberrypi5-01:
