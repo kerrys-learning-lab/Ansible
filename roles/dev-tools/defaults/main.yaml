@@ -134,6 +134,15 @@ devtools_defaults:
     group: podman
     registries: {}
 
+  terraform:
+    gpg:
+      url: https://apt.releases.hashicorp.com/gpg
+      dest: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+    apt:
+      repo_url: https://apt.releases.hashicorp.com
+      packages:
+        - terraform
+
   inherited:
     owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
     group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"

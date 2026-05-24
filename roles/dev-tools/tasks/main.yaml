@@ -12,11 +12,15 @@
 - name: OS Packages
   ansible.builtin.package:
     name: "{{ devtools_vars.packages }}"
+  tags:
+    - dev-tools
 
 - name: Install Debian Packages from URL
   ansible.builtin.apt:
     deb: "{{ item }}"
   loop: "{{ devtools_vars.debs }}"
+  tags:
+    - dev-tools
 
 
 - name: Role Prerequisites
@@ -26,44 +30,61 @@
     owner: "{{  devtools_vars.inherited.owner }}"
     group: "{{  devtools_vars.inherited.group }}"
     mode: "{{  devtools_vars.inherited.mode }}"
+  tags:
+    - dev-tools
 
 - name: Configure AWS CLI
   ansible.builtin.import_tasks: aws-cli.yaml
   tags:
     - aws
+    - dev-tools
 
 - name: Configure C++ Development Tools
   ansible.builtin.import_tasks: c++/main.yaml
   tags:
     - c++
+    - dev-tools
 
 - name: Configure Java Development Tools
   ansible.builtin.import_tasks: java/main.yaml
   tags:
     - java
+    - dev-tools
 
 - name: Configure GitLabCI Local
   ansible.builtin.import_tasks: gitlabci-local.yaml
   tags:
     - gitlabci-local
+    - dev-tools
 
 - name: Configure Podman
   ansible.builtin.import_tasks: podman.yaml
   tags:
     - podman
+    - dev-tools
 
 - name: Configure VS Code
   ansible.builtin.import_tasks: vscode.yaml
   tags:
     - vscode
+    - dev-tools
 
 - name: Configure Global Tools via NPM
   community.general.npm:
     name: "{{ item }}"
     global: true
   loop: "{{ devtools_vars.npm }}"
+  tags:
+    - dev-tools
 
 - name: Install Claude Code
   ansible.builtin.import_tasks: claude.yaml
   tags:
-    - podman
+    - claude
+    - dev-tools
+
+- name: Install Terraform
+  ansible.builtin.import_tasks: terraform.yaml
+  tags:
+    - dev-tools
+    - terraform
