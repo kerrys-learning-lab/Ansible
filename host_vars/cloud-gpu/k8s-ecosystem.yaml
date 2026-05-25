@@ -9,13 +9,13 @@ cloudgpu_k8s_ecosystem:
     local_volumes: {}
 
   cluster_cert_issuer:
-    name: letsencrypt-prod
+    name: acme-letsencrypt-cluster-issuer
     spec:
       acme:
         server: https://acme-v02.api.letsencrypt.org/directory
         email: kerry.t.johnson@gmail.com
         privateKeySecretRef:
-          name: letsencrypt-prod
+          name: acme-letsencrypt-cluster-issuer
         solvers:
           - http01:
               ingress:

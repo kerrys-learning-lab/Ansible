@@ -7,12 +7,6 @@ gitlab01_k8s_ecosystem:
       #       limit of the router's IP range to a.b.c.199
       - 192.168.0.235-192.168.0.239
 
-  k3s:
-    tls-san:
-      - gitlab01
-      - gitlab01.westsidestreet.net
-      - 192.168.0.38
-
   secrets:
     aws:
       type: kubernetes.io/basic-auth

@@ -8,6 +8,9 @@
                 initial_value=nvidia_defaults,
                 override='ignore') }}
 
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
 - name: Install NVIDIA GPU Drivers (Debian/Ubuntu)
   ansible.builtin.include_tasks: driver-debian.yaml
   tags:

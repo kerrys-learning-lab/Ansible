@@ -5,12 +5,6 @@ infrastructure01_k8s_ecosystem:
     pool:
       - 192.168.0.205-192.168.0.209
 
-  k3s:
-    tls-san:
-      - infrastructure01
-      - infrastructure01.westsidestreet.net
-      - 192.168.0.125
-
   secrets:
     aws:
       type: kubernetes.io/basic-auth

@@ -1,0 +1,16 @@
+ca_smallstep:
+  chart:
+    helm_values:
+      ca:
+        dns: ca.westsidestreet.net
+        password: ad31AD#!ad31AD#!
+        provisioner:
+          password: ad31AD#!ad31AD#!
+      ingress:
+        enabled: true
+        hosts:
+          - ca.westsidestreet.net
+  certificate:
+    clusterIssuer: acme-letsencrypt-cluster-issuer
+    dnsNames:
+      - ca.westsidestreet.net

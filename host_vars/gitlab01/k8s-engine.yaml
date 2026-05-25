@@ -1,0 +1,7 @@
+gitlab01_k8s_engine:
+
+  k3s:
+    tls-san:
+      - gitlab01
+      - gitlab01.westsidestreet.net
+      - 192.168.0.38

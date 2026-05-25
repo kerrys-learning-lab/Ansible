@@ -1,0 +1,48 @@
+# code: language=ansible
+- name: Merge SmallStep Variables
+  ansible.builtin.set_fact:
+    smallstep_vars: |
+      {{ lookup('community.general.merge_variables',
+                '_smallstep',
+                initial_value=smallstep_defaults,
+                pattern_type='suffix',
+                override='ignore') }}
+  tags:
+    - always
+
+
+- name: Create SmallStep TLS Certificate
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: small-step-ca
+        namespace: "{{ smallstep_vars.namespace }}"
+      spec:
+        secretName: small-step-ca-tls
+        dnsNames: "{{ smallstep_vars.certificate.dnsNames }}"
+        issuerRef:
+          name: "{{ smallstep_vars.certificate.clusterIssuer }}"
+          kind: ClusterIssuer
+    kubeconfig: "{{ smallstep_vars.inherited.kubeconfig }}"
+  when: smallstep_vars.certificate is defined
+  tags:
+    - smallstep
+
+
+# - name: Install/Configure SmallStep via Helm
+#   kubernetes.core.helm:
+#     name: "{{ smallstep_vars.name }}"
+#     namespace: "{{ smallstep_vars.namespace }}"
+#     chart_repo_url: "{{ smallstep_vars.chart.url }}"
+#     chart_version: "{{ smallstep_vars.chart.version }}"
+#     chart_ref: "{{ smallstep_vars.chart.ref }}"
+#     release_values: "{{ smallstep_vars.helm_values }}"
+#     create_namespace: true
+#     wait: true
+#     kubeconfig: "{{ smallstep_vars.inherited.kubeconfig }}"
+#   tags:
+#     - smallstep

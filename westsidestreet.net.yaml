@@ -95,6 +95,11 @@
       tags:
         - gitlab
         - gitlab-runner
+    - role: small-step-ca
+      when: "'ca' in group_names"
+      tags:
+        - ca
+        - small-step-ca
   tags:
     - k8s
     - kubernetes

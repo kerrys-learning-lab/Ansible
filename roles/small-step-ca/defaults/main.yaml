@@ -1,0 +1,17 @@
+# code: language=ansible
+smallstep_defaults:
+  name: small-step-ca
+  namespace: infrastructure
+  chart:
+    ref: step-certificates
+    url: https://smallstep.github.io/helm-charts
+    # renovate: datasource=helm registryUrl=https://smallstep.github.io/helm-charts depName=small-step
+    version: 1.30.1
+
+  inherited:
+    owner: "{{ lookup('ansible.builtin.vars', 'global').owner | default('root') }}"
+    group: "{{ lookup('ansible.builtin.vars', 'global').group | default('root') }}"
+    mode: "{{ lookup('ansible.builtin.vars', 'global').mode | default('a=rX') }}"
+    downloads: "{{ lookup('ansible.builtin.vars', 'global').downloads | default('/var/lib/ansible/downloads') }}/{{ role_name }}"
+    share: "{{ lookup('ansible.builtin.vars', 'global').share | default('/usr/local/share') }}"
+    kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"

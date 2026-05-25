@@ -19,10 +19,15 @@ argocd:
         gitlab01:
     argocd_cluster:
       hosts:
-        gitlab01:
         asus:
+        cloud-gpu:
+        gitlab01:
         infrastructure01:
         nvidia-5080:
+
+ca:
+  hosts:
+    gitlab01:
 
 development:
   hosts:
