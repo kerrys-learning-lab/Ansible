@@ -6,7 +6,11 @@ cloudgpu_k8s_ecosystem:
 
   storage:
     classes: {}
-    local_volumes: {}
+    local_volumes:
+      cloud-lab-inference--vllm-storage:
+        path: cloud-lab/cloud-gpu/vllm/data
+        capacity: 50Gi
+
 
   cluster_cert_issuer:
     name: acme-letsencrypt-cluster-issuer
