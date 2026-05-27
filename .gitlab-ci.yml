@@ -13,7 +13,8 @@ variables:
   ANSIBLE_CONFIG: ./ansible.cfg
 
   # Can't trust that my Asus laptop is on/available when CI/CD runs
-  ANSIBLE_HOST_FILTER: "all:!asus"
+  # Likewise, the cloud-gpu host is ephemeral
+  ANSIBLE_HOST_FILTER: "all:!asus:!cloud-gpu"
 
   ANSIBLE_PLAYBOOK_PATH: ./westsidestreet.net.yaml
   ANSIBLE_REMOTE_USER: gitlab-runner
