@@ -25,13 +25,13 @@ gitlab_defaults:
     url: https://charts.gitlab.io
     ref: gitlab-operator
     # renovate: datasource=helm registryUrl=https://charts.gitlab.io depName=gitlab-operator
-    version: 2.11.3
+    version: 3.0.1
     helm_values: {}
 
   application:
     name: gitlab
     # renovate: datasource=helm registryUrl=https://charts.gitlab.io depName=gitlab
-    version: 9.11.4
+    version: 10.0.1
     crd_values: {}
 
   cluster_cert_issuer:
