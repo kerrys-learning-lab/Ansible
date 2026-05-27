@@ -31,7 +31,7 @@ gitlab_defaults:
   application:
     name: gitlab
     # renovate: datasource=helm registryUrl=https://charts.gitlab.io depName=gitlab
-    version: 9.11.4
+    version: 9.11.5
     crd_values: {}
 
   cluster_cert_issuer:
