@@ -28,7 +28,7 @@ k8s_applications_defaults:
           url: https://nvidia.github.io/k8s-device-plugin
           ref: nvidia-device-plugin
           # renovate: datasource=helm registryUrl=https://nvidia.github.io/k8s-device-plugin depName=nvidia-device-plugin
-          version: "0.19.1"
+          version: "0.19.2"
       helm_values:
         runtimeClassName: nvidia
         gfd:

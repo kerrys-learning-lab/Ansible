@@ -6,7 +6,7 @@ argocd_defaults:
     ref: argo-cd
     url: https://argoproj.github.io/argo-helm
     # renovate: datasource=helm registryUrl=https://argoproj.github.io/argo-helm depName=argo-cd
-    version: 9.5.14
+    version: 9.5.17
 
   certificate:
     clusterIssuer: acme-letsencrypt-cluster-issuer
