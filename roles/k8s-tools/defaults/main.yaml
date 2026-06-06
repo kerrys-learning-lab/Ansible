@@ -12,7 +12,7 @@ k8s_tools_defaults:
 
   k9s:
     # renovate: datasource=github-releases depName=derailed/k9s
-    version: v0.50.18
+    version: v0.51.0
     url_prefix: https://github.com/derailed/k9s/releases/download
     bin: /usr/local/bin/k9s
 
