@@ -3,7 +3,7 @@ k8s_tools_defaults:
 
   helm:
     # renovate: datasource=github-releases depName=helm/helm
-    version: v4.2.0
+    version: v4.2.1
     url_prefix: https://get.helm.sh
     bin: /usr/local/bin/helm
     plugins:
@@ -18,7 +18,7 @@ k8s_tools_defaults:
 
   argocd:
     # renovate: datasource=github-releases depName=argoproj/argo-cd
-    version: v3.4.2
+    version: v3.4.3
     url_prefix: https://github.com/argoproj/argo-cd/releases/download
     bin: /usr/local/bin/argocd
 
