@@ -9,7 +9,7 @@
   hosts:
     - ansible
   roles:
-    - role: ansible
+    - role: kerrys_learning_lab.base.ansible
   tags:
     - ansible
 
@@ -23,7 +23,7 @@
   hosts:
     - all
   roles:
-    - role: common
+    - role: kerrys_learning_lab.base.common
   tags:
     - common
   any_errors_fatal: true
@@ -53,7 +53,7 @@
       tags:
         - always
   roles:
-    - role: nvidia
+    - role: kerrys_learning_lab.base.nvidia
       tags:
         - gpu
         - nvidia
@@ -67,22 +67,22 @@
       tags:
         - always
   roles:
-    - role: k8s-engine
+    - role: kerrys_learning_lab.kubernetes.k8s_engine
       tags:
         - k8s-engine
-    - role: k8s-tools
+    - role: kerrys_learning_lab.kubernetes.k8s_tools
       tags:
         - k8s-tools
-    - role: k8s-ecosystem
+    - role: kerrys_learning_lab.kubernetes.k8s_ecosystem
       tags:
         - k8s-ecosystem
-    - role: k8s-applications
+    - role: kerrys_learning_lab.kubernetes.k8s_applications
       tags:
         - k8s-applications
-    - role: k8s-share
+    - role: kerrys_learning_lab.kubernetes.k8s_share
       tags:
         - share
-    - role: argocd
+    - role: kerrys_learning_lab.kubernetes.argocd
       when: "'argocd' in group_names"
       tags:
         - argocd
