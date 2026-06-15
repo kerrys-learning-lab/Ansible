@@ -640,7 +640,15 @@ When adding a new versioned dependency:
 User must have password-less SSH to the target machine and must be able to
 execute 'sudo' without requiring a password.
 
-#### Ansible Galaxy Collections
+#### Ansible Collections
+
+##### Home Lab
+
+```
+ansible-galaxy install -r collections/requirements.yaml
+```
+
+##### Ansible Galaxy
 
 How to update all collections:
 
