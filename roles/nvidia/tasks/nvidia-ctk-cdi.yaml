@@ -1,6 +1,0 @@
-# code: language=ansible
-- name: NVIDIA CTK - Enable CDI spec generation
-  ansible.builtin.systemd:
-    name: nvidia-cdi-refresh.service
-    enabled: true
-    state: started
