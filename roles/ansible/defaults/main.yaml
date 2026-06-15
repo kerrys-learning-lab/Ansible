@@ -1,8 +1,0 @@
-# code: language=ansible
-ansible_defaults:
-  packages:
-    - ansible-lint
-    - brightnessctl
-    - python3-kubernetes
-    - yamllint
-    - yq

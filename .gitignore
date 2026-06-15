@@ -2,6 +2,12 @@
 _secrets**
 __pycache__
 .ansible
+.ansible-run
 .claude/worktrees
+.dotenv
 artifacts
 .gitlab-ci-local
+.python-version
+pyproject.toml
+uv.lock
+main.py

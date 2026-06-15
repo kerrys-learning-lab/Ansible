@@ -1,8 +1,0 @@
-# code: language=ansible
-- name: Reboot for NVIDIA driver
-  ansible.builtin.reboot:
-
-- name: Restart Kubernetes Runtime
-  ansible.builtin.systemd:
-    name: "{{ k8s_engine.service | default(nvidia_vars.container_toolkit.service) }}"
-    state: restarted

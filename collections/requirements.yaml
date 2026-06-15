@@ -1,7 +1,17 @@
 collections:
+  # Third-party collections (from Ansible Galaxy)
   - name: kubernetes.core
     version: ">=6.4.0,<7.0.0"
   - name: community.general
     version: ">=12.6.0,<12.7.0"
   - name: ansible.posix
     version: ">=2.0.0,<3.0.0"
+
+  # Internal shared-role collections (see ADR 0001). Tracking `main` for now;
+  # pin to a `vX.Y.Z` tag once the collections cut releases.
+  - name: git+ssh://git@gitlab.westsidestreet.net/kerrys-learning-lab/devsecops/ansible-collections/base.git
+    type: git
+    version: main
+  - name: git+ssh://git@gitlab.westsidestreet.net/kerrys-learning-lab/devsecops/ansible-collections/kubernetes.git
+    type: git
+    version: main
