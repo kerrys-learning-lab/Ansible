@@ -13,7 +13,7 @@ runners:
             [runners.kubernetes]
                 privileged = true
                 allowed_pull_policies = ["always", "if-not-present"]
-                pull_policy = "always"
+                pull_policy = "if-not-present"
 
             {% if 's3' in gitlab_runner_vars.config %}
             [runners.cache]

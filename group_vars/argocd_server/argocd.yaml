@@ -12,6 +12,11 @@ argocd_server_argocd:
           cert-manager.io/cluster-issuer: acme-letsencrypt-cluster-issuer
       service:
         type: LoadBalancer
+    redis:
+      secretInit:
+        enabled: true
+    rbac:
+      create: true
     configs:
       params:
         annotations:
