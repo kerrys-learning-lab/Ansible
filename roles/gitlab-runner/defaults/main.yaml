@@ -9,7 +9,7 @@ gitlab_runner_defaults:
       url: https://charts.gitlab.io
       ref: gitlab-runner
       # renovate: datasource=helm registryUrl=https://charts.gitlab.io depName=gitlab-runner
-      version: 0.88.3
+      version: 0.89.1
 
   inherited:
     kubeconfig: "{{ lookup('ansible.builtin.vars', 'global').kubeconfig | default('/etc/kubeconfig') }}"

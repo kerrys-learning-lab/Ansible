@@ -15,3 +15,10 @@ asus_k8s_ecosystem:
       # NOTE: Reserved these in the Netgear router by setting the upper
       #       limit of the router's IP range to a.b.c.199
       - 192.168.0.225-192.168.0.229
+
+  storage:
+    local_volumes:
+      oracle--dev--example--oracle-db:
+        capacity: 10Gi
+        path: oracle/dev/example/oracle-db
+        mode: u=rwx,go=
