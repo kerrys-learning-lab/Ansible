@@ -4,6 +4,8 @@ asus_k8s_applications:
     enabled: true
   gpu:
     enabled: true
+  oracle:
+    enabled: true
   helm:
     nats:
       namespace: dev

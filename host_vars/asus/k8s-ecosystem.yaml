@@ -18,7 +18,7 @@ asus_k8s_ecosystem:
 
   storage:
     local_volumes:
-      oracle--dev--example--oracle-db:
+      oracle--agentic--sandbox--oracle-db:
         capacity: 10Gi
-        path: oracle/dev/example/oracle-db
+        path: oracle/agentic/sandbox/oracle-db
         mode: u=rwx,go=
